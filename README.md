@@ -4,6 +4,45 @@ Back to basics NCAA basketball pool software implemented in pure C for speed.
 No nonsensical bit twiddling.  2.7M bracket scores per second. Implemented
 as a single file header for command line pool management.
 
+Scorers
+-------
+The pool configuration specifies the scorer to use in the pool.
+Each scorer uses as input the bracket being scored, the round number
+and the game number. In addition to the scorer, the pool configuration
+specifies 6 round multipliers that the scorer can use. The default
+multipliers are 1, 2, 4, 8, 16, 32
+There are 3 supported scorers:
+
+1. Basic: each correct pick is worth a constant amount - the
+   round multiplier configured for that round.
+1. Upset: each correct pick is worth the round multiplier
+   for the game's round plus the seed number of the winning team.
+1. SeedDiff: each correct pick is worth the round multiplier
+   for the game's round plus the difference in seeds of the 
+   winning team and the losing team. The bonus points only 
+   apply if the loser was picked correctly and the winner's
+   seed is greater than the loser's seed.
+
+The choice of scorer can affect the performance of the pool
+possibilities report.
+
+Possibilities Report
+---------------------
+We want to generate all possible outcomes and score all the entries
+against them. Can this be a DFS?
+
+possible_score(games[gamesLeft], gamesLeft, entries[N], entry_scores[N], entry_stats[N], g, winner)
+  stop recursion when gamesLeft &lt; 0
+  game = games[gamesLeft]
+  Assume winner of game = g is winner(0 or 1)
+  Add score of game = g to each entry_score
+  if winner == 0, recurse with winner set to 1
+      possible_score(games[gamesLeft], gamesLeft, entries[N], entry_scores[N], entry_stats[N], g, 1)
+  else, recurse with winner set to 0 and game advanced
+      gamesLeft--;
+      possible_score(games[gamesLeft], gamesLeft, entries[N], entry_scores[N], entry_stats[N], g+1, 0)
+  max recursion depth would be = number of games
+
 Game Index
 -----------
 Game numbers by round and what game numbers teams will play in
