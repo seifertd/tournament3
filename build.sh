@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-rm -rf main
-cc -O3 -o main main.c
+rm -rf pool
+cc -O3 -o pool pool.c
 
 
