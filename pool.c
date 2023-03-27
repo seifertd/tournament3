@@ -13,11 +13,15 @@ void usage(char *progName) {
 int main(int argc, char *argv[]) {
   int opt;
   bool initialized = false;
-  while ((opt = getopt(argc, argv, "d:")) != -1) {
+  char *format = "text";
+  while ((opt = getopt(argc, argv, "d:f:")) != -1) {
     switch (opt) {
       case 'd':
         pool_initialize(optarg);
         initialized = true;
+        break;
+      case 'f':
+        format = optarg;
         break;
       default:
         usage(argv[0]);
@@ -36,6 +40,7 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(command, "scores") == 0) {
     pool_score_report();
   } else if (strcmp(command, "poss") == 0) {
+    printf("FORMAT: %s\n", format);
     pool_possibilities_report();
   } else if (strcmp(command, "entries") == 0) {
     pool_print_entry(&poolTournamentBracket);

@@ -177,9 +177,9 @@ typedef uint32_t (*PoolScorerFunction)(PoolBracket *bracket, PoolBracket *result
 POOLDEF uint32_t pool_basic_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_upset_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
-
 POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType);
 POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket);
+POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength);
 
 #define POOL_TEAM_SHORT_NAME(w) ( w == 0 ? "Unk" : poolTeams[w-1].shortName )
 #define POOL_TEAM_NAME(w) ( w == 0 ? "Unknown" : poolTeams[w-1].name )
@@ -208,6 +208,32 @@ typedef struct {
   uint8_t team;
   uint64_t count;
 } PoolTeamWins;
+
+POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength) {
+  if (num < 10000) {
+    fprintf(f_stream, "%*ld", fieldLength, num);
+    return;
+  }
+  static uint64_t factors[5] = {1e15, 1e12, 1e9, 1e6, 1e3};
+  static char abbrev[5] = {'Q', 'T', 'B', 'M', 'K'};
+  for (int i = 0; i < 5; ++i) {
+    if (factors[i] <= num) {
+      double dispNum = (double) num / (double) factors[i];
+      if (dispNum < 10) {
+        fprintf(f_stream, "%*.3f%c", fieldLength, dispNum, abbrev[i]);
+      } else if (dispNum < 100) {
+        fprintf(f_stream, "%*.2f%c", fieldLength, dispNum, abbrev[i]);
+      } else {
+        if ((dispNum - (uint64_t) dispNum) >= 0.1) {
+          fprintf(f_stream, "%*.1f%c", fieldLength, dispNum, abbrev[i]);
+        } else {
+          fprintf(f_stream, "%*.0f%c", fieldLength, dispNum, abbrev[i]);
+        }
+      }
+      return;
+    }
+  }
+}
 
 POOLDEF void pool_inc_progress(PoolProgress *prog) {
   prog->complete += 1;
@@ -619,18 +645,21 @@ POOLDEF void pool_possibilities_report() {
       stats, poolBracketsCount,
       &prog);
 
-  printf("%20s %4s %4s %5s %5s %6s %10s %10s\n", "",
+  printf("%20s %4s %4s %5s %5s %6s %6s %6s\n", "",
       "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
-  printf("%20s %4s %4s %5s %5s %6s %10s %10s %-20s\n", "        Name",
+  printf("%20s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "        Name",
       "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
   qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
   for (size_t i = 0; i < poolBracketsCount; i++) {
     PoolStats *stat = &stats[i];
     float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
-    printf("%20s %4d %4d %5d %5d %6.2f %10ld %10ld ", stat->bracket->name,
+    printf("%20s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
         stat->minRank, stat->maxRank, stat->bracket->score,
-        stat->maxScore, winChance,
-        stat->timesWon, stat->timesTied);
+        stat->maxScore, winChance);
+    pool_print_humanized(stdout, stat->timesWon, 5);
+    printf(" ");
+    pool_print_humanized(stdout, stat->timesTied, 5);
+    printf(" ");
     if (winChance > 0.0) {
       PoolTeamWins top5[5] = {0};
       for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
