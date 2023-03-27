@@ -5,7 +5,7 @@
 #include "pool.h"
 
 int main(int argc, const char* argv) {
-  pool_initialize("2023");
+  pool_initialize("test/benchmark");
   printf("Running Scoring Benchmark:\n");
   clock_t start_t, end_t;
   double total_t;
