@@ -18,10 +18,6 @@ int main(int argc, const char* argv) {
       poolConfiguration.roundMultipliers[4],
       poolConfiguration.roundMultipliers[5]);
   pool_team_report();
-  printf("Loser for each game:\n");
-  for (int i = 0; i < 63; i++) {
-    printf("Game: %d Loser: %d\n", i, pool_loser_of_game(i, &poolTournamentBracket));
-  }
   pool_entries_report();
   pool_score_report();
   printf("Tournament Results:\n");

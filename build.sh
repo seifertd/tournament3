@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
 rm -rf main
-cc -o main main.c
+cc -O3 -o main main.c
 
 

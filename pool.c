@@ -376,11 +376,23 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
   printf("%10.10s\n", bracket->name);
   printf("   ");
   for (size_t g = 0; g < 32; g++) {
-    uint8_t loser = pool_loser_of_game(g, bracket);
+    uint8_t team1, team2 = 0;
+    pool_teams_of_game(g, 0, bracket, &team1, &team2);
     if (g == 0) {
-      printf("%3s", POOL_TEAM_SHORT_NAME(loser));
+      printf("%3s", POOL_TEAM_SHORT_NAME(team1));
     } else {
-      printf(" %3s", POOL_TEAM_SHORT_NAME(loser));
+      printf(" %3s", POOL_TEAM_SHORT_NAME(team1));
+    }
+  }
+  printf("\n");
+  printf("   ");
+  for (size_t g = 0; g < 32; g++) {
+    uint8_t team1, team2 = 0;
+    pool_teams_of_game(g, 0, bracket, &team1, &team2);
+    if (g == 0) {
+      printf("%3s", POOL_TEAM_SHORT_NAME(team2));
+    } else {
+      printf(" %3s", POOL_TEAM_SHORT_NAME(team2));
     }
   }
   printf("\n");
@@ -471,16 +483,13 @@ POOLDEF void pool_team_report() {
   }
 }
 
-// TODO: Get rid of game parameter, maybe it can be calculated from gamesLeftCount
-POOLDEF void possibilities_dfs(uint8_t gamesLeft[], int gamesLeftCount,
+POOLDEF void possibilities_dfs(
+    uint8_t gamesLeft[], int gamesLeftCount, uint8_t game,
     PoolBracket *possibleBracket,
     PoolStats stats[], uint32_t numBrackets,
-    uint8_t game,
     PoolProgress *prog) {
-  if (gamesLeftCount <= 0) {
+  if (game >= gamesLeftCount) {
     pool_inc_progress(prog);
-    //printf("possibilities_dfs: possible bracket:\n");
-    //pool_print_entry(possibleBracket);
     PoolScoreStats copyStats[numBrackets];
     for (int i = 0; i < numBrackets; i++) {
       copyStats[i].stats = &stats[i];
@@ -521,7 +530,6 @@ POOLDEF void possibilities_dfs(uint8_t gamesLeft[], int gamesLeftCount,
           }
           stat->timesTied += 1;
         }
-        //printf("Entry %s is champ with score %d\n", stat->bracket->name, stat->possibleScore);
       }
     }
     return;
@@ -537,30 +545,22 @@ POOLDEF void possibilities_dfs(uint8_t gamesLeft[], int gamesLeftCount,
   for (int t = 0; t < 2; t++) {
     uint32_t bracketGameScores[numBrackets];
     possibleBracket->winners[gameNum] = teams[t];
-    //printf("possibilities_dfs: game %d gamesLeft %d winner %d (%s)\n", gameNum, gamesLeftCount, teams[t], POOL_TEAM_NAME(teams[t]));
     for (int i = 0; i < numBrackets; i++) {
       bracketGameScores[i] = 0;
       if (teams[t] == stats[i].bracket->winners[gameNum]) {
         bracketGameScores[i] = (*poolConfiguration.poolScorer)(stats[i].bracket, possibleBracket, round, gameNum);
       }
       stats[i].possibleScore += bracketGameScores[i];
-      //if (bracketGameScores[i] > 0) {
-      //  printf("    -> Entry %s Game %d Pick %d (%s) pickScore: %d totalScore %d\n", stats[i].bracket->name, gameNum, stats[i].bracket->winners[gameNum],
-      //      POOL_TEAM_SHORT_NAME(stats[i].bracket->winners[gameNum]), bracketGameScores[i], stats[i].possibleScore);
-      //}
     }
     
     // RECURSE
-    possibilities_dfs(gamesLeft, gamesLeftCount - 1,
+    possibilities_dfs(
+      gamesLeft, gamesLeftCount, game + 1,
       possibleBracket,
       stats, poolBracketsCount,
-      game + 1,
       prog);
 
     for (int i = 0; i < numBrackets; i++) {
-      //if (bracketGameScores[i] > 0) {
-      //  printf("    -> Subtracting %d from entry %s\n", bracketGameScores[i], stats[i].bracket->name);
-      //}
       stats[i].possibleScore -= bracketGameScores[i];
       bracketGameScores[i] = 0;
     }
@@ -568,6 +568,9 @@ POOLDEF void possibilities_dfs(uint8_t gamesLeft[], int gamesLeftCount,
   }
 }
 
+// TODO: optionally return report as json
+// TODO: allow batching for parallelization in multiple processes
+// TODO: optional progress reporting
 POOLDEF void pool_possibilities_report() {
   if (poolBracketsCount == 0) {
     fprintf(stderr, "There are no entries in this pool.\n");
@@ -584,7 +587,8 @@ POOLDEF void pool_possibilities_report() {
     }
   }
   uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
-  printf("There are %d games remaining, %" PRIu64 " possible outcomes\n", gamesLeftCount, possibleOutcomes);
+  printf("There are %d teams and %d games remaining, %" PRIu64 " possible outcomes\n",
+      gamesLeftCount + 1, gamesLeftCount, possibleOutcomes);
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
   uint16_t bracketScores[POOL_BRACKET_CAPACITY];
   for (size_t i = 0; i < poolBracketsCount; i++) {
@@ -607,10 +611,12 @@ POOLDEF void pool_possibilities_report() {
   prog.total = possibleOutcomes;
   prog.complete = 0;
   prog.nextPercent = 0;
-  possibilities_dfs(gamesLeft, gamesLeftCount,
+
+  possibilities_dfs(
+      gamesLeft, gamesLeftCount, 0,
       &possibleBracket,
       stats, poolBracketsCount,
-      0, &prog);
+      &prog);
 
   printf("%20s %4s %4s %5s %5s %6s %10s %10s\n", "",
       "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
@@ -625,7 +631,6 @@ POOLDEF void pool_possibilities_report() {
         stat->maxScore, winChance,
         stat->timesWon, stat->timesTied);
     if (winChance > 0.0) {
-      // TODO: Show top 5 possible champs
       PoolTeamWins top5[5] = {0};
       for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
         if (stat->champCounts[t] > 0) {
@@ -769,7 +774,7 @@ POOLDEF void pool_add_entries_in_dir(const char *dirPath) {
     exit(1);
   }
 
-  char entryFilePath[1024];
+  char entryFilePath[2048];
 
   while ((dp = readdir(dfd)) != NULL) {
     struct stat stbuf;

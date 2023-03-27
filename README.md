@@ -29,19 +29,48 @@ possibilities report.
 Possibilities Report
 ---------------------
 We want to generate all possible outcomes and score all the entries
-against them. Can this be a DFS?
+against them. Set up a DFS with inputs:
+* games - array of game numbers remaining
+* gamesLeft - size of this array
+* game - game under review
+* stats - array of stats structs, one per entry
+  * maxRank, minRank, maxScore, timesWon, timesTied, possibleScore, champCounts[], bracket
+  * possibleScore is set to current bracket score
 
-possible_score(games[gamesLeft], gamesLeft, entries[N], entry_scores[N], entry_stats[N], g, winner)
-  stop recursion when gamesLeft &lt; 0
-  game = games[gamesLeft]
-  Assume winner of game = g is winner(0 or 1)
-  Add score of game = g to each entry_score
-  if winner == 0, recurse with winner set to 1
-      possible_score(games[gamesLeft], gamesLeft, entries[N], entry_scores[N], entry_stats[N], g, 1)
-  else, recurse with winner set to 0 and game advanced
-      gamesLeft--;
-      possible_score(games[gamesLeft], gamesLeft, entries[N], entry_scores[N], entry_stats[N], g+1, 0)
-  max recursion depth would be = number of games
+Algo:
+* determine the two teams in games[game]
+* Assume winner is the first team, calculate points awarded to each bracket, add
+  to possibleScore
+* Recurse with game += 1
+* Repeat the above with winner assumed to be second team
+
+max recursion depth would be = number of games remaining
+
+Parallelization of Possibilities Report
+---------------------------------------
+We can parallelize the above to a power of 2 processes/servers/cores/etc if the
+current tournament bracket is advanced and the algo run from there, then results
+collected and combined.
+
+2 cores:
+* 1st core assumes game 1 winner is team1
+* 2nd core assumes game 1 winner is team2
+4 cores:
+* 1st core assumes game 1 winner is team1, game 2 winner is team1
+* 2nd core assumes game 1 winner is team2, game 2 winner is team1
+* 3nd core assumes game 1 winner is team1, game 2 winner is team2
+* 4th core assumes game 1 winner is team2, game 2 winner is team2
+8 cores:
+* 1st core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team1
+* 2nd core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team1
+* 3nd core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team1
+* 4th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team1
+* 5th core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team2
+* 6th core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team2
+* 7th core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team2
+* 8th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team2
+
+etc
 
 Game Index
 -----------
