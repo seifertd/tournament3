@@ -256,7 +256,13 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
       prog->nextPercent += 1;
     }
   } else {
-    printf("\n");
+    clock_t curr = clock();
+    uint64_t elapsed_t = (uint64_t)(curr - prog->start)/CLOCKS_PER_SEC;
+    double bps = prog->complete / elapsed_t;
+    uint64_t hours = elapsed_t / 3600;
+    uint64_t minutes = (elapsed_t - hours * 3600) / 60;
+    uint64_t secs = elapsed_t % 60;
+    printf("DFS BPS: %12.0f %3.0f%% ELAPSED: %02ld:%02ld:%02ld\n", bps, 100.0, hours, minutes, secs);
     fflush(stdout);
   }
 }
