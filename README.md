@@ -1,8 +1,11 @@
 Tournament 3
 -------------
 Back to basics NCAA basketball pool software implemented in pure C for speed.
-No nonsensical bit twiddling.  2.7M bracket scores per second. Implemented
-as a single file header for command line pool management.
+No nonsensical bit twiddling.  40.2M bracket scores per second. 
+
+Implemented as a single file header for command line pool management.
+This may change at some point, not sure what benefit this has as
+the use case I was thinking of no longer applies.
 
 Scorers
 -------
