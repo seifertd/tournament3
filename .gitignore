@@ -1,5 +1,7 @@
 # apps
 pool
+testpool
+benchmark
 
 # Prerequisites
 *.d
