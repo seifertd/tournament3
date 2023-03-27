@@ -246,7 +246,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
     if ( perc > prog->nextPercent) {
       clock_t curr = clock();
       double elapsed_t = (double)(curr - prog->start)/CLOCKS_PER_SEC;
-      double bps = prog->complete / elapsed_t;
+      double bps = elapsed_t > 0 ? prog->complete / elapsed_t : 9999999.99;
       uint64_t eta = (uint64_t) ((prog->total - prog->complete) / bps);
       uint64_t hours = eta / 3600;
       uint64_t minutes = (eta - hours * 3600) / 60;
@@ -258,7 +258,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
   } else {
     clock_t curr = clock();
     uint64_t elapsed_t = (uint64_t)(curr - prog->start)/CLOCKS_PER_SEC;
-    double bps = prog->complete / elapsed_t;
+    double bps = elapsed_t > 0 ? prog->complete / elapsed_t : 9999999.99;
     uint64_t hours = elapsed_t / 3600;
     uint64_t minutes = (elapsed_t - hours * 3600) / 60;
     uint64_t secs = elapsed_t % 60;
@@ -408,7 +408,7 @@ POOLDEF void pool_initialize(const char *dirPath) {
 #define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\e[9m" f "\e[0m" : f )
 
 POOLDEF void pool_print_entry(PoolBracket *bracket) {
-  printf("%10.10s\n", bracket->name);
+  printf("%s\n", bracket->name);
   printf("   ");
   for (size_t g = 0; g < 32; g++) {
     uint8_t team1, team2 = 0;
@@ -580,10 +580,10 @@ POOLDEF void possibilities_dfs(
   assert(team1 != 0);
   assert(team2 != 0);
   uint8_t teams[2] = { team1, team2 };
-  for (int t = 0; t < 2; t++) {
+  for (size_t t = 0; t < 2; t++) {
     uint32_t bracketGameScores[numBrackets];
     possibleBracket->winners[gameNum] = teams[t];
-    for (int i = 0; i < numBrackets; i++) {
+    for (size_t i = 0; i < numBrackets; i++) {
       bracketGameScores[i] = 0;
       if (teams[t] == stats[i].bracket->winners[gameNum]) {
         bracketGameScores[i] = (*poolConfiguration.poolScorer)(stats[i].bracket, possibleBracket, round, gameNum);
@@ -598,7 +598,7 @@ POOLDEF void possibilities_dfs(
       stats, poolBracketsCount,
       prog);
 
-    for (int i = 0; i < numBrackets; i++) {
+    for (size_t i = 0; i < numBrackets; i++) {
       stats[i].possibleScore -= bracketGameScores[i];
       bracketGameScores[i] = 0;
     }
@@ -625,6 +625,7 @@ POOLDEF void pool_possibilities_report() {
     }
   }
   uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
+  printf("%s: Possibilities Report\n", poolConfiguration.poolName);
   printf("There are %d teams and %d games remaining, %" PRIu64 " possible outcomes\n",
       gamesLeftCount + 1, gamesLeftCount, possibleOutcomes);
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
@@ -709,6 +710,7 @@ POOLDEF void pool_score_report() {
     pool_bracket_score(bracket, &poolTournamentBracket);
   }
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
+  printf("%s: Leaderboard\n", poolConfiguration.poolName);
   printf("            Curr  Max            Round\n");
   printf("  Name     Score Score   1   2   3   4   5   6\n");
   printf("---------- ----- ----- --- --- --- --- --- ---\n");
@@ -738,6 +740,8 @@ POOLDEF void pool_entries_report() {
   if (poolBracketsCount == 0) {
     fprintf(stderr, "There are no entries in this pool.\n");
   }
+  printf("%s: Entries Report\n", poolConfiguration.poolName);
+  pool_print_entry(&poolTournamentBracket);
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_name_cmpfunc);
   for (size_t i = 0; i < poolBracketsCount; i++) {
     pool_print_entry(&poolBrackets[i]);

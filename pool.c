@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
     printf("FORMAT: %s\n", format);
     pool_possibilities_report();
   } else if (strcmp(command, "entries") == 0) {
-    pool_print_entry(&poolTournamentBracket);
     pool_entries_report();
   } else {
     fprintf(stderr, "Unknown COMMAND: %s\n", command);
