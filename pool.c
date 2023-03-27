@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Please specify a COMMAND.\n");
     usage(argv[0]);
   }
-  char * command = optind < argc ? argv[optind] : "NULL";
+  char * command = argv[optind];
   if (strcmp(command, "teams") == 0) {
     pool_team_report();
   } else if (strcmp(command, "scores") == 0) {
