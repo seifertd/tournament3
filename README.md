@@ -56,22 +56,24 @@ current tournament bracket is advanced and the algo run from there, then results
 collected and combined.
 
 2 cores:
-* 1st core assumes game 1 winner is team1
-* 2nd core assumes game 1 winner is team2
+  * 1st core assumes game 1 winner is team1
+  * 2nd core assumes game 1 winner is team2
+
 4 cores:
-* 1st core assumes game 1 winner is team1, game 2 winner is team1
-* 2nd core assumes game 1 winner is team2, game 2 winner is team1
-* 3nd core assumes game 1 winner is team1, game 2 winner is team2
-* 4th core assumes game 1 winner is team2, game 2 winner is team2
+  * 1st core assumes game 1 winner is team1, game 2 winner is team1
+  * 2nd core assumes game 1 winner is team2, game 2 winner is team1
+  * 3nd core assumes game 1 winner is team1, game 2 winner is team2
+  * 4th core assumes game 1 winner is team2, game 2 winner is team2
+
 8 cores:
-* 1st core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team1
-* 2nd core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team1
-* 3nd core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team1
-* 4th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team1
-* 5th core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team2
-* 6th core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team2
-* 7th core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team2
-* 8th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team2
+  * 1st core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team1
+  * 2nd core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team1
+  * 3nd core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team1
+  * 4th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team1
+  * 5th core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team2
+  * 6th core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team2
+  * 7th core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team2
+  * 8th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team2
 
 etc
 
