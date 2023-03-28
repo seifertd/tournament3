@@ -7,6 +7,17 @@ Implemented as a single file header for command line pool management.
 This may change at some point, not sure what benefit this has as
 the use case I was thinking of no longer applies.
 
+Building
+--------
+
+Run
+
+```console
+./build.sh
+```
+
+Tested on Linux Mint and Ubuntu only.
+
 Scorers
 -------
 The pool configuration specifies the scorer to use in the pool.
