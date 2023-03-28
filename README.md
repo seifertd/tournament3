@@ -17,7 +17,7 @@ $ ./build.sh
 $ ./pool -h
 ```
 
-Tested on Linux Mint, Ubuntu and Mac OS X (M1).
+Tested on Linux Mint, Ubuntu, Windows 11 (MinGW) and Mac OS X (M1).
 
 Scorers
 -------
