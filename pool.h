@@ -614,7 +614,7 @@ POOLDEF void possibilities_dfs(
 // TODO: optional progress reporting
 POOLDEF void pool_possibilities_report() {
   if (poolBracketsCount == 0) {
-    fprintf(stderr, "There are no entries in this pool.\n");
+    fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
   }
 
@@ -629,8 +629,10 @@ POOLDEF void pool_possibilities_report() {
   }
   uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
   printf("%s: Possibilities Report\n", poolConfiguration.poolName);
-  printf("There are %d teams and %d games remaining, %" PRIu64 " possible outcomes\n",
-      gamesLeftCount + 1, gamesLeftCount, possibleOutcomes);
+  printf("There are %d teams and %d games remaining, ",
+      gamesLeftCount + 1, gamesLeftCount);
+  pool_print_humanized(stdout, possibleOutcomes, 6);
+  printf(" possible outcomes\n");
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
   uint16_t bracketScores[POOL_BRACKET_CAPACITY];
   for (size_t i = 0; i < poolBracketsCount; i++) {
@@ -705,20 +707,30 @@ POOLDEF void pool_possibilities_report() {
 
 POOLDEF void pool_score_report() {
   if (poolBracketsCount == 0) {
-    fprintf(stderr, "There are no entries in this pool.\n");
+    fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
   }
   for (size_t i = 0; i < poolBracketsCount; i++) {
     PoolBracket *bracket = &poolBrackets[i];
     pool_bracket_score(bracket, &poolTournamentBracket);
   }
+  uint8_t rank = 1;
+  uint32_t lastScore = 0;
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
   printf("%s: Leaderboard\n", poolConfiguration.poolName);
   printf("            Curr  Max            Round\n");
-  printf("  Name     Score Score   1   2   3   4   5   6\n");
-  printf("---------- ----- ----- --- --- --- --- --- ---\n");
+  printf("Rank    Name    Score Score   1   2   3   4   5   6\n");
+  printf("---- ---------- ----- ----- --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
-    printf("%10.10s %5d %5d %3d %3d %3d %3d %3d %3d\n", poolBrackets[i].name,
+    if (i > 0) {
+      if (poolBrackets[i].score != lastScore) {
+        rank = i + 1;
+        lastScore = poolBrackets[i].score;
+      }
+    }
+    printf("%4d %10.10s %5d %5d %3d %3d %3d %3d %3d %3d\n",
+        rank,
+        poolBrackets[i].name,
         poolBrackets[i].score,
         poolBrackets[i].maxScore,
         poolBrackets[i].roundScores[0],
