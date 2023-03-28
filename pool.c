@@ -32,7 +32,7 @@ void help() {
   fprintf(stderr, "          final four: region 1 vs region 2, region 3 vs. region 4\n");
   fprintf(stderr, "     results.txt: file containing short names of winners of each match\n");
   fprintf(stderr, "          winners can be reported in any order, EXCEPT:\n");
-  fprintf(stderr, "          all round winners must be reported before new round winners may be reported\n");
+  fprintf(stderr, "          all current round winners must be reported before next round winners may be reported\n");
   fprintf(stderr, "          lines starting with '#' are ignored and may contain comments or notes\n");
   fprintf(stderr, "          last line should be the actual total score of the championship\n");
   fprintf(stderr, "     entries: a directory containing entry files\n");
