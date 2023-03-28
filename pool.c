@@ -42,8 +42,8 @@ void help() {
   fprintf(stderr, "    Basic: each correct pick is worth the roundMultiplier of the round\n");
   fprintf(stderr, "           the game was played in.\n");
   fprintf(stderr, "    Upset: same as Basic except the seed number of the victor is added\n");
-  fprintf(stderr, "    SeedDiff: same as Basic except in the case of upsets, the DIFFERENCE\n");
-  fprintf(stderr, "           between the winner and loser seeds is added\n");
+  fprintf(stderr, "    SeedDiff: each correct winner is worth the roundMultiplier of the round\n");
+  fprintf(stderr, "           If the loser is picked as well, the difference between the seeds is added as a bonus\n");
   fprintf(stderr, "\nExample Configuration File:\n");
   fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundMultipliers=1,2,4,8,11,15\n");
   fprintf(stderr, "\nSample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2023/teams.txt\n");
