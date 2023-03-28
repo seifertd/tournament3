@@ -718,7 +718,7 @@ POOLDEF void pool_score_report() {
   uint32_t lastScore = 0;
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
   printf("%s: Leaderboard\n", poolConfiguration.poolName);
-  printf("            Curr  Max            Round\n");
+  printf("                 Curr  Max            Round\n");
   printf("Rank    Name    Score Score   1   2   3   4   5   6\n");
   printf("---- ---------- ----- ----- --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
