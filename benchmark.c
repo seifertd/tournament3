@@ -4,7 +4,7 @@
 #define POOL_IMPLEMENTATION
 #include "pool.h"
 
-int main(int argc, const char* argv) {
+int main(int argc, const char* argv[]) {
   pool_initialize("test/benchmark");
   printf("Running Scoring Benchmark:\n");
   clock_t start_t, end_t;

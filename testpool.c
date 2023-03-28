@@ -4,7 +4,7 @@
 #define POOL_IMPLEMENTATION
 #include "pool.h"
 
-int main(int argc, const char* argv) {
+int main(int argc, const char* argv[]) {
   pool_initialize("2023");
   //pool_initialize("test/benchmark");
   printf("Initialized pool, there are %d entries\n", poolBracketsCount);
