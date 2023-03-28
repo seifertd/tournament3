@@ -29,6 +29,7 @@ void help() {
   fprintf(stderr, "          teams should be listed by region in seed matchup order:\n");
   fprintf(stderr, "              1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15\n");
   fprintf(stderr, "          region 1 first, region 2 second, etc\n");
+  fprintf(stderr, "          final four: region 1 vs region 2, region 3 vs. region 4\n");
   fprintf(stderr, "     results.txt: file containing short names of winners of each match\n");
   fprintf(stderr, "          winners can be reported in any order, EXCEPT:\n");
   fprintf(stderr, "          all round winners must be reported before new round winners may be reported\n");
