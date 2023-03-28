@@ -13,7 +13,8 @@ Building
 Run
 
 ```console
-./build.sh
+$ ./build.sh
+$ ./pool -h
 ```
 
 Tested on Linux Mint and Ubuntu only.
