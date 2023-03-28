@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+ane
+wid
+opi
+Pai
+Sau
+pyl
+pos
+ext
+fan
+Cle
+end
+mus
+dum
+dur
+sid
+wor
+hea
+gri
+plo
+pin
+gre
+lan
+cla
+mas
+san
+rap
+ten
+amp
+# ROUND: 2
+foe
+mar
+ane
+Pai
+Sau
+ext
+Cle
+mus
+dum
+sid
+gri
+plo
+lan
+mas
+rap
+amp
+# ROUND: 3
+mar
+Pai
+Sau
+Cle
+dum
+plo
+mas
+amp
+# ROUND: 4
+mar
+Cle
+dum
+amp
+# ROUND: 5
+Cle
+dum
+# ROUND: 6
+dum

@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+can
+dis
+ane
+wid
+spl
+Pai
+mor
+dee
+bla
+ext
+blo
+aba
+wil
+mus
+dum
+dur
+sid
+wor
+coe
+gri
+moo
+Tor
+Cat
+sky
+Big
+mas
+san
+rap
+sec
+amp
+# ROUND: 2
+shi
+dis
+wid
+Pai
+mor
+bla
+aba
+wil
+dur
+sid
+coe
+Tor
+Cat
+Big
+san
+sec
+# ROUND: 3
+dis
+wid
+bla
+aba
+sid
+coe
+Big
+san
+# ROUND: 4
+wid
+aba
+sid
+Big
+# ROUND: 5
+aba
+Big
+# ROUND: 6
+aba

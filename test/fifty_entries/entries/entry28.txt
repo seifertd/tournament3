@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+can
+dis
+Pru
+bar
+spl
+Pai
+mor
+pyl
+pos
+ext
+blo
+Cle
+end
+mus
+max
+dur
+sid
+Cha
+coe
+gri
+plo
+pin
+gre
+sky
+cla
+sli
+san
+pkd
+sec
+Wis
+# ROUND: 2
+ram
+dis
+Pru
+Pai
+mor
+ext
+blo
+end
+max
+Cha
+gri
+pin
+gre
+cla
+san
+Wis
+# ROUND: 3
+ram
+Pai
+mor
+blo
+Cha
+pin
+gre
+Wis
+# ROUND: 4
+ram
+blo
+pin
+Wis
+# ROUND: 5
+ram
+pin
+# ROUND: 6
+pin

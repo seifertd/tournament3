@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+dis
+ane
+bar
+opi
+Pai
+mor
+dee
+bla
+ext
+fan
+aba
+wil
+chu
+max
+dur
+sid
+Cha
+hea
+gri
+plo
+Tor
+gre
+lan
+cla
+sli
+slu
+pkd
+sec
+Wis
+# ROUND: 2
+foe
+dis
+ane
+opi
+mor
+ext
+fan
+wil
+dur
+Cha
+gri
+Tor
+gre
+cla
+pkd
+Wis
+# ROUND: 3
+foe
+ane
+mor
+wil
+dur
+Tor
+cla
+Wis
+# ROUND: 4
+foe
+mor
+dur
+cla
+# ROUND: 5
+foe
+dur
+# ROUND: 6
+dur

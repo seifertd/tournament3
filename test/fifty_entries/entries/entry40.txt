@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+ane
+wid
+opi
+Pai
+Sau
+pyl
+pos
+ext
+fan
+Cle
+end
+chu
+dum
+Mao
+sid
+Cha
+coe
+sca
+moo
+pin
+Cat
+lan
+cla
+sli
+san
+pkd
+ten
+amp
+# ROUND: 2
+foe
+mar
+ane
+Pai
+pyl
+ext
+Cle
+chu
+dum
+sid
+coe
+moo
+Cat
+cla
+san
+amp
+# ROUND: 3
+mar
+Pai
+pyl
+Cle
+dum
+coe
+cla
+san
+# ROUND: 4
+Pai
+pyl
+dum
+cla
+# ROUND: 5
+pyl
+dum
+# ROUND: 6
+dum

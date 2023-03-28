@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+foe
+par
+mar
+ane
+wid
+opi
+cir
+mor
+dee
+pos
+ext
+fan
+aba
+end
+mus
+max
+dur
+ove
+Cha
+coe
+sca
+plo
+pin
+Cat
+sky
+Big
+sli
+slu
+rap
+ten
+amp
+# ROUND: 2
+foe
+par
+wid
+cir
+dee
+pos
+aba
+mus
+dur
+Cha
+coe
+pin
+sky
+sli
+slu
+amp
+# ROUND: 3
+par
+wid
+pos
+mus
+Cha
+coe
+sky
+amp
+# ROUND: 4
+wid
+mus
+Cha
+sky
+# ROUND: 5
+wid
+Cha
+# ROUND: 6
+Cha

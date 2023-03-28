@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+shi
+par
+dis
+ane
+bar
+spl
+Pai
+Sau
+pyl
+bla
+ext
+blo
+aba
+end
+mus
+max
+dur
+sid
+wor
+hea
+gri
+plo
+pin
+gre
+lan
+Big
+mas
+slu
+pkd
+sec
+amp
+# ROUND: 2
+sho
+par
+ane
+spl
+pyl
+bla
+aba
+end
+max
+sid
+hea
+plo
+gre
+mas
+slu
+sec
+# ROUND: 3
+sho
+spl
+bla
+end
+max
+hea
+mas
+slu
+# ROUND: 4
+spl
+bla
+hea
+mas
+# ROUND: 5
+bla
+mas
+# ROUND: 6
+mas

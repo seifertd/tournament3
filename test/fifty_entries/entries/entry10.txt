@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+dis
+Pru
+bar
+spl
+cir
+mor
+pyl
+bla
+sac
+fan
+aba
+wil
+mus
+max
+dur
+ove
+Cha
+hea
+gri
+plo
+pin
+gre
+sky
+Big
+mas
+san
+pkd
+sec
+Wis
+# ROUND: 2
+foe
+par
+bar
+spl
+mor
+sac
+aba
+mus
+dur
+ove
+hea
+plo
+sky
+mas
+san
+Wis
+# ROUND: 3
+foe
+spl
+mor
+mus
+dur
+hea
+mas
+Wis
+# ROUND: 4
+foe
+mus
+dur
+mas
+# ROUND: 5
+foe
+dur
+# ROUND: 6
+dur

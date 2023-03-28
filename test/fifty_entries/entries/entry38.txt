@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+shi
+par
+mar
+Pru
+wid
+spl
+cir
+Sau
+pyl
+pos
+sac
+blo
+aba
+end
+mus
+dum
+Mao
+sid
+Cha
+coe
+gri
+plo
+pin
+Cat
+lan
+Big
+sli
+san
+pkd
+sec
+Wis
+# ROUND: 2
+shi
+mar
+Pru
+cir
+pyl
+sac
+aba
+mus
+Mao
+Cha
+coe
+plo
+Cat
+Big
+pkd
+Wis
+# ROUND: 3
+mar
+Pru
+pyl
+mus
+Mao
+plo
+Cat
+pkd
+# ROUND: 4
+Pru
+mus
+Mao
+Cat
+# ROUND: 5
+Pru
+Mao
+# ROUND: 6
+Pru

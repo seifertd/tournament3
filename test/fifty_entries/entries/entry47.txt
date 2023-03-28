@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+par
+mar
+Pru
+wid
+opi
+cir
+Sau
+pyl
+bla
+ext
+fan
+aba
+wil
+mus
+dum
+dur
+sid
+Cha
+hea
+gri
+moo
+pin
+Cat
+sky
+Big
+mas
+san
+pkd
+ten
+amp
+# ROUND: 2
+shi
+par
+Pru
+opi
+pyl
+ext
+fan
+wil
+dur
+sid
+gri
+moo
+sky
+mas
+pkd
+ten
+# ROUND: 3
+shi
+opi
+pyl
+wil
+sid
+gri
+sky
+ten
+# ROUND: 4
+opi
+pyl
+gri
+ten
+# ROUND: 5
+pyl
+gri
+# ROUND: 6
+gri

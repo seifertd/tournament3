@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+par
+dis
+ane
+bar
+opi
+cir
+mor
+pyl
+pos
+ext
+fan
+aba
+wil
+chu
+max
+dur
+ove
+Cha
+hea
+sca
+plo
+Tor
+Cat
+sky
+Big
+sli
+san
+pkd
+ten
+amp
+# ROUND: 2
+ram
+dis
+ane
+opi
+mor
+ext
+fan
+chu
+max
+Cha
+sca
+Tor
+Cat
+Big
+san
+ten
+# ROUND: 3
+dis
+ane
+ext
+chu
+Cha
+Tor
+Cat
+san
+# ROUND: 4
+ane
+ext
+Tor
+Cat
+# ROUND: 5
+ext
+Tor
+# ROUND: 6
+Tor

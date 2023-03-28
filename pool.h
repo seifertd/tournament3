@@ -211,7 +211,7 @@ typedef struct {
 
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength) {
   if (num < 10000) {
-    fprintf(f_stream, "%*ld", fieldLength, num);
+    fprintf(f_stream, "%*ld", fieldLength+1, num);
     return;
   }
   static uint64_t factors[5] = {1e15, 1e12, 1e9, 1e6, 1e3};
@@ -500,7 +500,10 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
   PoolStats *bStats = (PoolStats *) b;
   int cmp = ( bStats->timesWon - aStats->timesWon );
   if (cmp == 0) {
-    cmp = bStats->maxScore - aStats->maxScore;
+    cmp = bStats->timesTied - aStats->timesTied;
+    if (cmp == 0) {
+      cmp = bStats->maxScore - aStats->maxScore;
+    }
   }
   return cmp;
 }
@@ -657,15 +660,15 @@ POOLDEF void pool_possibilities_report() {
       stats, poolBracketsCount,
       &prog);
 
-  printf("%20s %4s %4s %5s %5s %6s %6s %6s\n", "",
+  printf("%10s %4s %4s %5s %5s %6s %6s %6s\n", "",
       "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
-  printf("%20s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "        Name",
+  printf("%10s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "Name  ",
       "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
   qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
   for (size_t i = 0; i < poolBracketsCount; i++) {
     PoolStats *stat = &stats[i];
     float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
-    printf("%20s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
+    printf("%10.10s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
         stat->minRank, stat->maxRank, stat->bracket->score,
         stat->maxScore, winChance);
     pool_print_humanized(stdout, stat->timesWon, 5);
@@ -737,14 +740,14 @@ POOLDEF int pool_name_cmpfunc (const void * a, const void * b) {
 }
 
 POOLDEF void pool_entries_report() {
-  if (poolBracketsCount == 0) {
-    fprintf(stderr, "There are no entries in this pool.\n");
-  }
   printf("%s: Entries Report\n", poolConfiguration.poolName);
   pool_print_entry(&poolTournamentBracket);
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_name_cmpfunc);
   for (size_t i = 0; i < poolBracketsCount; i++) {
     pool_print_entry(&poolBrackets[i]);
+  }
+  if (poolBracketsCount == 0) {
+    fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
   }
 }
 
@@ -767,7 +770,7 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
   char * line = fgets(buffer, 1023, f);
   uint8_t teamRounds[POOL_NUM_TEAMS] = {0};
   uint8_t resultsCount = 0;
-  for (size_t i = 0; i < POOL_NUM_GAMES + 1 && line != NULL; i++) {
+  while (line != NULL) {
     // Turn the new line into a 0
     buffer[strlen(buffer)- 1] = 0;
 
@@ -777,9 +780,13 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
       continue;
     }
 
-    if (i == POOL_NUM_GAMES) {
+    if (resultsCount == POOL_NUM_GAMES) {
       // reading tie break
       bracket->tieBreak = (uint8_t) atoi(buffer);
+      break;
+    } else if (resultsCount > POOL_NUM_GAMES) {
+      fprintf(stderr, "Too many lines in entry file %s: %d\n", filePath, resultsCount);
+      exit(1);
     } else {
       uint8_t teamNum = pool_team_num_for_short_name(buffer);
       if (teamNum == 0) {
@@ -790,8 +797,8 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
       size_t gameIndex = poolGameNumber[teamNum-1][round];
       if (bracket->winners[gameIndex] != 0) {
         PoolTeam prevWinner = poolTeams[bracket->winners[gameIndex]-1];
-        fprintf(stderr, "Error in bracket %s: conflicting result %s for game %ld, previous winner: %s\n",
-            bracket->name, buffer, gameIndex, prevWinner.name);
+        fprintf(stderr, "Error in bracket %s: conflicting result %s for game %ld round %d, previous winner: %s\n",
+            bracket->name, buffer, gameIndex, round + 1, prevWinner.name);
         exit(1);
       } else {
         bracket->winners[gameIndex] = teamNum;
@@ -799,8 +806,8 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
           uint8_t loserNum = pool_loser_of_game(gameIndex, bracket);
           poolTeams[loserNum-1].eliminated = true;
         }
+        teamRounds[teamNum-1] = teamRounds[teamNum-1] + 1;
       }
-      teamRounds[teamNum-1] = teamRounds[teamNum-1] + 1;
       line = fgets(buffer, 1023, f);
       resultsCount++;
     }
@@ -922,7 +929,7 @@ POOLDEF void pool_read_team_file(const char *filePath) {
     exit(1);
   }
   uint8_t buffer[1024];
-  for (size_t i = 0; i < POOL_NUM_TEAMS; i++) {
+  for (uint8_t i = 0; i < POOL_NUM_TEAMS; i++) {
     if (fgets(buffer, 1023, f) == NULL) {
       fprintf(stderr, "Could not read a line from file %s: %s\n",
           filePath, strerror(errno));
@@ -938,6 +945,17 @@ POOLDEF void pool_read_team_file(const char *filePath) {
     if (vars_filled != 2) {
       fprintf(stderr, "Could not read name and short name from line %s\n", buffer);
       exit(1);
+    }
+    // Check if we already read this
+    for (uint8_t t = 0; t < i; t++) {
+      if (strcmp(poolTeams[i].name, poolTeams[t].name) == 0) {
+        fprintf(stderr, "Duplicate team name %s for team %d and %d\n", poolTeams[i].name, i+1, t+1);
+        exit(1);
+      }
+      if (strcmp(poolTeams[i].shortName, poolTeams[t].shortName) == 0) {
+        fprintf(stderr, "Duplicate team shortName %s for team %d and %d\n", poolTeams[i].shortName, i+1, t+1);
+        exit(1);
+      }
     }
   }
   fclose(f);

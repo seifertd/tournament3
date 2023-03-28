@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+par
+mar
+ane
+wid
+opi
+cir
+mor
+dee
+pos
+sac
+blo
+Cle
+wil
+chu
+max
+dur
+sid
+wor
+hea
+sca
+moo
+Tor
+Cat
+sky
+cla
+sli
+slu
+rap
+sec
+amp
+# ROUND: 2
+ram
+mar
+ane
+opi
+dee
+sac
+blo
+chu
+max
+sid
+sca
+moo
+sky
+sli
+slu
+sec
+# ROUND: 3
+ram
+ane
+dee
+blo
+max
+moo
+sky
+slu
+# ROUND: 4
+ane
+blo
+max
+sky
+# ROUND: 5
+blo
+sky
+# ROUND: 6
+sky

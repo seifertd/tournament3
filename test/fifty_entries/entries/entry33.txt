@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+foe
+can
+mar
+Pru
+bar
+spl
+cir
+Sau
+dee
+bla
+sac
+blo
+Cle
+wil
+mus
+max
+Mao
+ove
+Cha
+coe
+sca
+moo
+pin
+gre
+sky
+Big
+mas
+slu
+rap
+sec
+amp
+# ROUND: 2
+sho
+can
+bar
+spl
+dee
+bla
+Cle
+wil
+max
+Cha
+sca
+moo
+sky
+Big
+rap
+amp
+# ROUND: 3
+can
+spl
+bla
+wil
+max
+moo
+Big
+rap
+# ROUND: 4
+can
+wil
+max
+Big
+# ROUND: 5
+can
+Big
+# ROUND: 6
+can

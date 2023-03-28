@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+foe
+par
+dis
+Pru
+bar
+opi
+cir
+Sau
+dee
+pos
+ext
+fan
+aba
+end
+chu
+max
+dur
+ove
+Cha
+hea
+gri
+plo
+pin
+Cat
+sky
+cla
+sli
+san
+pkd
+sec
+Wis
+# ROUND: 2
+foe
+par
+Pru
+cir
+dee
+pos
+aba
+end
+max
+ove
+hea
+pin
+Cat
+sli
+san
+Wis
+# ROUND: 3
+par
+Pru
+dee
+end
+ove
+pin
+sli
+san
+# ROUND: 4
+Pru
+dee
+ove
+sli
+# ROUND: 5
+Pru
+sli
+# ROUND: 6
+Pru

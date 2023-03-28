@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+can
+mar
+ane
+wid
+spl
+Pai
+Sau
+dee
+pos
+sac
+fan
+aba
+end
+chu
+max
+dur
+sid
+wor
+hea
+gri
+moo
+Tor
+gre
+sky
+Big
+mas
+san
+rap
+sec
+Wis
+# ROUND: 2
+foe
+mar
+wid
+spl
+Sau
+pos
+fan
+chu
+max
+wor
+gri
+moo
+gre
+mas
+san
+Wis
+# ROUND: 3
+foe
+spl
+pos
+chu
+wor
+gri
+mas
+Wis
+# ROUND: 4
+spl
+pos
+wor
+Wis
+# ROUND: 5
+pos
+wor
+# ROUND: 6
+wor

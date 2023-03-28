@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+foe
+par
+mar
+Pru
+bar
+opi
+Pai
+Sau
+pyl
+bla
+sac
+blo
+aba
+wil
+mus
+dum
+Mao
+ove
+wor
+hea
+gri
+moo
+Tor
+gre
+sky
+Big
+mas
+san
+rap
+ten
+Wis
+# ROUND: 2
+foe
+par
+bar
+opi
+pyl
+bla
+blo
+wil
+dum
+ove
+gri
+Tor
+gre
+Big
+rap
+ten
+# ROUND: 3
+par
+bar
+bla
+blo
+ove
+Tor
+Big
+ten
+# ROUND: 4
+bar
+blo
+ove
+Big
+# ROUND: 5
+bar
+ove
+# ROUND: 6
+ove

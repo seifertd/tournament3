@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+can
+mar
+Pru
+bar
+spl
+Pai
+Sau
+dee
+bla
+sac
+blo
+Cle
+wil
+chu
+max
+dur
+ove
+Cha
+hea
+sca
+moo
+pin
+gre
+lan
+Big
+sli
+slu
+rap
+sec
+amp
+# ROUND: 2
+shi
+can
+Pru
+Pai
+Sau
+bla
+Cle
+wil
+dur
+Cha
+sca
+pin
+gre
+Big
+rap
+amp
+# ROUND: 3
+shi
+Pru
+bla
+Cle
+Cha
+sca
+gre
+amp
+# ROUND: 4
+Pru
+Cle
+Cha
+gre
+# ROUND: 5
+Pru
+gre
+# ROUND: 6
+Pru

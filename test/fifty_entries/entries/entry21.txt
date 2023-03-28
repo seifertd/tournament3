@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+Pru
+bar
+spl
+cir
+mor
+pyl
+pos
+sac
+fan
+Cle
+end
+chu
+dum
+dur
+ove
+wor
+hea
+gri
+plo
+Tor
+Cat
+lan
+cla
+mas
+san
+rap
+sec
+amp
+# ROUND: 2
+foe
+par
+Pru
+cir
+pyl
+pos
+fan
+end
+dur
+wor
+hea
+Tor
+Cat
+cla
+san
+sec
+# ROUND: 3
+foe
+cir
+pos
+end
+dur
+Tor
+cla
+san
+# ROUND: 4
+cir
+pos
+dur
+san
+# ROUND: 5
+cir
+dur
+# ROUND: 6
+dur

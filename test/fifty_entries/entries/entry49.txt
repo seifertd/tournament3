@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+can
+mar
+ane
+bar
+spl
+Pai
+mor
+dee
+pos
+ext
+blo
+aba
+end
+chu
+max
+dur
+sid
+Cha
+hea
+gri
+moo
+Tor
+Cat
+lan
+Big
+sli
+san
+pkd
+ten
+amp
+# ROUND: 2
+shi
+can
+ane
+spl
+mor
+pos
+blo
+end
+dur
+sid
+gri
+moo
+lan
+sli
+pkd
+ten
+# ROUND: 3
+can
+spl
+pos
+end
+dur
+gri
+sli
+pkd
+# ROUND: 4
+spl
+pos
+gri
+pkd
+# ROUND: 5
+pos
+pkd
+# ROUND: 6
+pos

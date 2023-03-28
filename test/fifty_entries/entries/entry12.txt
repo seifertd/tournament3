@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+can
+mar
+Pru
+bar
+opi
+Pai
+mor
+pyl
+pos
+ext
+blo
+Cle
+end
+chu
+max
+dur
+ove
+wor
+coe
+sca
+plo
+pin
+gre
+lan
+Big
+sli
+slu
+rap
+sec
+Wis
+# ROUND: 2
+shi
+mar
+bar
+opi
+mor
+ext
+blo
+chu
+max
+wor
+coe
+plo
+lan
+Big
+slu
+Wis
+# ROUND: 3
+mar
+bar
+ext
+chu
+wor
+plo
+lan
+Wis
+# ROUND: 4
+bar
+ext
+plo
+Wis
+# ROUND: 5
+ext
+plo
+# ROUND: 6
+ext

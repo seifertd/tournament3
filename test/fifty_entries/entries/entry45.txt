@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+shi
+par
+dis
+ane
+bar
+spl
+cir
+mor
+dee
+pos
+sac
+blo
+Cle
+end
+chu
+max
+Mao
+ove
+Cha
+hea
+gri
+moo
+pin
+Cat
+sky
+Big
+mas
+slu
+pkd
+ten
+amp
+# ROUND: 2
+shi
+dis
+ane
+cir
+mor
+sac
+Cle
+chu
+Mao
+ove
+gri
+pin
+Cat
+mas
+slu
+ten
+# ROUND: 3
+dis
+cir
+sac
+Cle
+ove
+pin
+Cat
+ten
+# ROUND: 4
+cir
+sac
+pin
+Cat
+# ROUND: 5
+cir
+pin
+# ROUND: 6
+pin

@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+shi
+can
+mar
+ane
+bar
+spl
+Pai
+Sau
+pyl
+bla
+sac
+fan
+aba
+wil
+chu
+dum
+dur
+sid
+wor
+coe
+sca
+plo
+Tor
+Cat
+sky
+Big
+sli
+san
+rap
+ten
+amp
+# ROUND: 2
+sho
+can
+ane
+Pai
+Sau
+bla
+fan
+wil
+dum
+sid
+coe
+plo
+sky
+sli
+san
+amp
+# ROUND: 3
+can
+Pai
+bla
+wil
+dum
+coe
+sli
+san
+# ROUND: 4
+Pai
+bla
+dum
+sli
+# ROUND: 5
+Pai
+sli
+# ROUND: 6
+Pai

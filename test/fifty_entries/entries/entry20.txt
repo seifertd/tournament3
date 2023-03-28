@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+shi
+par
+dis
+ane
+wid
+spl
+cir
+Sau
+pyl
+pos
+ext
+blo
+aba
+end
+mus
+dum
+Mao
+ove
+Cha
+coe
+sca
+moo
+pin
+gre
+sky
+cla
+mas
+slu
+pkd
+ten
+amp
+# ROUND: 2
+shi
+dis
+ane
+spl
+pyl
+ext
+blo
+end
+dum
+ove
+sca
+moo
+sky
+cla
+slu
+amp
+# ROUND: 3
+dis
+spl
+ext
+blo
+dum
+sca
+cla
+slu
+# ROUND: 4
+dis
+ext
+dum
+cla
+# ROUND: 5
+ext
+dum
+# ROUND: 6
+dum

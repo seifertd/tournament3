@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+shi
+can
+mar
+ane
+bar
+spl
+Pai
+Sau
+dee
+pos
+ext
+blo
+aba
+wil
+chu
+dum
+Mao
+sid
+wor
+hea
+sca
+plo
+Tor
+Cat
+sky
+Big
+mas
+san
+pkd
+ten
+Wis
+# ROUND: 2
+shi
+can
+bar
+spl
+dee
+ext
+blo
+wil
+dum
+sid
+hea
+plo
+sky
+mas
+san
+ten
+# ROUND: 3
+can
+spl
+ext
+wil
+sid
+plo
+mas
+ten
+# ROUND: 4
+spl
+ext
+plo
+ten
+# ROUND: 5
+ext
+ten
+# ROUND: 6
+ten

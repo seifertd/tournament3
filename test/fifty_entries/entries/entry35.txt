@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+ane
+bar
+opi
+Pai
+mor
+pyl
+bla
+sac
+fan
+aba
+end
+mus
+max
+Mao
+sid
+Cha
+hea
+gri
+plo
+Tor
+Cat
+lan
+Big
+sli
+slu
+pkd
+sec
+amp
+# ROUND: 2
+ram
+mar
+ane
+Pai
+pyl
+sac
+fan
+mus
+Mao
+Cha
+gri
+plo
+lan
+Big
+slu
+sec
+# ROUND: 3
+mar
+Pai
+pyl
+fan
+Mao
+plo
+lan
+sec
+# ROUND: 4
+Pai
+pyl
+Mao
+lan
+# ROUND: 5
+pyl
+Mao
+# ROUND: 6
+Mao

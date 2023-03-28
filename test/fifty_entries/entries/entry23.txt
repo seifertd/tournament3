@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+Pru
+wid
+opi
+Pai
+mor
+dee
+pos
+sac
+blo
+Cle
+wil
+mus
+max
+Mao
+sid
+Cha
+coe
+sca
+plo
+Tor
+Cat
+sky
+cla
+sli
+slu
+pkd
+sec
+Wis
+# ROUND: 2
+foe
+mar
+wid
+Pai
+mor
+pos
+blo
+mus
+max
+Cha
+sca
+plo
+Cat
+sli
+slu
+sec
+# ROUND: 3
+mar
+Pai
+pos
+mus
+max
+sca
+sli
+sec
+# ROUND: 4
+mar
+mus
+max
+sli
+# ROUND: 5
+mus
+sli
+# ROUND: 6
+sli

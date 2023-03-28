@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+shi
+par
+mar
+ane
+wid
+spl
+cir
+Sau
+pyl
+bla
+sac
+fan
+Cle
+wil
+chu
+max
+dur
+sid
+wor
+hea
+sca
+moo
+Tor
+gre
+lan
+cla
+mas
+san
+pkd
+ten
+Wis
+# ROUND: 2
+sho
+par
+ane
+spl
+Sau
+sac
+fan
+chu
+max
+wor
+hea
+Tor
+lan
+cla
+pkd
+ten
+# ROUND: 3
+sho
+spl
+sac
+fan
+wor
+Tor
+cla
+ten
+# ROUND: 4
+sho
+fan
+Tor
+ten
+# ROUND: 5
+fan
+ten
+# ROUND: 6
+fan

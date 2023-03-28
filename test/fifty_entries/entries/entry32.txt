@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+can
+mar
+ane
+wid
+opi
+Pai
+mor
+dee
+bla
+ext
+blo
+Cle
+wil
+mus
+dum
+dur
+ove
+wor
+coe
+sca
+moo
+pin
+gre
+sky
+Big
+mas
+san
+pkd
+sec
+Wis
+# ROUND: 2
+ram
+mar
+ane
+opi
+dee
+bla
+Cle
+mus
+dur
+ove
+coe
+moo
+sky
+mas
+san
+sec
+# ROUND: 3
+ram
+ane
+bla
+mus
+ove
+coe
+mas
+san
+# ROUND: 4
+ram
+mus
+ove
+san
+# ROUND: 5
+ram
+san
+# ROUND: 6
+ram

@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+can
+dis
+Pru
+bar
+spl
+Pai
+mor
+dee
+bla
+ext
+fan
+Cle
+wil
+chu
+dum
+dur
+sid
+wor
+coe
+gri
+moo
+Tor
+gre
+lan
+Big
+mas
+slu
+rap
+ten
+amp
+# ROUND: 2
+foe
+dis
+Pru
+spl
+dee
+bla
+fan
+wil
+dum
+wor
+gri
+Tor
+lan
+Big
+slu
+ten
+# ROUND: 3
+dis
+Pru
+dee
+fan
+dum
+Tor
+Big
+slu
+# ROUND: 4
+dis
+dee
+Tor
+slu
+# ROUND: 5
+dee
+Tor
+# ROUND: 6
+Tor

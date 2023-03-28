@@ -1,0 +1,69 @@
+# ROUND: 1
+sho
+foe
+can
+mar
+ane
+bar
+spl
+cir
+mor
+pyl
+bla
+ext
+blo
+aba
+wil
+mus
+dum
+dur
+sid
+wor
+coe
+sca
+plo
+pin
+Cat
+sky
+Big
+sli
+san
+rap
+ten
+Wis
+# ROUND: 2
+foe
+can
+ane
+spl
+mor
+ext
+aba
+wil
+dum
+sid
+coe
+pin
+sky
+Big
+rap
+ten
+# ROUND: 3
+can
+spl
+ext
+aba
+sid
+coe
+Big
+rap
+# ROUND: 4
+spl
+aba
+sid
+rap
+# ROUND: 5
+spl
+rap
+# ROUND: 6
+spl

@@ -1,0 +1,69 @@
+# ROUND: 1
+ram
+foe
+can
+mar
+Pru
+bar
+opi
+Pai
+Sau
+dee
+pos
+sac
+fan
+Cle
+end
+mus
+max
+dur
+sid
+wor
+hea
+gri
+plo
+Tor
+gre
+lan
+cla
+mas
+slu
+pkd
+sec
+amp
+# ROUND: 2
+ram
+can
+bar
+Pai
+Sau
+sac
+fan
+end
+max
+sid
+hea
+Tor
+lan
+cla
+pkd
+amp
+# ROUND: 3
+ram
+Pai
+Sau
+fan
+max
+hea
+cla
+amp
+# ROUND: 4
+Pai
+fan
+max
+cla
+# ROUND: 5
+Pai
+max
+# ROUND: 6
+Pai
