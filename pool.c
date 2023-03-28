@@ -33,9 +33,11 @@ void help() {
   fprintf(stderr, "          winners can be reported in any order, EXCEPT:\n");
   fprintf(stderr, "          all round winners must be reported before new round winners may be reported\n");
   fprintf(stderr, "          lines starting with '#' are ignored and may contain comments or notes\n");
+  fprintf(stderr, "          last line should be the actual total score of the championship\n");
   fprintf(stderr, "     entries: a directory containing entry files\n");
   fprintf(stderr, "          entry files are named for the entrant\n");
-  fprintf(stderr, "          same format as the results.txt file\n");
+  fprintf(stderr, "          same format as the results.txt file, except last line is the predicted\n");
+  fprintf(stderr, "          total points of the championship and is used to break ties.\n");
   fprintf(stderr, "\nScorers:\n");
   fprintf(stderr, "There are 3 supported scorers. Each scorer uses the configured\n");
   fprintf(stderr, "roundMultipliers as follows:\n");

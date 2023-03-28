@@ -22,3 +22,4 @@ games = 32
   teams = winners
   games = games / 2
 end
+puts 100 + rand(50)
