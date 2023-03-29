@@ -19,6 +19,36 @@ $ ./pool -h
 
 Tested on Linux Mint, Ubuntu, Windows 11 (MinGW), Windows 11 (WSL) and Mac OS X (M1).
 
+Running a Pool
+--------------
+You can use this software to run your office or friend group NCAA pool.
+
+1. Collecting entries.
+   1. You can hand out forms, set up a pool on one of the free websites
+      or send out the included bracket HTML entry collector page via email.
+   1. The HTML entry collector needs to be edited with the current year's
+      teams. If you hand this out before the First Four games are finished
+      you will have to enter placeholders at the right seeds and region.
+      You will then have to hand edit any entries produced to have the right
+      team short name in the right spots.
+1. Create a directory on your computer to hold the pool files.
+1. Create the `config.txt` file and set your pool's name, scoring method
+   and round multipliers.
+1. After the playin games are complete, you can create the `teams.txt` file
+   in the directory. See the `./pool -h` for a link to a sample you can
+   edit.
+1. Create the `entries` subfolder and copy/create/save any entry files you
+   got from the pool entrants. Again, you may need to hand edit them to
+   swap out First Four placeholder short names for actual ones.
+1. Generate an entries report and send it out to everyone for confirmation:
+   `./pool -d mypool entries`
+1. As games are played in the tournament, record the winners in the 
+   `results.txt` file
+1. Run the scores report: `./pool -d mypool scores` until the first round
+   is complete.
+1. Run your first possibilities report: `./pool -d mypool poss` and pass
+   around the results via email, slack, discord or whatever.
+
 Scorers
 -------
 The pool configuration specifies the scorer to use in the pool.
