@@ -31,6 +31,7 @@ You can use this software to run your office or friend group NCAA pool.
       you will have to enter placeholders at the right seeds and region.
       You will then have to hand edit any entries produced to have the right
       team short name in the right spots.
+   1. Here is what the HTML entry collector looks like: [2023 NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/bracket.html)
 1. Create a directory on your computer to hold the pool files.
 1. Create the `config.txt` file and set your pool's name, scoring method
    and round multipliers.
