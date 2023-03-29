@@ -73,21 +73,85 @@ possibilities report.
 
 Possibilities Report
 ---------------------
+
+M1 mac can analyze 2.147B possible outcomes against 50 entries
+in 37 minutes.
+
+```
+Supercalifragilistic Pool: Possibilities Report
+There are 32 teams and 31 games remaining,  2.147B possible outcomes
+DFS BPS:       968207 100% ELAPSED: 00:36:58
+            Min  Max  Curr  Max    Win   Times  Times
+    Name   Rank Rank Score Score Chance   Won    Tied Top Champs
+   entry23    1   29   193   497  17.93   385M 11.17M Cat,foe,wil,ane,hea
+   entry26    1   36   169   521  15.94 342.3M 8.821M mor,cir,mas,ten,gri
+   entry30    1   29   184   474  14.92 320.3M 11.19M slu,dis,dee,mus,hea
+   entry32    1   31   184   420   7.61 163.5M 6.399M lan,pos,dur,wid,sho
+   entry33    1   38   161   460   6.53 140.3M 5.080M fan,cla,ove,can,ane
+    entry7    1   37   165   444   5.13   110M 5.036M lan,aba,ext,spl,Cha
+    entry3    1   42   150   460   4.70 100.9M 4.543M dum,can,ten,ane,pos
+    entry9    1   33   169   439   4.43 95.10M 4.895M Cha,mus,ane,Wis,can
+    entry4    1   31   180   396   4.26 91.41M 4.098M moo,spl,ext,wid,aba
+   entry14    1   41   165   406   4.24 91.14M 4.179M dee,dum,mas,gri,Wis
+   entry47    1   44   155   380   2.57 55.11M 2.515M wil,mas,wid,pos,gri
+   entry50    1   36   167   423   2.11 45.27M 2.912M Cha,sho,aba,rap,pos
+   entry28    1   44   147   438   1.66 35.60M 1.718M mus,cir,lan,rap,gri
+   entry21    1   42   154   403   1.55 33.21M 1.777M mus,hea,spl,Wis,rap
+   entry19    1   41   158   363   1.20 25.79M 1.701M cla,spl,wid,sho,gri
+   entry38    1   40   161   368   1.19 25.66M 1.612M rap,wil,sho,spl,wid
+    entry6    1   48   121   423   0.82 17.61M 1.025M ten,ext,dur,foe,cir
+   entry13    1   48   128   352   0.40 8.512M 512.9K cir,Wis,pin,ove,dum
+   entry20    1   44   146   333   0.31 6.577M 587.7K dee,pin,ten,cla,ove
+   entry10    1   43   150   345   0.24 5.236M   477K sho,cla,ext,cir,aba
+   entry36    1   49   119   392   0.12 2.644M 213.4K aba,dur,dis,wid,spl
+   entry16    1   44   146   353   0.10 2.212M 208.7K moo,foe,mas,Wis,ext
+   entry41    1   40   155   302   0.06 1.254M 186.9K gri,aba,wid,pos,spl
+   entry29    1   50   102   303   0.05 1.042M 86.31K mas,spl,ext,aba,pos
+   entry37    1   48   133   335   0.03 630.7K 107.5K ten,spl,aba,gri,foe
+   entry46    1   50   122   320   0.02 497.2K 62.95K mus,dur,ten,mas,gri
+    entry8    1   50   101   311   0.01 232.3K 23.14K rap,pos,pin,can,gri
+   entry31    1   50   100   318   0.01 166.9K 20.40K moo,ane,Wis,ext,wil
+   entry34    1   50   124   272   0.00 46.97K 11.22K wid,mas,pin,ove,gri
+   entry12    1   50   103   267   0.00   2720    752 rap,ane,ext
+   entry27    1   50   122   255   0.00     29     64 cir,gri,rap,dur,ove
+   entry17    2   50   114   291   0.00      0      0
+    entry1    2   48   136   289   0.00      0      0
+   entry43    2   49   128   284   0.00      0      0
+   entry24    2   46   140   271   0.00      0      0
+   entry42    2   49   119   258   0.00      0      0
+   entry40    3   50    70   253   0.00      0      0
+   entry15    4   50   112   253   0.00      0      0
+    entry2    3   50   101   247   0.00      0      0
+   entry48    6   50   103   236   0.00      0      0
+   entry35    3   50    91   234   0.00      0      0
+   entry18    6   50   103   225   0.00      0      0
+   entry49    8   50   103   219   0.00      0      0
+   entry45    6   49   112   210   0.00      0      0
+   entry25   10   50   111   201   0.00      0      0
+   entry11   10   50   106   199   0.00      0      0
+   entry22   16   50   104   184   0.00      0      0
+    entry5   13   50    84   184   0.00      0      0
+   entry39   18   50   104   177   0.00      0      0
+   entry44   27   50    91   152   0.00      0      0
+```
+
 We want to generate all possible outcomes and score all the entries
 against them. Set up a DFS with inputs:
 * games - array of game numbers remaining
 * gamesLeft - size of this array
-* game - game under review
+* game - game in games array under review
 * stats - array of stats structs, one per entry
   * maxRank, minRank, maxScore, timesWon, timesTied, possibleScore, champCounts[], bracket
-  * possibleScore is set to current bracket score
+  * possibleScore is set to current bracket score given state of tournament so far
 
 Algo:
-* determine the two teams in games[game]
-* Assume winner is the first team, calculate points awarded to each bracket, add
-  to possibleScore
-* Recurse with game += 1
-* Repeat the above with winner assumed to be second team
+1. Initial setup as above
+1. Determine the two teams in games[game]
+2. Assume winner is the first team, calculate gameScore for each entry, add
+   to possibleScore = possibleScore + gameScore
+3. Recurse with game += 1. If game == gamesLeft, sort stats by possiblScore and update stats for this result, stop recursion.
+4. Subtract the gameScore from step 2 from each possibleScore of each entry
+5. Repeat 2-4 with winner assumed to be second team
 
 max recursion depth would be = number of games remaining
 
@@ -124,6 +188,7 @@ Game Index
 Game numbers by round and what game numbers teams will play in
 as they advance. Read across and up.
 
+```
     Game indexes
                     Round
     Teams     1  2   3   4   5   6
@@ -160,3 +225,4 @@ as they advance. Read across and up.
     t59 t60: 29
     t61 t62: 30 47
     t63 t64: 31
+```
