@@ -17,6 +17,15 @@ $ ./build.sh
 $ ./pool -h
 ```
 
+Build script uses value of CC environment variable or `cc` if it is not set
+as the compiler.
+
+Use clang:
+
+```console
+$ CC=clang ./build.sh
+```
+
 Tested on Linux Mint, Ubuntu, Windows 11 (MinGW), Windows 11 (WSL) and Mac OS X (M1).
 
 Running a Pool
