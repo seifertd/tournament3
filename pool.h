@@ -488,7 +488,14 @@ POOLDEF int pool_score_cmpfunc (const void * a, const void * b) {
 }
 
 POOLDEF int pool_champ_counts_cmpfunc (const void * a, const void * b) {
-  return ( *((uint64_t *)b) - *((uint64_t *)a) );
+  // Handle 64 bit unsigned ints ... with int return value
+  int64_t diff = *((uint64_t *)b) - *((uint64_t *)a);
+  if (diff < 0) {
+    return -1;
+  } else if (diff > 0) {
+    return 1;
+  }
+  return 0;
 }
 
 POOLDEF int pool_stats_possible_score_cmpfunc (const void * a, const void * b) {
@@ -498,14 +505,19 @@ POOLDEF int pool_stats_possible_score_cmpfunc (const void * a, const void * b) {
 POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
   PoolStats *aStats = (PoolStats *) a;
   PoolStats *bStats = (PoolStats *) b;
-  int cmp = ( bStats->timesWon - aStats->timesWon );
+  int64_t cmp = ( bStats->timesWon - aStats->timesWon );
   if (cmp == 0) {
     cmp = bStats->timesTied - aStats->timesTied;
     if (cmp == 0) {
       cmp = bStats->maxScore - aStats->maxScore;
     }
   }
-  return cmp;
+  if (cmp < 0) {
+    return -1;
+  } else if (cmp > 0) {
+    return 1;
+  }
+  return 0;
 }
 
 
