@@ -6,10 +6,13 @@
       * No fancy hardwood background image
       * Embedded inline base64 logo
       * Some class names changed (to protect the innocent)
-      * Got rid of the vertical scrollbar on the bracket div.
+      * Got rid of the scrollbars
       * CSS inlined
       * Added an area to record the champion and tie break (for
         use in some NCAA Pool Management software)
+      * Allowed clicking on teams to advance them to next round
+      * Added a button to save the entry as a file for my pool software:
+        https://github.com/seifertd/tournament3
   -->
 <head>
   <meta charset="UTF-8">
@@ -364,7 +367,6 @@ ul.game li.team {
   </style>
 </head>
 <body>
-<!-- partial:index.partial.html -->
 <header>
 	<ol>
 		<li>Round 1</li>
@@ -720,15 +722,18 @@ ul.game li.team {
 		<ul class="game game-63 championship">
 			<li class="team team-top" data-sn=""></li>
 			<li class="team team-bottom" data-sn=""></li>
-			<li class="champion" style="margin-top: 20px">Champion!</li>
-      <li class="tie-break">
-        <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Total points scored in championship game"/>
+      <li style="margin-top:40px"><span>CHAMPION:</span></li>
+			<li class="champion" style="padding: 5px"></li>
+      <li class="tie-break" style="padding: 5px">
+        <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Tie Break: Total points scored in championship game"/>
       </li>
-      <li class="entry-name">
-        <input type="text" id="entry-name" name="entryname" size="20" placeholder="Entry name" title="Your name"/>
+      <li class="entry-name" style="padding: 5px">
+        <input type="text" id="entry-name" name="entryname" size="20" placeholder="Entry name" title="Entry name"/>
       </li>
-      <li>
+      <li style="padding: 5px">
         <button id="generate-entry">Save Entry</button>
+      </li>
+      <li style="padding: 5px">
         <button id="random-picks">Random Picks</button>
       </li>
 		</ul>
