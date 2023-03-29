@@ -343,10 +343,15 @@ ul.game li.team {
 .championship {
   grid-column: 2/span 1;
   grid-row: 1/span 4;
+  width: 150px;
 }
 .championship .team, .championship .champion, .championship .tie-break, .entry-name {
   height: 28px;
   line-height: 28px;
+}
+
+#tie-break, #entry-name {
+  width: 135px;
 }
 
 .logo {
@@ -723,7 +728,7 @@ ul.game li.team {
 			<li class="team team-top" data-sn=""></li>
 			<li class="team team-bottom" data-sn=""></li>
       <li style="margin-top:40px"><span>CHAMPION:</span></li>
-			<li class="champion" style="padding: 5px"></li>
+			<li class="champion" style="padding: 5px; height: 18px; line-height: 18px;"></li>
       <li class="tie-break" style="padding: 5px">
         <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Tie Break: Total points scored in championship game"/>
       </li>
