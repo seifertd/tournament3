@@ -13,7 +13,7 @@
   -->
 <head>
   <meta charset="UTF-8">
-  <title>2023 NCAA Tournament Bracket in CSS Grid</title>
+  <title>NCAA Tournament Bracket Entry</title>
   <link href="https://fonts.googleapis.com/css?family=Signika:400,600" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
 	<style>
@@ -36,7 +36,7 @@ header ol {
   grid-gap: 0 6px;
   width: 1220px;
   margin: 0 auto;
-  overflow: scroll;
+  overflow: auto;
 }
 @media (min-width: 1450px) {
   header ol {
@@ -341,7 +341,7 @@ ul.game li.team {
   grid-column: 2/span 1;
   grid-row: 1/span 4;
 }
-.championship .team, .championship .champion, .championship .tie-break {
+.championship .team, .championship .champion, .championship .tie-break, .entry-name {
   height: 28px;
   line-height: 28px;
 }
@@ -367,15 +367,15 @@ ul.game li.team {
 <!-- partial:index.partial.html -->
 <header>
 	<ol>
-		<li>Round 1 <br/><span>Mar 16/17</span></li>
-		<li>Round 2 <br/><span>Mar 18/19</span></li>
-		<li>Sweet 16 <br/><span>Mar 23/24</span></li>
-		<li>Elite 8 <br/><span>Mar 25/26</span></li>
-		<li>Final 4 <br/><span>Apr 1/3</span></li>
-		<li>Elite 8 <br/><span>Mar 25/26</span></li>
-		<li>Sweet 16<br/><span>Mar 23/24</span></li>
-		<li>Round 2 <br/><span>Mar 18/19</span></li>
-		<li>Round 1 <br/><span>Mar 16/17</span></li>
+		<li>Round 1</li>
+		<li>Round 2</li>
+		<li>Sweet 16</li>
+		<li>Elite 8</li>
+		<li>Final 4</li>
+		<li>Elite 8</li>
+		<li>Sweet 16</li>
+		<li>Round 2</li>
+		<li>Round 1</li>
 	</ol>
 </header>
 <div class="bracket">
@@ -574,7 +574,7 @@ ul.game li.team {
 
 		<ul class="game game-22">
 			<li class="team team-top" data-sn="Xav">3 Xavier</li>
-			<li class="team team-bottom" data-sn="KeS">14 Kennesaw State</li>
+			<li class="team team-bottom" data-sn="KnS">14 Kennesaw State</li>
 		</ul>
 
 		<ul class="game game-23">
@@ -722,9 +722,15 @@ ul.game li.team {
 			<li class="team team-bottom" data-sn=""></li>
 			<li class="champion" style="margin-top: 20px">Champion!</li>
       <li class="tie-break">
-        <input type="number" name="tiebreak" size="20" placeholder="Tie breaker" title="Total points scored in championship game"/>
+        <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Total points scored in championship game"/>
       </li>
-      <li><button id="generate-entry">Generate Entry</button></li>
+      <li class="entry-name">
+        <input type="text" id="entry-name" name="entryname" size="20" placeholder="Entry name" title="Your name"/>
+      </li>
+      <li>
+        <button id="generate-entry">Save Entry</button>
+        <button id="random-picks">Random Picks</button>
+      </li>
 		</ul>
 	</div>
 </div>
@@ -766,6 +772,17 @@ ul.game li.team {
       });
       return [curGame, nextGame];
     };
+    const getGameNum = (ul) => {
+      let gameNo = null;
+      for (const clz of ul.classList) {
+        const md = clz.match(/game-(\d+)/);
+        if (md) {
+          gameNo = parseInt(md[1], 10);
+          break;
+        }
+      }
+      return gameNo;
+    };
     const teams = document.querySelectorAll('ul.game li.team');
     const pickTeam = (evt) => {
       if (evt.target.classList.contains("winner")) {
@@ -773,6 +790,7 @@ ul.game li.team {
       }
       const teamName = evt.target.getAttribute("data-sn");
       const [curGame, ngClass] = nextGame(evt.target.parentElement);
+      //console.log("Clicked ", evt.target.innerHTML, "classes: ", evt.target.classList, " curGame ", curGame, " new game class ", ngClass);
       for (const li of evt.target.parentElement.children) {
         li.classList.remove("winner");
       }
@@ -780,12 +798,101 @@ ul.game li.team {
       const dest = document.querySelector(ngClass);
       dest.setAttribute("data-sn", teamName);
       dest.innerHTML = evt.target.innerHTML;
+      dest.classList.remove("winner");
+      // Find all games larger than dest if it is equal to the 
+      // other team in the curGame and blank it remove winner class
+      // and blank data-sn
+      let otherTeamClass = `ul.game-${curGame} li.`;
+      if (evt.target.classList.contains("team-bottom")) {
+        otherTeamClass = `${otherTeamClass}team-top`;
+      } else {
+        otherTeamClass = `${otherTeamClass}team-bottom`;
+      }
+      let otherTeamSn = document.querySelector(otherTeamClass).getAttribute("data-sn");
+      const allGameUls = document.querySelectorAll("ul.game");
+      allGameUls.forEach((ul) => {
+        let gameNo = getGameNum(ul);
+        if (gameNo && gameNo > curGame) {
+          for (const li of ul.children) {
+            if (li.getAttribute("data-sn") === otherTeamSn) {
+              li.classList.remove("winner");
+              li.innerHTML = "";
+              li.setAttribute("data-sn", "");
+            }
+          }
+        }
+      });
     };
     for (const team of teams) {
       team.addEventListener('click', pickTeam, false);
     }
+
+    const download = (filename, text) => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+
+      element.style.display = 'none';
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
+    }
+    document.getElementById("random-picks").onclick = (event) => {
+      if (confirm("This will scramble all the picks. Are you sure?")) {
+        let i = 1;
+        for (let i = 1; i < 64; i++) {
+          let selector = `ul.game-${i} li.team-`;
+          if (Math.floor(Math.random() * 2) == 0) {
+            selector = `${selector}top`;
+          } else {
+            selector = `${selector}bottom`;
+          }
+          document.querySelector(selector).click();
+        }
+      }
+    };
     document.getElementById("generate-entry").onclick = (event) => {
-      console.log("SUBMITTING!");
+      const entryName = document.getElementById("entry-name");
+      if (!entryName.value || entryName.value === "") {
+        entryName.style.border = 'thick solid red';
+        alert("You haven't set the Entry name.");
+        return;
+      }
+      entryName.style.border = 'none';
+      const tieBreak = document.getElementById("tie-break");
+      if (!tieBreak.value || tieBreak.value === "") {
+        tieBreak.style.border = 'thick solid red';
+        alert("You haven't set the tie break value.");
+        return;
+      }
+      tieBreak.style.border = 'none';
+      const winnersLis = document.querySelectorAll("li.winner");
+      if (winnersLis.length < 63) {
+        alert("You haven't completed making all picks.");
+        return;
+      }
+      let entryData = [];
+      for (const li of winnersLis) {
+        const gameNo = getGameNum(li.parentElement);
+        const teamName = li.getAttribute("data-sn");
+        entryData.push([gameNo, teamName]);
+      }
+
+      entryData.sort((a, b) => { return a[0] - b[0]; })
+      entryData = entryData.map((a) => a[1]);
+
+      entryData.push(tieBreak.value);
+      entryData.splice(0, 0, "# Round 1:");
+      entryData.splice(33, 0, "# Round 2:");
+      entryData.splice(50, 0, "# Round 3:");
+      entryData.splice(59, 0, "# Round 4:");
+      entryData.splice(64, 0, "# Final Four:");
+      entryData.splice(67, 0, "# Championship:");
+
+      download(`${entryName.value}.txt`, entryData.join("\n"));
+      alert(`File ${entryName.value}.txt was saved to your downloads folder.`);
     };
   </script>
 </body>
