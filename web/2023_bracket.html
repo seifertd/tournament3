@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en" >
+  <!-- This bracket is based nearly 100% on this codepen by Jeff Bridgforth: 
+    https://codepen.io/webcraftsman/pen/XWPYEZv
+    Minor changes:
+      * No fancy hardwood background image
+      * Embedded inline base64 logo
+      * Some class names changed (to protect the innocent)
+      * Got rid of the scrollbars
+      * CSS inlined
+      * Added an area to record the champion and tie break (for
+        use in some NCAA Pool Management software)
+      * Allowed clicking on teams to advance them to next round
+      * Added a button to save the entry as a file for my pool software:
+        https://github.com/seifertd/tournament3
+  -->
+<head>
+  <meta charset="UTF-8">
+  <title>NCAA Tournament Bracket Entry</title>
+  <link href="https://fonts.googleapis.com/css?family=Signika:400,600" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+	<style>
+body {
+  background-color: #FFE5B4;
+  font-family: "Signika", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+header {
+  margin-bottom: 50px;
+}
+header ol {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-gap: 0 6px;
+  width: 1220px;
+  margin: 0 auto;
+  overflow: auto;
+}
+@media (min-width: 1450px) {
+  header ol {
+    grid-template-columns: repeat(11, 1fr);
+    width: 1450px;
+  }
+  header ol li:nth-child(5) {
+    grid-column: span 3;
+  }
+}
+header li {
+  background-color: #04314c;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 0;
+}
+header li span {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.bracket {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(94, 8px);
+  grid-gap: 2px 6px;
+  grid-auto-flow: column;
+  margin: 20px auto;
+  width: 1220px;
+}
+@media (min-width: 1450px) {
+  .bracket {
+    grid-template-columns: repeat(11, 1fr);
+    width: 1450px;
+  }
+}
+
+.region {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(46, 8px);
+  grid-gap: 2px 6px;
+  grid-auto-flow: column;
+}
+
+.region-1 {
+  grid-column: 1/span 4;
+  grid-row: 1/span 47;
+}
+
+.final-four {
+  grid-column: 4/span 3;
+  grid-row: 45/span 6;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(6, 8px);
+  grid-gap: 2px 6px;
+  grid-auto-flow: column;
+}
+@media (min-width: 1450px) {
+  .final-four {
+    grid-column: 5/span 3;
+  }
+}
+
+.region-2 {
+  grid-column: 1/span 4;
+  grid-row: 49/span 47;
+}
+
+.region-3 {
+  grid-column: -5/span 4;
+  grid-row: 1/span 47;
+}
+
+.region-4 {
+  grid-column: -5/span 4;
+  grid-row: 49/span 47;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+ul.game li.team {
+  cursor: pointer;
+}
+
+.team, .champion {
+  background-color: white;
+  font-size: 11px;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 5px;
+}
+
+.team-top {
+  margin-bottom: 2px;
+}
+
+.winner {
+  background-color: #005eb8;
+  color: white;
+}
+
+.game {
+  grid-column: span 1;
+  grid-row: span 4;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+.game-1,
+.game-9 {
+  grid-column: span 1;
+  grid-row: span 4;
+}
+
+.game-2,
+.game-10 {
+  grid-row: 7/span 4;
+}
+
+.game-3,
+.game-11 {
+  grid-row: 13/span 4;
+}
+
+.game-4,
+.game-12 {
+  grid-row: 19/span 4;
+}
+
+.game-5,
+.game-13 {
+  grid-row: 25/span 4;
+}
+
+.game-6,
+.game-14 {
+  grid-row: 31/span 4;
+}
+
+.game-7,
+.game-15 {
+  grid-row: 37/span 4;
+}
+
+.game-8,
+.game-16 {
+  grid-row: 43/span 4;
+}
+
+.game-17,
+.game-25 {
+  grid-column: -2/span 1;
+  grid-row: 1/span 4;
+}
+
+.game-18,
+.game-26 {
+  grid-column: -2/span 1;
+  grid-row: 7/span 4;
+}
+
+.game-19,
+.game-27 {
+  grid-column: -2/span 1;
+  grid-row: 13/span 4;
+}
+
+.game-20,
+.game-28 {
+  grid-column: -2/span 1;
+  grid-row: 19/span 4;
+}
+
+.game-21,
+.game-29 {
+  grid-column: -2/span 1;
+  grid-row: 25/span 4;
+}
+
+.game-22,
+.game-30 {
+  grid-column: -2/span 1;
+  grid-row: 31/span 4;
+}
+
+.game-23,
+.game-31 {
+  grid-column: -2/span 1;
+  grid-row: 37/span 4;
+}
+
+.game-24,
+.game-32 {
+  grid-column: -2/span 1;
+  grid-row: 43/span 4;
+}
+
+.game-33,
+.game-37 {
+  grid-column: 2/span 1;
+  grid-row: 4/span 4;
+}
+
+.game-34,
+.game-38 {
+  grid-column: 2/span 1;
+  grid-row: 16/span 4;
+}
+
+.game-35,
+.game-39 {
+  grid-column: 2/span 1;
+  grid-row: 28/span 4;
+}
+
+.game-36,
+.game-40 {
+  grid-column: 2/span 1;
+  grid-row: 40/span 4;
+}
+
+.game-41,
+.game-45 {
+  grid-column: -3/span 1;
+  grid-row: 4/span 4;
+}
+
+.game-42,
+.game-46 {
+  grid-column: -3/span 1;
+  grid-row: 16/span 4;
+}
+
+.game-43,
+.game-47 {
+  grid-column: -3/span 1;
+  grid-row: 28/span 4;
+}
+
+.game-44,
+.game-48 {
+  grid-column: -3/span 1;
+  grid-row: 40/span 4;
+}
+
+.game-49,
+.game-51 {
+  grid-column: 3/span 1;
+  grid-row: 10/span 4;
+}
+
+.game-50,
+.game-52 {
+  grid-column: 3/span 1;
+  grid-row: 34/span 4;
+}
+
+.game-53,
+.game-55 {
+  grid-column: -4/span 1;
+  grid-row: 10/span 4;
+}
+
+.game-54,
+.game-56 {
+  grid-column: -4/span 1;
+  grid-row: 34/span 4;
+}
+
+.game-57,
+.game-58 {
+  grid-column: 4/span 1;
+  grid-row: 22/span 4;
+}
+
+.game-59,
+.game-60 {
+  grid-column: -5/span 1;
+  grid-row: 22/span 4;
+}
+
+.game-61 {
+  grid-column: 1/span 1;
+  grid-row: 2/span 4;
+}
+
+.game-62 {
+  grid-column: 3/span 1;
+  grid-row: 2/span 4;
+}
+
+.championship {
+  grid-column: 2/span 1;
+  grid-row: 1/span 4;
+  width: 150px;
+}
+.championship .team, .championship .champion, .championship .tie-break, .entry-name {
+  height: 28px;
+  line-height: 28px;
+}
+
+#tie-break, #entry-name {
+  width: 135px;
+}
+
+.logo {
+  grid-column: 4/span 3;
+  grid-row: 1;
+  margin: 0;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAACWCAMAAAChORBFAAAP1HpUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjapZlrciS3joX/cxWzBD7AB5YDEmTE7GCWPx9Kkt3taMediFG5pVIpk8kEDs4jne7//PdL/8VXm3Uk6XMNHSPzJSpajTcrf33F+82/+v0+/jTyz1fJ+vn++Ur9fr8tv/9Bv08o9ffPf34W+8dC8n31sn//w8/ndf1jofr1o8UFeF/keyH9uVDj4z9ceeiaWf7+3b5PfN8Ldo6Yq+bUar1t8U/jKi3+tWb8jO+1jfr1qX1/L3Fc/tw2b2Zs/XtHn1Nro0Jafv3DZ+Ptu+K/fM7xbL59ivRbjf6+99//8FcT2u+f699d+773z+olfa5afvnwDx35vzQk/akjn9v6pcDy867+4/OZ/Wdj6dOB5+u9+zlCTAbAHN/I+ulf+T4OeEr7NKuxZLwa7/mZ+NY/r0FJD5ie368Hpjf7PaXkVyqv+BlfrYxyyuSnFCv989lK/H3xq/N6n1crs9YqtZZbhRMun92/9lK+Lzs/F75ceOXLMZJYTcr9/7/SfzrgvRMlKjHIbX7mmX3VaEvcbAFWfH8vnWiJ/9WT9ilxyX/6ittZnyL3/BllLsLZUso3INvnRcM+h1a+6y9UUb9PHZ/jJ5uh3FHnzi75MWrtQ3vyGK46aELUXKoWjpi1d6hpF6/SRHofdVZtKrvRk88+PqAtn/uITXzh6A9fgY4vWI6vE6uVLzzJz+c/s/gLIH9WLoCFHtNi3rTY/NdONyio7cE9Gih5Hmx5vnbyKTlnshBHZBvdtLmWYcVeHdJlzHOKXKsHDhPV0ctZ2su9w7c8MHoeTDSnuowm6WY5Im1K3e2u6uvInLXMJ6udPN+W2b3brvL0bVOp/Mll5yNjKJvdHD72S5sL7ZqXrn6vr7y7ebHaTbzNU/WN2jY9E9Y8ctXuG2u/w7wqczlv99lt1jRU91x3Wx/P67jVZuM4Oa1UZ9XCDnJlX/Vd7qL1df32K9Tp1T2tt8GCe6W5/XQQENPa6jQ9EGWxde6Vrq0/o+PaezPzWt5aawxZ6/TTbyvnrPPyXfOkbXd7HhvelkIrOOoyladx7fOssk6lc2pdqbrEQnqfnmm2jELcMxlzH2mxtwdSX9Hr4NFuWa9xmTO4tk9Aede7FBfovjY5zOaWOLLqVX+c1IrtdFofNq0ujrcDW5jvqSrH7SC7wM+nVtBzRxdhQZ+1nel7P+FM8OB2q2pqQKUxSA/E7dOu0sTXz9Z3u70m3LcZQBy+donS9rO2+D7+YMdVbbg4pJ3a0yVjn9P3sAPJWrdRvd1X5jF+5OHjUI/JDddmw57QgNGr626PNvvgFg7t525X71ab964g6jKOFOq8y6Xzc3bFyYCXBWpfbQdeer3ZwBBz1ACDtDR69tJ1xt57ZaEKlNlIPRNGhhZ63zqH96X5rWf+2ex6Z1+gaXv0pvxS0/IBT5gO2YuR8AK6vMuJWrEhdkqr9eJ9WkcT5oCM7j2+g8WtO3Pn69adtB9z6S0af9oqQ6OCM2QDqEz3k2uLTc37Zt9vMLWbMT3X3Iqyj3uKjZaEsbblmeVGfz0flSd3fQgFLFEZ68JAjtuXXAEDJlI2xBClr+p5D7HS0lOlsk5Rt44ic2i+m1bxH0VlMArL7KrZHizyRQUX1tmzqzkAlAZAQLY1A6BQAdw66955rArIdNcNt57X64f4liwXQNXG4j5k7VpjzkxqGCs9PQ0pDCz1szxgGimgxvFOhWZu7Yt2bqbXtU8tAqcpLqgoiHj3MVl3OeUrnqAcm5Ipax5xjQ2AoQhQzyxMRiym+uxelx4WY9KDZXPrjC2DpE28ALudOKW3g8tiTnPhDwZngVW6drVVFzpIifBriouhaJsR7Q7MGthlmxmRgVASbLWfdS7Qi6lyy1Xk4Fho8Dy7dFAn/Xp1RxDDa0KL77JQ/MZwDVttdmrUL7J1mDyn55SwWpSdDrIHhBLymzSzZ2YGaqy8u3fKeBBzRanA6a7lCDXyPbYxjKgNE4AtDS1r/pgYKmblHUVa1uxAuFuecIkvbdjaqlPOBdLyeqoP7JbHNB/qNhhL6QfxQcCoFNxqARpIBvg/6ETPFg46wU7zM1j66JOxEBsSGMy7X4NOoKkRsw31ZFgCHA/YfKAD7G9JtGbhqylLebgxl8NUtZGcNXqF2UvVDgz8PWQBKu4d9rpSPdMBKYJcsV6zBUGiMnev27ger3Fvmam3BVCNJnV59O/GEZMeO4PMHFefvHVrjXU7VC3HnkGmCt9MuBQYw189GQo8cFCGVJ0F3UBMXJbJRTGIBZj9Vd7GEkxYDMN6g8ZbtqYeDXZzZMwkBdbwmEyS3sW2SEM9Rl4XrKg0W/NcALwEALk6GoCTcAP/AtnMgy4weiVRFKYOwYFHoYG2ZowSe4J3MAiFsrwJCT90OeQKaqXNG7DTERrXwAz3cFPsCz0sjM4cCxHBKTAIYNkf3mqewbxCdyFtC4CVHbLGqsrs49YKOr0KC6EpiERDk8fNjOAiVfXCrXfKenTdx63EnunRBKQMW/ksVsvAPcC3a9OemoKQdUdPK5eoaNpmCXDMiGEAF62ZyMQE+pyD1WAaN35kNhQDTYLnGAfLqfaLiHB3aFnRgXfCAt8SG7JY36HkPnBFzRvYZysT7prcBkKxo2aT5nZN6HUHXduxZnh90A+z4tN2WAwkYrT2cD1a5qUE7GKMaQ3a3cbiGEQ/IVGetLIKICR2PPiQqDkaiMR620bfs49HudkWvhBhRU5B6jb8yYGNuHkoztYoRFEfBApOBwNz7m0MtWOqZeNe8MrvAapdcLWtbqyhDYW1wz0NFO+wwxI2NTWwrIdGZRwmVAa/TUfQd0w52Jwz12fcLNoHYBjLfEO+cCgQMFTT7nlr449uyL3YYfqAISYRkTx9ODfaw7MwcACDudxxDQt/QSMo+3ogQAlrNVqR4PIVRqgPCo5s7DZHxSldPwWCgYUhNXQgiKD4CvuHRRAbVDMYnQ7WWC1xnzjRin0FIoakwmbXFdCER1kMGDevZsbggAxat4cbZasoZlZMFI4FiCc0bOMpIFksJH4NXYtocAQjSQBBlTFsG9ln5PuYgSoQ+AyGIsjXATkhAmOmMiUetoBOPMAxfIT28KlBamEE9Iy9mFykEW8WJ/VJ6KFsqAZ1xzzBSYarvRh/+ItyW9AOHCw1A0NcECrnYShAbyiVKSz6cKRrhU2AlxZ61AysuadGZCDFPEq2MB5gG2TSICYUdjgPQaGDMVyZpSkiw450RUqLVIaPBaqgJZ1QJZDTGHU2qhGnuS5n4Q1xiMOxVXhgVqR7Me741IplEkNW6xikOlCrKejYwJ4z/e1gQvCjKDA+JOoBCcBQCGTk9nVHBh0K/enH9pncgv0ua7kl9LDuTHvAHnyu3CNeGlPDxaPkwC08HJOFaD2YEp2jJiRQjsQ9YSG5A8zoQdWNxmN/KQxgglZ3wydBg8w8NMboUwp0AbDhOGBZKBZ26UZGJg/Npuw3gRM043Iq5hgOq9UpO94c4WMISICFHEKUghig6RNLslZQLL4qEmXsWHC15TU0szlcRU/CLuAQ1isN21W+mH0tFIhcSNx6jtLTn3KhBLzz0QkhMRYJy1w+qsIddroEiGtYVSoygWDFhhAI6BFzTvHHajavE1fLli8DAgy47RQOpO06JkgkCCE4owShhF7did0kinTc4euktndB6MORwGh6SROQzFs55iptsIxTg4lPxsBQS2jiDBLkCBa016lmWBSCjGI2+4p0ZR9LHyyH8aLTYmnBtffz9AAOFDLykEixmHdUDt+JLfU3F2HLl3ysOSgkdAMXuZM4DmkKdJ+aYsI4510MbXDkyBcuQVcgjRkONAxtm5bbZ2QxJWgjw4lxVepP+Ccfbk9QC81iwMMjZcHEbcNFR1fxarWHimykkMqQbBe5/2VgUnqIRUXFDTVAg5NG4kcrN3TENMFySiGkYeBgNgh1R8KYmFkOhxJB7l6Fyn8ecp166yNrvJkykJgQFVdGZTQ8OzYNGUJ+kZkaunXxPNjEmHdCDQPJkh3l66usz5M/ODbBLi83TEy9tAgSdegUxTPSnTuRSCnApooWilsvvUN88CrMPDELqUAs2VwCYJSewAYFCzGGigNQGNrQEhaTyrzQ7ouHDk9AnqO9TnRnQsrHa18IXaAR/6jiIuATn0h92AuUnVmhSlD7ATHMJZoTnptkGaN1mXlCvmEGJezSuWnByRuc2iVT0OsJ/6IZmWvDALeQr3IYQ3wJtn9MjGiLxyedSkVBLLxYeZaY4l3GO2URzvXzcIQdfUYPQSJqF684z0MWhXeoKqgZtyEYj0HEVxjyB3snrLRD2RD2XCgA7Qq2Bn0LC/yWPx0zDCdwIeswxqEWZGaa3fAN9B8yoHgJTZJHHmAQCPeO1nO+hn9n16DqAUW8EWK2yTGwdDyryKS4NXYwWjz2i8dlidEma0LxrTtxFq1kJPDLJQgUL5gJE6E52Eys4fCDb2f9eKYj4Fj7DY2YDh/h7THhIDsea8HI0mKUZpS+afCiQxglkkBcaRF6N6H0BO4miNuI1yGKomcSwr/CD2ol/0iJMNw1w/RDsTwniPgFXxhtfXO/C2TwGkfYEdymL0LNxsg+RI6rQlcADszPV56GtLV4VrIIjEwMALloXcczxww7b5hYmgWcWQjSx5h0hH/iHukfTlhgYxRqwXdlnSAj2RNrhgiFDrwwk77YrsfzBpC7MKPhq1o8poJPSpA0sTjDdLk1OCO+E+3QWaaOLIBsReq2eH7ETN+olgYCSorQmttBsA63BW9AVZRWCsIYKGQqiPvw42m8xTs1onDlchjXOwibCgcj14kZAv2V9QjMZZ/HTFOhQ3l3ZEU0GlOuA9eVkaaoDdGCPzIDODXCYsZ3tpoeNM9NY0OwoyhQJC52kyOcUCgOQuaYkxHPUzBZLx43r0ecpArxJPhBc+gvckRcwSp42C1ICcEhLo14LAkJPyIKllvxmXA94IUQ4/8tbCKSQSC4F9gxy7rJyIyOkfJwZgzK5Gx4lMZ1orJiTSD5FcWnuZ8HnPF8mtyQIS30HoYLU5cTZGDEM2Q27LLEI82o3YyHEAyGTJBA+9nBqkFHRG1ouFBRrNAEA50bAq0phh1pnGCukLYgpQFTrBWlIUsHx098U0bA4E8GiW7wybW4zvAcsaaA1YSpgNU2HjQeJ9FdUiGlhQhIdCfXUP3GjeBgkJU12e5guJBOUinWmgDLDlZPIOi2AehbwxGDSZKV3UhIBWP9IokSlP/lfIfZuLsdD6Ieeaa/A+LJSlj1SIWPJu1HkoGKrAk3+n30vxwMH2r649EM7x+P/pel4+D0j438fvQOMfCbcYRwRSE6ZySMJCNr5NeQNlyzxbOqmVYk241EQqWQ3skR6tf+lKDW91xzTv8LY4Kv5NCqGoMAAAL0UExURUdwTMjP0snP0sjP0MzT07u+v8jO0snP1MnP0snO0sjO0crO08fP0tHT18jO1MnP0snP08nP0snP0sjP0crQ0cnP0snP0snP0snP0snP0sjP08nP0snP0snP0sjO0snP0snP0snP0snP0snO0cnO0snP0snP0snP0sjO1MnP0v///yMfIABeuMnP0nB6hCUhIiQgISsoKf7+/yYiI2Jpcbm+wUVDRSMfIf38/IiKjE5LTPX19f3+/mpnaOno6SglJgBdtiomJ0M/QCIhJfr6+4uNkCckJSIgIjEtLuTk5HZzdPn5+QFctPz7/C0pKiAkLD87PAFbsTUyMw9CdQRVozMwMgJZrB4oNVZTVABet/f29i8rLAdRmeDf31lXVwJasPPz81NQUQNXp9nY2QtJhjw5Ouzr7Jygond1djc0NQhQlUxJSjo3OEE9Pqisr11aWxczUXJwcRI+ae7u7iEjKh8mMsjO0RQ5YNTT1B0pOPHw8MjHx0lGR9HR0TIuL295g8vKy29tbhovSCEiJ+bl5jg1NhU3W87Nzt7d3WdlZhwrPRY2VvDv7whiuApLi2BdXujn54KAgcTKzX58fRstQhBAcQZTnby7u0RBQoaEhJeVlpiYmRM7Y8PCwlBNTgxIhJybnEdERbm4uMXExZGPkF5lbeLh4ZSSk9bV1nt4edzb2xkxS8fN0G12gKmnqGNgYfj4+YyJiqKhoo6MjaCenmVjZGtqa1pgaLe1tkxQVmZvdyUhI2lxe1VaYcC/vz4/Q/Ly8jw8QL7Dxqyqq4uOkLGvsK6traWmpwlNkLWztOrq6rOxscHGyaSjpPD1+Wx1fw1GfaHB30lMUePi4mt0fTAvMba7vUNFSYmHiAVUoEBBRqnG4YGs1hovRkZITVBUWvv8/rK3uRBnulaRyubu9YGDhiEiKEWGxS4sL62xtDh/w3Gi0Cx4wbC0t8fZ6tXi72Sazpm93x5wvc/f73h5e7DJ4pe52d/p8iZ1wLbP5qK0xnSSsDdtnM4AAAAqdFJOUwD69yAjAdkw3OP+b1sDCPwWO/SMD0Oq7+l/J7TEvixlopvJVE120Ygck485U7EAACsvSURBVHja7X1pWBRX9vdoghriEp0Ys+8zmWmsdPe0SoutiOm0CHSLrSiCbBJQBERccEEJJCoSTRCJezSouKBGEZeYcTSMifsyMU62vzoxmph9X2byvl/euy/VVV3VJM/zfyd4vkBXdXV1n7r33HN+55zf/d3vrouRhHVqqVzXnQnpenML5eHO15VnKJ3+3KaF8sB19RrLrXcpLZPwO65bB2O54Y/K9onjQpVjS5RuHcNaNFs633Jv14fuA8blvo7d2//p1k5hv2n1dr1d6Z1vD1Wieiu3d22Bbm/pevP9D3bo0a1t2zZt2nbrcdMf77rj4Rs7/3Y1HNaxm/JpXkSokn5aaXdDqLq9tfsjD97eRm1jurW7v+MNv1U70+mOLkqdPVTtHijertxza2jP8ZaOd93eBSp0++nenx6DBmbiB4eXlCANP3hH1/a/Sel6V3jJR45Q1RvdV1EeCGnE3dLxnm5QtYeP9e2fVZhXlurzxfpz8qtrx729BBxvc/tNv03ppizZF7JtSG1Swv8QgsXs3PW2HopScnriD2vL5Gdp8w2qWt17u/LblcNZIau34Eul20MhDN0/dAhXSg6vrvZrzRObL/+jL3v/ZmViYsjqzT+s3NTetHlvf1tbRTk9Lt0Xqfd5noI+v1kp9ISs3p1LlD/+yax2uz/YRSn5siLJFtHKZXBwYe+z/rBducuk49D5oXbhypLV6xytXbkRo5YODyaTpzHHYZUS/ntzjkOnjsDsHq71t/qhGxGxMGN0MFnG1Bs7UWl7nynHodPDHRSl9z77deVGRE4e2DOYPHeNvjPxbaVHd1OxRPd2ivL2Xtm4D54689Kk+dPnL3xq5tDBrUe9j70YVLujhzNdZJ1WOtxrRr133t1F6S1pd/DQbUuPjxg5LCEhYVjGiOPDJ01rLRoeOiGoege+QP0qW9US5e5bzICdD3RRDldEC8od9cKEjNHiMxs2ZvLM1qHgmSPg7x0xRkcmXKJvdNSUKLeZwNI73ddDWfKRT3iA88ckBDy2hPcmT9NwiB05g7gkcuPtKxSOD8pjS6ZdPF4gTBj5goDrSBgqv4k7kan0UGEq9tDZ15pnDU29T2WAHzts/lA9YYPMtxpg6cYrW1j7dkrJOI7GDX7+iQzNeZFwfNtjgYHhofNcFtSV0ZkzfoFwfFM91aNtn3h8yy72UG3F4gkqG7JE/VrXHU2TTu8fRE/HbSKHsqvR68Jy+p66GGnhemaSgQyHK9vYZ4yfg3+i0qajCY8XmIa317Kf8dikZaP1zPqI6U+rbxK12CLISRq4p+53CYfdK+nH219zSe9PZgHhaukEEWd5Ptevp7rcK592nyCRrHUPvXrAWozEzqKfUC958k+/OMxA0Lzl3pe+rOit9OhqIlq7SVnyAzO8j00fG8SwZ0yeqrpJ/0zx9zYX0XD8vHg4s4q+fdBWST+NDKbyrbdoiXMD02/ZyiEBT8B9Kgc/teX0yJYCdKDYTe9QIdmXoWN6mpHnHjOFpXe40Xhduy1cmTiPaXf+yKD3zZh8TcZ53nWLP3dWOjlcKx1eHEXfX9FPR70Fcyza+l3TB+nHtuJYP43T7tfQV5+3hR44hMy/bTN9ElOSpe/7zFgz2h09PNJQuzaIpRs7Dt1vB1AnfcKDJxndfuR06cF6dkgjahH5Mfb9khJmFJC3xxxzyuplwzp/sbZ6Ld4TSeh8qVvzdCOyrexqVxNayWJO0PMLCiWlbMswo96B040Hr6dvSbhxEr7zA+HKMT97uMsMbz12m/hky0qlH5tLbO/sTdLh9dSjKMyWldNvJ/2gqn466rXMgOPT+q5X5/R6n3i1swZ9O38lPV1aJq1sL8CFa2DGSF0ZhuboNhNY+jiljTGWfmc7ZUnxAXLJ1DcGGk+c46LZT1wg/daTeGGxNjSKR111Vh0lZlbTqbbSaQmmv5gdOmeddcApsa6kQzsTP6/Z1PS7XouWItE34LK9bNvzuoLeMGLmr4Slh93XVvmAzp/I+WamTsJkwTwkT5F+7OJ8vE6dkOd3A51QdIF3u1RLoeMM01cmEmYKXKs90ixxpYCz/djDiK+1QZtDX86djZHYZmqbd0kr29Tj8Bc88bR+SIzUO+aZaToyNTQs/dbbFOV1+oCnTTC1rL7HnUJbhTRM6a9bl6Y9Run65V3glpfCCN8a+ua0fUVAdjLHzt0AFTSIzZKtceB0FZv8zfCzy9jVc+bJK2umnEEb9R6cf0sHG4TEw95bpi1j5jPLWA2w9BvM2IadbPAmmFLvwMns6znq5Tl9fh36dQ0pstLXUXifeKOL1ser1vUcZpTXoEjDVk/VOwsN8HQ6S5xoMMeccIl3LGTu3n6fNEssA6Ik7T0P/aKEhZHBQ2J9GbaQDazxJcZYetjDPZS3qW2Y+lxPczKGWV/7EdkSpq3AtkF2UCtJSOipIw9jxh63vBRGZJ2kc/8MCgOij7Inhj4yjj6wlDj4MqmcfTZclpNzqfJXoatTuRucI61sC+EAGvm8QUgcxG9il3peV8L/3NlE+cS4VPpox5pU77BJLDCslNWL3aA+sm1wnSKOwzz67qOriR+Qu5Z80D6qPicO8LitRfqzbqaOwxRkTgaxO5yCflkxvTp+PLo6h7nBy1OllW0ptKzvjdJX7/zgazu/NPaY0uZmo1RF59vCt3/kEZ0WUzKcLm7r6ApN1qpsGKTa4hql9cu7mTgO1bPocrSHDOMB+cTI7Kbq67cXR5xUf64TUH92Nh8WDEK2YhE9XW+DyqcmahFeKteyubDHI4fE8Nsfv6aPpS8dGFSeY0tb4gcmsPRb7ublEwY4sigThpJriojCnHPxbM+G8YPvCNKFd65XnM9AC6uIFhYnU+Rh8WwKRah8D6Y/J3o2edyPTUIRUzx9rMXQEp9yScYpoj8dze5aa2BI/Ib+yjZ40uSgMolduhY4DoZY+o3tlNN0dZk2xrR6GaBUSxyH+HL8e2fkcb9hSqVLXr+YwVyTQ4O6uX3IqVLV0j+e6i+lGPmxc+n5HXAwO+hwdS2YrRFE2N6lo7mZLdtIUEg8+oVgqSADiRCw9AcNQ+L2oO5ydkjheE8xqmFr1aJTePTO8fNlqLJSms9gROZSY8EcqSHkFLMFOIiIcNCBTp5NNQWOvO/CtStmVTaWQ/vg5F/B8KOjyBY4WKQ+hPgsM6cjGT5MWjl+gThqzWDpXQXH4VKGafUOJP6Jj67QaU1YvZVJzDa4m6i3tAHHpR5qX5v3+uk43kQARcHvQku/ncUlWwuRH0tNc0p/ZGb8iUhyyqyiibK4dqOVLXUDmwt+kp4chm1nT5NYrqHYVytdHjFMwnfvoXxAXZdtKNzu+SwQ/Ie+epb9wX+f7TmaQB4FdIUuX+Vlk5P4DQNqBpCTxzCg7ac/OjuxYAYd2ES94xvlpZ/bWvRsrHWqqFvGrsbTIMJdUwglmc2F/dFCLEbdyqG/gnr9MAlvnCHupnxJ0axJSL3PXvz224tXen7x07lvrz77xeffnjt37qcvvjmH/vS8chH+c/EKNV/5ZIV2Han3MmWQZWfD+H50PuPlJZmq+0gMQyq24mfrWO2UgoiIfNnWslliyc7RwK4YEu9avBXKJqpu1yprYHoySEhsXla8rdxunIQPHL2ffWixnL3a83O3pfHzz/99GX7Jrz/7CkF/V9FJ8Po7Onr3khXau5uo91BqRMxR9GOdu3eRH5mCQUcrfe2uta2g2svGz9bOsPS56QVAEnc1WsRnU8Dh3NTAn6qDxMNbjQ+MxYKFxKHVpd9pOHoDbe9nX4OHfu7K52ctH547a7n89feX/3Lhi6+gxtxXe36M1Pvv/xDba6shg65fBVmKgBe/Apvc3CK6vpzEcWnsGg5a5ueKYCOwBQxLj18AV6ytzQyx7A+NxVoO52oU2jFTEyAU0nj+vbFQRkITkTA/8ldQb4UpLB16Duskz+HKj+BrffjZF/+2NAPtnvvi6vfff/PdV5azH1oufwPV+yHQ+xfEc2Aw18lk4kLs99lIBLVhRak8QpmKyv0RyYvkpYf7XWrBeY7+/Zhx1ajS0kXiqRsc8fSomVBQ3DTy0q+gXSuoS7/fOAl/Zwe13/sdGL2WyxevnrWAwffVf3pe+e67KxcbL397wXL58ysXXGcvfm85+xlZfFPpgMwuJGHYKTvJVbp3M18Lz2drDbENXgDQMj+rEqu3OlNPQVswlu5W+7Gi7NW9GsUgQnmTUUj89NSgco2Ne/s4pYuJhrZbHlSWVElR28dnLWddlq9/dLm8QKHIWoEx+/0X31qcF78567rwHzCSPyZRWyKFuQ4lncGW4Kid2ob0ZBrQ4fkcS1enTOBaVVHTWl6mkZkTJKUJwhXR3I+dreE4rNS72vVaTGB50/Gp+mDv0glBZTi71P8pwNINUxVhEHOocQiYw7MXne6fPrQ43ZYPP4SLGRzPPwMjcfVni+Xnry1nL37zNThMMAcGVDX5iAJ2xBRjzW1IorlaMp+j6PzfCiZsMXVjS2Nl/FAlufVodJdtUGNvkuNwxqWXpttlDcRyg4TERmnkF1keYV1v5SYTDW0IMfMJiNmVny3//vhH8H3/8uP3wEZcAV7uRaAwd+NlBNH8Bf5z+SqJeypSqAbt2F2wnPFh8MC520EBWzyfbTR8hoisrZb6YWtSZfxQzvNsLcZQG4dzT/gClcLWzMCxLyfhcXnTC/orm0HcOprj3EWnzdWlP9RN+SBRwHvBkvbzFWB4gVv2k8ty9seffjoHRvHZs2ehdlzg79nLFtf/xXivlYZhmTtjTuH/9hDbMCU9+og0n300++CusQJMgI63Qz4ZS5emdmmWQxXTuVZpOA6JTPnZTXuANG11qYtahCxxsJDYII08jMHw1jiTden3dlCWFDGwM6HnN42XL/YEngJwHj77CmgSCLAIH3/8MVC25fur4J+vLN6P8KAgHi5MAcUQ17OuuB/xDhh+g+czyy3mgpXUtooqYLldwg8t3vh4Zkidm6kueU0Iiukc/nlYUtH3yOLKt3uAlB1i6pa6USKnI8dBPyQebIDIciw95nGTDW0w19bXw3NtVy+c+6xnz28uXACR238+P3cBCvi35+iPz104B03xs99c+D8E5mLIwRw/qZJx1RG/od7BkGA8n1ncOmBXQ0MDs6Xr0dqzj/ldx6qqNrPs3SliCYSaEOTHFq5BsdnW7PVoYuyj4Fp8nC0iSAzy2PDRUqZFI42JIAn9sn8WTceeUbrcbKYuvdPNbZVPc1iuJINDCwxxwP/25H8nH1DBXOtjfHjEOI8S21DEoHM8n2NY0sjlBsISdAgrt+1iiUeApUedlLFJ4DgwfCetUMKC4xvQ1S45iIiiwbelSSovw7mu5/SxdJJGvqbXs8KNds4HSreHTTVVtAfWob81hDqHgazOgQJVoIyBeMCuLXixK8+z1ZIx1YiG1IoF2p7TEQi5xLCyvrn5YgxGkPWIJA7nxiIEp1HEgj0sK7dphVxL4ZRjEJwlXrZUV4bDPOdAMzFzlOmGts73A98hlq2dY0YbqXfEJfoUG6jr1cBSY/iIt97DkGA0n23FKTqOqScAS/etd7GAGN+njwznciwY2nEhq1mOggjrSgZe7gzMEhtXccw3EbTtBVi6uYa2sId6CP2eZmrM6NO1UqAKoFxl5aLWgEoZzIKSm6qyU67eYx4pLwnT6Bw9oyUg1ayYFMG5Kix4hZzVjIhmBSk0kUc7fkyVGZiJmQ/UbjdVl07SbSUfMX9n8PyxBhWSDM6j3gKclHLGGKAKbIqj+awqO+WeLYroWC0uttNs7ruOIr/CWsuLSVG+eY6EBTMs3VtvlWMQVjhIspSjTdXIjDJWbwyoS3/EZCd8pz+04YsbrEANpt+RQv2pfw7XZp5YPuoFWmJV1Wg+V6ToqBclcpnfhZd+tnIRn85T55IKBDkWDHF6lSUWYhDXel8IHT9UgsTMTJJMN7QR13cfjx5BdfpA3er0+QIUPXsIH2TzREwQ+A0RVSlCesZzjCrI6UZiEVM/3O9ahGsY2DKI88g8psvdCZzdnF0sS7zSGmCJxZKS1ZLjcO2NMcFlGTIeb5gonC4029CGF7dwYXED9uGZF4fp9FZcEldVWibnBJOyQIy7yvN4wSOaz6yqw1VaA6UuU8yy04gPWJlBctYYr03cj3WenzNnzhaOBVfZYCWxS7TEQklJY4OcAx5qIJfGor4qE44DbGi706x6fyctbrgzaIJGZ9CyF6TOIIYwwsg+RzCuTmAbWK4WzmdbFatXrLVBSZfMJbfbeOnntaa4YidKD85Fjhu3xGsQ+mat98p5JdOCQuKEpdt05CkWVNj2bTfX0EYWt3uUkr5SGWzktOnHR4omYmDGBHVfW3STMCkT02TbwJFgEJdGM0BsMU5E7uzHIC2bWIt7NFr2rCw7PAHdG+q6am6Jz0TjqjdVSYnpZlcUM/dM0GtpGfsUg+g+KjGDpfPFra3ypYosYvDQp5Yefw93ZY7U7MpMpaH9VnBpodCpAiFyBtLAuJS3TWxAwzOSrXReODyr6dj27raqaqxRVUhFs7Z2G89Ax2JnpmiJpbngD63ZdbiBv8/ACl+dqYY2vcWN9RSPen7bwvkLJ10aNVXDIDEsHYKKK4ZwX3Y1+KSsXCE3tnOWYDZQfSpbnGpELL1fhTq5swkmqsrqNP2O3M3zxHQf6D5CXnIf9k2OhtaAjkNiE4VfEXmfKm07mtcu6q8YV6ZXFKTzdRjMBStG1/Fk2aydsKo6hWPpnjqv3H/F0wvuWtHvojUMfC1DtdER/jPxWlgwLudpcskhdFEzi0FCo6ZAMXMQeULE0nuERA4HqnwPJ4eaK+0nVI/nD+AobR4seHRyO8zKTi0zsAWysppriMnwGobKAlXtDwEsIubtaFRpN345wYJ9hyxy2m68N6CXzpw8PyIjqEyOFLD0djeGol6wuG2XFzfjXOmueC+UzOWJaHX3YmnMrrLCIBi9cM9qKoOlZfiUe3GtgxSNuMm7+8VBy0xOD2kgsSM7715AnnnB0XivKFNWF9joSKdXj7fiKkzyuvloaKY3Yuqlp4LKNKmhLSRyOLi4fVAY0rexrY1Dshf9UH8FfhW3bzbUkacIvSgughZnUDE+VZFFjKE1i7w5rhjcM7U/Ob2W5R1n09NZNFgvoJ+PpZrFY+qrbcnk0uoQtWtePI+XdAmRVfbedsr2iutEL6bkkzNmGtoCF7fY66ozIwBLb3tzaGSaYS1Z3FqpDHpbCf9j99D0Gxi5BZ0ffyfiR+uJp4C9bgUGJrr4sBL+YNeQzAPMuX0wyOQN3nr5Hy8h6fV3qE7Pm/98ibwuaA322w702yVE/cLFrdiccj55+clHkfztf6xYu/jlo399FYd+nhVRXNbxdG1svnA8KpEztYjHBwmFS2XSBfQ6Hl+yC1dQF2MefRd+0Hka10flp+p8/gq5isI2T3Vjxvnxw2kl/O72OvrV3KLhVrC4nYkNUbswZez4l1q7EQUbFnM5f4wRwDTMFY4vpu1YwJHcJBzeupk/j2LpAiKV6ezCfefJsVISkXjqyRVza6wogNG4fvEWEh1a80/In5/dX9Svp2iNfF15Mr1xKtBvl3vu1dbvLXf8XkPuAmxQySaGb6pq7AZqV0iFS42tPqnWiedx7UelztkpDEi01mml6Fwz6NdkDUKWKVmqSmpc/2TXLKwmFA/2fTPUXfhpAtlYbMMm1d1dc7LoL/TVLFHa6JRIdr09XEMA43RJ3xhj7R6k2n0HxmAH3vnbo+JYxpBXiiYBzGyJACZlLyukl7P0JKmjqx2LqzIK69fOgPh40pzHwDmcupinSXGCyzKTdg0IeHiurdVEgbacPbMCgQ56Y+CdfarbWwE4BpQSTTFe3HxUu/9E2nVoaVcAbMUScWuthMyc5AQwjTrqzdMpO3eWR6kaXFBzpgi24aaNfM2y7COQAWL2ES0czpVdhAJ3T/IarapWZyll9tHPB3V6pIvyQf3rWtI332jRZNr9F/wa1v9h2n2H41PRxyxaxiFVJoBhzdTRx+RR1I9xBOgWrTuX+1XT4Qh2KvdSqHhDqm5htWuzLcIWVenVmRlohO3cqs3e4V3u9/hhaZs+wWHn25SSGnu0phhgeL73X6La9ehqV0iFS13vMjmUZblPDRwL9dVGZee4J6O6WdV0z9HfHQ7dwup4MDsO6HLHoIJOzzG9G89JLBpfAQZG1Xa9pkxUkd4i/zSGavcfb6Kx++pfHxXHMkukbtUigOEVvpykBR1XJ3ua96qzeYGCn41gbebmS80ezneRQ96ktTQOiQrCHWOZA59T7Aa9evf1hRUri9PBV9Ntyrz3JuXw2hZp9xWm3WiVdiWHUUUAQ4pleHET6YpnOTunTAAzq1qdzbN4p5wEMoUn8OscqKjdqWJKY+gvbt5k+SpLfO5JKtk1MeIEczWDU7n8ySO+DT5AnLNypRuvju1fUTEbMSPrFJI8LPSytVC7yDL8XXvsCqlwiQBm9hC5J4oqMYesX85sryrDy8vO06qygKSzxndUGikVtbtx/1u2RELCzc6a9CwiaxPhly9kzsqWffAoS6jgQiE2QFyl1fDGLNnf2GDz54PoQ58ZOezmNsqx1BaE2q/8g2j3FTh2bVy7b8rBDk+Fk8mIMra8mkakhREM7KwTTrGYRNZOrJzlwE+Ak2IAPeyAX2otdbhnoPFDM36E7khrgmHuGF5+HN9gFSsOG2ttUtEgvDE8os+M3PnPivJ46Cz3Hqrdl15BNbk5vZ4Ux7LoXZySLd555MWnyuRQNHcT4aBZ+hl0qk9hBDBMO2c8UjU8ybFH5ap6rGyM0wTbZubxxTeo1hrGHYPTTUKhUJEcrqTLv4gOiqzDeoUkYGeykrjQVzb/+wexvIlCj5g3ycuD/1LjbGoCmDSUYVMRx1mOkNQF9V1dr9GCS0YAwwgRCcOnUGrqD4heoMYdu7y04hg+D9tul05FyQHGHYOniueUFNGpayVYGb6lFA+KIGwOYGeyJUWh2wargwgOa2wH6OuAJ7WOGlm34OFTcii6fjFi0upF1KrRYXySON+sMwYVrcPobpOUY5eZ5WBSmfkDbjSnAwqr+QTjHIjIzS0rJUm8RZujpQGC+w5XpJEE3oDxJFuoz+YAdiY7vI7VThhIS9pvizJpRZhXIIDBZDjuIV6ZmNRDzdrctTssMgFM9BGX5HXxUlOcY5edUy/QKOM3wgl8XnRcWaY3wTB9ia9hF5KVe9GixPpCLK+hOTavBp+uKSKggV3fcYA7k1HC08cmPxFUlk5tgXobiAbjS+N53yr5xrmVTjmUy2MEMHknVAwi3BaQJgtaDU/wGrmfDXJzstpKbCILWWXWiWidCWZ5DS8cNisSMhOr1bUS8mlUgdrmPv2dyWjANM2AkTNIn4e+FaEw16KjbuaoU0aLynIVMWnRFAoaMDeLzuRBzBbst8v4GY4DVdELoJdj/W943eTtcJtVFozrb5fWKsS5T/bZQqxABeWmvBjdqA2xJdQHDOZKq3Oz30ro5LxnsmViUsdm1nnIZnYapd5ZJJZVCdXwBK9RRS+g1I35A6gNgLuC8XGqIgI2D+K1dhHjVNYndXbB0nccRGotQkASpI2jBbaXlf2X17sZ/kfIoU7W5MrEpKyWN7uQFbuTOl1bXLxMesHxM9Qqq26HyU1m7ikerR7WnJhSN55IcYFc756ymp4ZX8EoojmVde677HR/MdWwT3dLhTtv4hQDRsRwGU+1wPQyEPDobsavYxuPVbGGDijalUJLyV1H7KyokvRSskWPAsYC2RZCmlX0lY1xjEsOkZuJNKzuRiIL1snhnoudaczc4Q/AQV3x7PSset5K4PhI13HoLvCPDJ6vu6ghdhQzNLYBUkUdh92k0AyMNeJIundRgjGCijkoUQOIjliHD0EquXYwiyQvNcVV1dw5peFsQaWEMOdpYOmY81AM94Tn0+RXV2hKUTzfpcC+Wm974rD7uigTGYnEYD2HbOqLuObSJGmaaNdWsqJ1MrxAW3YfvKQPSN8hE5MyPrMBWXzUEwIYnmnAQQTHzzA5D/P1G4m/tj5riGS9VSAHMrUoA6dX756ypywYDjprpZ07DjqIQ6ffhyubjVM+mPpg2QvTg4sGlWg0ZVcYkEVsH2jLJqSSaxI3yCM0azGPhljLyZw82RaQ/iuOn2ECGOacDjmEH+OMuFlSMLAzsOx6Lg4IEzdog+X9VqHBvXaLdhdebq3d0HEAIfEPxvuQYOqk0QMNZHLglbG87H817TiOIaSSu1h/G56k1pXxHFhhhbmVeHLtVBWtxx6S+9WYc1VOWoVO7nCL8I5NAy1ejtcnW365tn5nIRzcWr1VW79DSP5Kv3XlTyAkrjZGHMwR5GtxI3ACmLI91KcnWp2STH0pQkwau9xFe3yEkn+caYyoYSySFSr8DPer0ejFcpRUv8efd4nrpqcpQIXulQ5ao1mpqUAc7UU49i7Qz2TABICu49AeYOn5xuvT9ISQmDo1oD7XGfsZMrdjKDmUn/pShJiU2UAQ+duKG2UCGKYdkkzi+BnCa1iQ4dpNqcRdUrKOY+k8T8nAAGvWHC39nifxuKMqTes0oZqBezHptK48JNDu6cvg4aYaRLW4ESgI6KwhAItrRywlh/JQXwqPEtZVAfsnWQs9JYBRk14w/AyR0XPnNL4iSd7cgWSfOMXJlBlI5izfy2F/a/qhGVSyU9QoaYSnfyk7vdWtopqx6+7F1OkPXZQmYyz9GqI+yBihLwk6MTPjPO+3136UDON1lByK+VIYVvDtF5p6bCy5iEkuuC04FCvjZxhdZM5pbrI6cYaJEDnFybEcyOxXQMhLqH6TCqikz5WbvtEIzWOnWWcSpUfR34sJ1PGW9DXG0jEW8cbMUXpyaYS88R5H3Y+wThJS5OHcE9eP2AYGVFXKefTcZJvNwxBtDIWvZVh5EwrwYpibu6mPFL1kJ6rqKsi6ySiSvbUGv5a3jNdrrUosk9FIavAAf6RO68qt9wiFelOf0ZOFiDhiun5IjBn0NWJmBgLOmUcGp7OJ+A27PcyX2o8wAbZ3yIB60Alb6hKTiRH9Gy2c2ygikLaBOacgUbRTclTxusm3aelXbdDGECdRWQecXqXefihZ13EA+yicpqmsyPlj9XZ2QTsNBguJJyXovIFxM+z3kdDTeWIBLUuivhQmJvWxFIvLCbBqtpYgIntOIE32UeH4GerdZPusuEAzplxugrF0bjEWq6jlfGuTkWQlOkj0zZIaUH9lWeQ0KablSBJlw9VHHGBITJH7wQYEB0FCYkwXqPUGCnMBT5YsTs6tKTT2okAfxmjWaXs/OBXhUWtHJqPnQQa023L4izchKStVU/Iw32bTIiRTyvEnsyUAUfXYKk6S08uxC8CgJktpKkEctofrOA73tVEm0tXx2hNm2xADhNAFBr6BcZ6D5CGNeLFO3ZsdzJfCmEBco7Z6EWOvoJ081QyukKIX6DLbpTQp3oSEQeuuE3bVV2yUO984WQKk3+BpzNx8VQHBa3i02+v0+CPDHglXVtO7TTNN6acTM2vQBbKJBglgJH8pN537UihBGH1Uh5vwTIxUiIB3y+L4Gd6zjDkWMELmu1rw58GwdO8quQpDTcvOF0kU7XEkieDOLHrElT/IcejWUbe8rJbe7ZkRCcFk2GSDrV9Ga7yBTTSgwSQpYwxQBeZLIUygUIcAxoIJYFRk6nwG4zxHlsQALLGd4OfBU+3j9dKYBFhmi6Qb6o8bGoxcCEgSqX0Dmzje3lW3vGwvdRyGTloYVEYZxMwJGiExg7lAZOuXCGDAZqR0mCBiUluF3gZtMCizMctBtFMgE+hwhSJlch8X3Ak9D4cq1c5F0F+ZBPFhY8FsAaFP5UgSrZhNXqLX86oqLwsZbaTXTcdb7wTQp/E1HCzveWoCGDpMEEZjZ2WnXgRXxzNTAdXDLWBzMaT4LxzPVrZj0VKQgbaCEwFc/Dz4Ni1zixK5+ERUvjwKHopa4xKROGYLXCf6wNPpW1QVs5H7dImnW1pephkzZ7xByP+e4vrd28wpdGQCmCTuSyGMhhlP15q4YiD1mSzv6BDrzr1zFwBJa3ZJJSUsyPAGVJvhwhpeWR1/fgGTOckCKm9xw49OW8zsNtrFlCFJlhR4YVquU1Uxa/0I8Ed21u6uall5mXbMTPHKYTy6YCAgXN7Ful24ExUjGEMJwv7NrCrOKhHAoAKTvEq9AlGc52BBBvbCxF14cWHNurk6kJetRq+y17I+Va66VAFCpGIW7lih7TjA8rLXHb9cvXL+XiBWY0zFcFEW1y5YusWR4ByIutOfMTdKleqBnMYamQYJS2cFO9gL43vg0BVJmy4cQF6OJj0yZVTnF4izWSQkCe9Y8ZBuedn4X6GxT6YLFIjV2JeDy7vYkVI+T0SCU0WmSLInCyu380LSFl0ydfd+vwQTEIwwnSflcWFNg+YYBZCXZ4/e6F0MF/2y5Trad2WTRQvuWNH11ywvCxCZLlAgVmMgIGRlWrdJIo7jvhQkJuUrCGlvYzQXCGOo1dHBrD2od48FGTRm4BTJzl0O/ZYtCHkNWq752d7KvdFBgPb4Q8kOhjjoOA5dhW0UfoHgkHjYGELYzimvGczlhMu7MMFRqxrF0p21NqHSgGyla1vJ1i4AtVu1ydRdaQ0+OUnv3Yx/NGOeIoU1Pk26cMLGekjDvKYcwbtNA0KIGRr3XlRHPQJbhS5Zhlhe9kscB5xGnkno1QRiPgoCpiACGJ6PXeMXqqohXlugJoDhe2PCWly7pnbcpekeVfRCdxp1UMJVUlijvVMINvO22aUB+l28m7FrWIuy1fp1LmhgSXjAsqWDOEjlZYOnjQoqQYr3pk7QYQO01jSjTXBzj0IXJz8Nb4mb2TwDZveid+BXA+qA6U2fS86lkZJO6ypyIHMKAEzzyjMDZUoTa+rNK8WHclnpR1Q5vnXmHATE5C/Q+IC5uwljSX6p6sycKqHGz1GULZ9tXpPMIfJ5x4DjEGZYXjbq+Ihg8t62CKOQOBBxsM3uD6UquQzqoWxnfyzVhSiOSsYns6BnmFiFT+2cTX6XLZ+8uX8VmIa+6v6BUsTLkMh5ciP0eBLJ3fAA9+8NvH5vPkVbrCuqpDNVKyR3yhGlujCHuwNJfZfoIQ6ovIy+81JwsuAMo91Qf5VN5f7rxA+02+XuOw13sIkw2JN4hD7igLczHvlMK9QuHLuAKaOTcXnZ0oEtpbEdjNgAl01rnWNXl4ckDGDpjFvh6Sd0S29QvBuExvaaNoN+tJ0I9GMjY+grewwMma30FTJyDumVcKndjlpO7AEilm1Z2WdH29Q3RzfTuB5/K2pbxeMBUZYtxi5/Ha7dx6Fl0GMhQeVldIV8bNILOoK26xz4gkFIrM4SRya93AsL7Muy+emrXhshy4PjnY341cG3oC7eJOcO4nKntw7SN/d6GXpwr27spZKNr3ItHKCf1Wsja8Knn7ARUkxoXN+r1/s8ZcFuD0XdNQYoSF7mZ1/OswVYBj2OFxgS/2AcEqOS6mELn9YVtBl3wnT5SyVtxG1uT74MFGjLI69gj6FHICz5K+TeiabdnehVRORblH8DHAHq4b20THCjIhl6jOLgpffJmGafgFruNK5/9MmNSYHtj+jbfhKg3V78sr+9Y1VZBl2GF1Retr3a2MCgkuqE4y/qyvGBwla69MlS7W6E2vUz7b4EFcM08te/W4WfR9hLBO1CTggN7bwkaJfTczzJBuQnonZ5t6ggGzlDledNUbtvqZdtf68nBe06VGP37vb6/FrmyssGv2GKwV3OEvOxmySNXazdfwXRbqRKuwfMjt0nD1LtsrH7vo52n+yVF2lOu2Bg8Mv+KWoXeWT3tA8LvrmVcXnZteOhbWOuGruREZF5v/bYjdEauwd96rELR7MtR2Ps9prHxq6DsVbJFoMqcSMfu1IjepKhdsPABgrjjLH0ae+ZUq/gWURy7eKxKymGa/dVWbsHArRrDUW7qZpjN6eXhnY5uRrnVYIWI0m1ELEFJIBEwXjsmi0vM7f1y0AhJFZpt9ej8tj9p6Tdl37B2HVoaFceuwXmtfvkxgCKVFG7mBBE9MjuujfMgMZwiTEPXCTCchMmPBdcnuD5tZj3mVMFjtnfZ14NWmgKXqauFRitNuoybcRjN+YV7gNBJyvp5QCHStBuBHeZDn7C3ADR8frkYKBHtpEDBpEFG3V8LvmHIIctWm0Zgmv3dzd24OVl+kliXBk1YqZRszEfvAeYkx8pviIxA/P3baLHHoN/mlXl9nsCowGHVuDCvX2dcEUMSGxaHyAfjwj4Nnb1qmYwdgGW3kPpTcvLIp+fryPTJ5jd2aW1SBnS7p0G2g3rKJSXPfaGbnHOaIOQuDXiDG0Mtfu7sDuE8jKDTQQGTo68rlfB7t51oyHbqVReZrCJQMak63rl2m1zm4n9gaTysksZIXf8tGLt3mCGn1csL5s0YmwweW7adc1y7d5ohgdZKi+bOjOoTBt8XbVkVWtrauxi9rLQqf0Jy0lrlANlWLumOLw7/zm8pD5k9jLHzr7/X8jj/wvy+jig3ftNjV2EpW8fbw1Vvb7VSmuWtveb2y0XlZedrg7d+kxUutzU4b9a2v0CecCsdltYXtYHbJ310I3/3XJDy8X8vksdwVbweSGrNz3UrbNaqcCQuM4XqnYPhLx1ViuVzvcD2lN/WYjiry8JD3HrrNYpt96tKL0nhiyHQ946q3UKKC9rmXR7+Lp6jaX7TW1bJh3aX1eeCbe3Ywvl4esrmynXoaVyXXWG8v8A+gJVuXFdY34AAAAASUVORK5CYII=)
+    no-repeat
+    left center;
+    max-width: 350px;
+    height: 150px;
+}
+@media (min-width: 1450px) {
+  .logo {
+    grid-column: 5/span 3;
+  }
+}
+  </style>
+</head>
+<body>
+<header>
+	<ol>
+		<li>Round 1</li>
+		<li>Round 2</li>
+		<li>Sweet 16</li>
+		<li>Elite 8</li>
+		<li>Final 4</li>
+		<li>Elite 8</li>
+		<li>Sweet 16</li>
+		<li>Round 2</li>
+		<li>Round 1</li>
+	</ol>
+</header>
+<div class="bracket">
+	<figure class="logo"></figure>
+	<div class="region region-1">
+	<!-- Region 1 Round 1-->
+		<ul class="game game-1">
+			<li class="team team-top" data-sn="Ala">1 Alabama</li>
+			<li class="team team-bottom" data-sn="TCC">16 Texas A&amp;M-CC</li>
+		</ul>
+
+		<ul class="game game-2">
+			<li class="team team-top" data-sn="Mrl">8 Maryland</li>
+			<li class="team team-bottom" data-sn="WVa">9 West Virginia</li>
+		</ul>
+
+		<ul class="game game-3">
+			<li class="team team-top" data-sn="SDS">5 SD State</li>
+			<li class="team team-bottom" data-sn="Cha">12 Charleston</li>
+		</ul>
+
+		<ul class="game game-4">
+			<li class="team team-top" data-sn="UVa">4 Virginia</li>
+			<li class="team team-bottom" data-sn="Fur">13 Furman</li>
+		</ul>
+
+		<ul class="game game-5">
+			<li class="team team-top" data-sn="Cre">6 Creighton</li>
+			<li class="team team-bottom" data-sn="NCS">11 NC State</li>
+		</ul>
+
+		<ul class="game game-6">
+			<li class="team team-top" data-sn="Bay">3 Baylor</li>
+			<li class="team team-bottom" data-sn="USB">14 UCSB</li>
+		</ul>
+
+		<ul class="game game-7">
+			<li class="team team-top" data-sn="Mis">7 Missouri</li>
+			<li class="team team-bottom" data-sn="USt">10 Utah State</li>
+		</ul>
+
+		<ul class="game game-8">
+			<li class="team team-top" data-sn="Ari">2 Arizona</li>
+			<li class="team team-bottom" data-sn="Pri">15 Princeton</li>
+		</ul>
+	
+	<!-- Region 1 Round 2 -->
+		<ul class="game game-33">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+		<ul class="game game-34">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+		<ul class="game game-35">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+		<ul class="game game-36">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+	<!-- Region 1 Sweet 16 -->
+		<ul class="game game-49">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-50">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	<!-- End Region 1 Sweet 16 -->
+	
+	<!-- Region 1 Final -->
+		<ul class="game game-57">
+			<li class="team team-top" data-sn=""> </li>
+			<li class="team team-bottom" data-sn=""> </li>
+		</ul>
+		
+	</div>
+	<div class="region-2 region">
+		<!-- Region 2 Round 1 -->
+		<ul class="game game-9">
+			<li class="team team-top" data-sn="Pur">1 Purdue</li>
+			<li class="team team-bottom" data-sn="FDU">16 FDU</li>
+		</ul>
+	
+		<ul class="game game-10">
+			<li class="team team-top" data-sn="Mem">8 Memphis</li>
+			<li class="team team-bottom" data-sn="FAU">9 FAU</li>
+		</ul>
+
+		<ul class="game game-11">
+			<li class="team team-top" data-sn="Duk">5 Duke</li>
+			<li class="team team-bottom" data-sn="ORo">12 Oral Roberts</li>
+		</ul>
+
+		<ul class="game game-12">
+			<li class="team team-top" data-sn="Ten">4 Tennessee</li>
+			<li class="team team-bottom" data-sn="Lou">13 LA Lafeyette</li>
+		</ul>
+
+		<ul class="game game-13">
+			<li class="team team-top" data-sn="Ken">6 Kentucky</li>
+			<li class="team team-bottom" data-sn="Pro">11 Providence</li>
+		</ul>
+
+		<ul class="game game-14">
+			<li class="team team-top" data-sn="KSt">3 Kansas State</li>
+			<li class="team team-bottom" data-sn="MSt">14 Montana State</li>
+		</ul>
+
+		<ul class="game game-15">
+			<li class="team team-top" data-sn="MiS">7 Michigan State</li>
+			<li class="team team-bottom" data-sn="USC">10 USC</li>
+		</ul>
+
+		<ul class="game game-16">
+			<li class="team team-top" data-sn="Mar">2 Marquette</li>
+			<li class="team team-bottom" data-sn="Ver">15 Vermont</li>
+		</ul>
+		<!-- End Region 2 Round 1 -->
+		
+		<!-- Region 2 Round 2 -->
+		<ul class="game game-37">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-38">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-39">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-40">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 2 Round 2 -->
+		
+		<!-- Region 2 Sweet 16 -->
+		<ul class="game game-51">
+			<li class="team team-top "></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-52">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 2 Sweet 16 -->
+		
+		<!-- Region 2 Final -->
+		<ul class="game game-58">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		
+	</div>
+	<div class="region-3 region">
+	
+		<!-- Region 3 Round 1 -->
+		<ul class="game game-17">
+			<li class="team team-top" data-sn="Hou">1 Houston</li>
+			<li class="team team-bottom" data-sn="NKy">16 Morthern Kentucky</li>
+		</ul>
+
+		<ul class="game game-18">
+			<li class="team team-top" data-sn="Iow">8 Iowa</li>
+			<li class="team team-bottom" data-sn="Aub">9 Auburn</li>
+		</ul>
+
+		<ul class="game game-19">
+			<li class="team team-top" data-sn="MiF">5 Miami</li>
+			<li class="team team-bottom" data-sn="Dra">12 Drake</li>
+		</ul>
+
+		<ul class="game game-20">
+			<li class="team team-top" data-sn="Ind">4 Indiana</li>
+			<li class="team team-bottom" data-sn="KeS">13 Kent State</li>
+		</ul>
+
+		<ul class="game game-21">
+			<li class="team team-top" data-sn="IoS">6 Iowa State</li>
+			<li class="team team-bottom" data-sn="Pit">11 Pitt</li>
+		</ul>
+
+		<ul class="game game-22">
+			<li class="team team-top" data-sn="Xav">3 Xavier</li>
+			<li class="team team-bottom" data-sn="KnS">14 Kennesaw State</li>
+		</ul>
+
+		<ul class="game game-23">
+			<li class="team team-top" data-sn="A&amp;M">7 Texas A&amp;M</li>
+			<li class="team team-bottom" data-sn="PSt">10 Penn State</li>
+		</ul>
+
+		<ul class="game game-24">
+			<li class="team team-top" data-sn="Tex">2 Texas</li>
+			<li class="team team-bottom" data-sn="Col">15 Colgate</li>
+		</ul>
+		<!-- End Region 3 Round 1 -->
+		
+		<!-- Region 3 Round 2 -->
+		<ul class="game game-41">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-42">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-43">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-44">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 3 Round 2 -->
+		<!-- Region 3 Sweet 16 -->
+		<ul class="game game-53">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-54">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- Region 3 Final -->
+		<ul class="game game-59">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""> </li>
+		</ul>
+	</div>
+	
+	<div class="region-4 region">
+		<!-- Region 4 Round 1 -->
+		<ul class="game game-25">
+			<li class="team team-top" data-sn="Kan">1 Kansas</li>
+			<li class="team team-bottom" data-sn="How">16 Howard</li>
+		</ul>
+
+		<ul class="game game-26">
+			<li class="team team-top" data-sn="Ark">8 Arkansas</li>
+			<li class="team team-bottom" data-sn="Ill">9 Illinois</li>
+		</ul>
+
+		<ul class="game game-27">
+			<li class="team team-top" data-sn="StM">5 St. Mary's</li>
+			<li class="team team-bottom" data-sn="VCU">12 VCU</li>
+		</ul>
+
+		<ul class="game game-28">
+			<li class="team team-top" data-sn="UCn">4 UConn</li>
+			<li class="team team-bottom" data-sn="Ion">13 Iona</li>
+		</ul>
+
+		<ul class="game game-29">
+			<li class="team team-top" data-sn="TCU">6 TCU</li>
+			<li class="team team-bottom" data-sn="ASt">11 Arizona State</li>
+		</ul>
+
+		<ul class="game game-30">
+			<li class="team team-top" data-sn="Gon">3 Gonzaga</li>
+			<li class="team team-bottom" data-sn="GCy">14 Grand Canyon</li>
+		</ul>
+
+		<ul class="game game-31">
+			<li class="team team-top" data-sn="NWn">7 Northwestern</li>
+			<li class="team team-bottom" data-sn="BoS">10 Boise State</li>
+		</ul>
+
+		<ul class="game game-32">
+			<li class="team team-top" data-sn="UCL">2 UCLA</li>
+			<li class="team team-bottom" data-sn="NCA">15 UNC Asheville</li>
+		</ul>
+		<!-- End Region 4 Round 1 -->
+		
+		<!-- Region 4 Round 2 -->
+		<ul class="game game-45">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-46">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-47">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-48">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 4 Round 2 -->
+		<!-- Region 4 Sweet 16 -->
+		<ul class="game game-55">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-56">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 4 Sweet 16 -->
+		<!-- Region 4 Final -->
+		<ul class="game game-60">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	</div>
+	<div class="final-four">
+		<!-- Final Four Game 1-->
+		<ul class="game game-61">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- Final Four Game 2-->
+		<ul class="game game-62">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom "></li>
+		</ul>
+
+		<ul class="game game-63 championship">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+      <li style="margin-top:40px"><span>CHAMPION:</span></li>
+			<li class="champion" style="padding: 5px; height: 18px; line-height: 18px;"></li>
+      <li class="tie-break" style="padding: 5px">
+        <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Tie Break: Total points scored in championship game"/>
+      </li>
+      <li class="entry-name" style="padding: 5px">
+        <input type="text" id="entry-name" name="entryname" size="20" placeholder="Entry name" title="Entry name"/>
+      </li>
+      <li style="padding: 5px">
+        <button id="generate-entry">Save Entry</button>
+      </li>
+      <li style="padding: 5px">
+        <button id="random-picks">Random Picks</button>
+      </li>
+		</ul>
+	</div>
+</div>
+  <script>
+    const nextGame = (elem) => {
+      let curGame = null
+      let nextGame = null;
+      elem.classList.forEach((cn) => {
+        if (m = cn.match(/game-(\d+)/)) {
+          let gn = parseInt(m[1], 10) - 1;
+          curGame = gn + 1;
+          let base = null;
+          if (gn < 32) {
+            base = 32;
+          } else if (gn < 48) {
+            base = 48;
+            gn -= 32;
+          } else if (gn < 56) {
+            base = 56;
+            gn -= 48;
+          } else if (gn < 60) {
+            base = 60;
+            gn -= 56;
+          } else if (gn < 62) {
+            base = 62;
+            gn -= 60;
+          } else {
+            base = 999;
+          }
+          if (base === 999) {
+            nextGame = '.champion';
+          } else {
+            const gadd = Math.round(gn/2 - 0.01);
+            const torb = gn % 2 ? 'bottom' : 'top';
+            //console.log("Match: ", m, " gn = ", gn, " gn/4 = ", gn/4, " gadd = ", gadd);
+            nextGame = `.game-${base + gadd + 1} .team-${torb}`;
+          }
+        }
+      });
+      return [curGame, nextGame];
+    };
+    const getGameNum = (ul) => {
+      let gameNo = null;
+      for (const clz of ul.classList) {
+        const md = clz.match(/game-(\d+)/);
+        if (md) {
+          gameNo = parseInt(md[1], 10);
+          break;
+        }
+      }
+      return gameNo;
+    };
+    const teams = document.querySelectorAll('ul.game li.team');
+    const pickTeam = (evt) => {
+      if (evt.target.classList.contains("winner")) {
+        return;
+      }
+      const teamName = evt.target.getAttribute("data-sn");
+      const [curGame, ngClass] = nextGame(evt.target.parentElement);
+      //console.log("Clicked ", evt.target.innerHTML, "classes: ", evt.target.classList, " curGame ", curGame, " new game class ", ngClass);
+      for (const li of evt.target.parentElement.children) {
+        li.classList.remove("winner");
+      }
+      evt.target.classList.add("winner");
+      const dest = document.querySelector(ngClass);
+      dest.setAttribute("data-sn", teamName);
+      dest.innerHTML = evt.target.innerHTML;
+      dest.classList.remove("winner");
+      // Find all games larger than dest if it is equal to the 
+      // other team in the curGame and blank it remove winner class
+      // and blank data-sn
+      let otherTeamClass = `ul.game-${curGame} li.`;
+      if (evt.target.classList.contains("team-bottom")) {
+        otherTeamClass = `${otherTeamClass}team-top`;
+      } else {
+        otherTeamClass = `${otherTeamClass}team-bottom`;
+      }
+      let otherTeamSn = document.querySelector(otherTeamClass).getAttribute("data-sn");
+      const allGameUls = document.querySelectorAll("ul.game");
+      allGameUls.forEach((ul) => {
+        let gameNo = getGameNum(ul);
+        if (gameNo && gameNo > curGame) {
+          for (const li of ul.children) {
+            if (li.getAttribute("data-sn") === otherTeamSn) {
+              li.classList.remove("winner");
+              li.innerHTML = "";
+              li.setAttribute("data-sn", "");
+            }
+          }
+        }
+      });
+    };
+    for (const team of teams) {
+      team.addEventListener('click', pickTeam, false);
+    }
+
+    const download = (filename, text) => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+
+      element.style.display = 'none';
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
+    }
+    document.getElementById("random-picks").onclick = (event) => {
+      if (confirm("This will scramble all the picks. Are you sure?")) {
+        let i = 1;
+        for (let i = 1; i < 64; i++) {
+          let selector = `ul.game-${i} li.team-`;
+          if (Math.floor(Math.random() * 2) == 0) {
+            selector = `${selector}top`;
+          } else {
+            selector = `${selector}bottom`;
+          }
+          document.querySelector(selector).click();
+        }
+      }
+    };
+    document.getElementById("generate-entry").onclick = (event) => {
+      const entryName = document.getElementById("entry-name");
+      if (!entryName.value || entryName.value === "") {
+        entryName.style.border = 'thick solid red';
+        alert("You haven't set the Entry name.");
+        return;
+      }
+      entryName.style.border = 'none';
+      const tieBreak = document.getElementById("tie-break");
+      if (!tieBreak.value || tieBreak.value === "") {
+        tieBreak.style.border = 'thick solid red';
+        alert("You haven't set the tie break value.");
+        return;
+      }
+      tieBreak.style.border = 'none';
+      const winnersLis = document.querySelectorAll("li.winner");
+      if (winnersLis.length < 63) {
+        alert("You haven't completed making all picks.");
+        return;
+      }
+      let entryData = [];
+      for (const li of winnersLis) {
+        const gameNo = getGameNum(li.parentElement);
+        const teamName = li.getAttribute("data-sn");
+        entryData.push([gameNo, teamName]);
+      }
+
+      entryData.sort((a, b) => { return a[0] - b[0]; })
+      entryData = entryData.map((a) => a[1]);
+
+      entryData.push(tieBreak.value);
+      entryData.splice(0, 0, "# Round 1:");
+      entryData.splice(33, 0, "# Round 2:");
+      entryData.splice(50, 0, "# Round 3:");
+      entryData.splice(59, 0, "# Round 4:");
+      entryData.splice(64, 0, "# Final Four:");
+      entryData.splice(67, 0, "# Championship:");
+
+      download(`${entryName.value}.txt`, entryData.join("\n"));
+      alert(`File ${entryName.value}.txt was saved to your downloads folder.`);
+    };
+  </script>
+</body>
+</html>
