@@ -6,8 +6,9 @@
 #include "pool.h"
 
 void usage(char *progName) {
-  fprintf(stderr, "Usage: %s [-h] [-f FMT] -d DIR COMMAND\n", progName);
+  fprintf(stderr, "Usage: %s [-hp] [-f FMT] -d DIR COMMAND\n", progName);
   fprintf(stderr, "   -h get extended help\n");
+  fprintf(stderr, "   -p show progress and ETA for possibilities report\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
   fprintf(stderr, "   -f FMT: Format of report, one of 'text' or 'json'\n");
   fprintf(stderr, "   COMMAND: report to run\n");
