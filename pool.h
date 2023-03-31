@@ -802,9 +802,9 @@ POOLDEF void pool_score_report() {
   uint32_t lastScore = 0;
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
   printf("%s: Leaderboard\n", poolConfiguration.poolName);
-  printf("                 Curr  Max            Round\n");
-  printf("Rank    Name    Score Score   1   2   3   4   5   6\n");
-  printf("---- ---------- ----- ----- --- --- --- --- --- ---\n");
+  printf("                 Curr  Max  Champ/        Round Scores\n");
+  printf("Rank    Name    Score Score  Live?   1   2   3   4   5   6\n");
+  printf("---- ---------- ----- ----- ------ --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
     if (i > 0) {
       if (poolBrackets[i].score != lastScore) {
@@ -812,11 +812,13 @@ POOLDEF void pool_score_report() {
         lastScore = poolBrackets[i].score;
       }
     }
-    printf("%4d %10.10s %5d %5d %3d %3d %3d %3d %3d %3d\n",
+    printf("%4d %10.10s %5d %5d  %3s %c %3d %3d %3d %3d %3d %3d\n",
         rank,
         poolBrackets[i].name,
         poolBrackets[i].score,
         poolBrackets[i].maxScore,
+        POOL_TEAM_SHORT_NAME(poolBrackets[i].winners[62]),
+        poolTeams[poolBrackets[i].winners[62] - 1].eliminated ? 'N' : 'Y',
         poolBrackets[i].roundScores[0],
         poolBrackets[i].roundScores[1],
         poolBrackets[i].roundScores[2],
