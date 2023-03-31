@@ -870,6 +870,11 @@ ul.game li.team {
         alert("You haven't set the Entry name.");
         return;
       }
+      if (!entryName.value.match(/^[^\\\/'\"]+$/)) {
+        entryName.style.border = 'thick solid red';
+        alert("Entry names can't contain \\, /, ' or\" characters.");
+        return;
+      }
       entryName.style.border = 'none';
       const tieBreak = document.getElementById("tie-break");
       if (!tieBreak.value || tieBreak.value === "") {
