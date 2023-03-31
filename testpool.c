@@ -6,7 +6,6 @@
 
 int main(int argc, const char* argv[]) {
   pool_initialize("test/fifty_entries");
-  //pool_initialize("test/benchmark");
   printf("Initialized pool, there are %d entries\n", poolBracketsCount);
   printf("Pool Name: %s\n", poolConfiguration.poolName);
   printf("Pool Scorer: %d\n", poolConfiguration.scorerType);
@@ -22,7 +21,7 @@ int main(int argc, const char* argv[]) {
   pool_score_report();
   printf("Tournament Results:\n");
   pool_print_entry(&poolTournamentBracket);
-  pool_possibilities_report();
+  pool_possibilities_report(PoolFormatText, true);
 
 #if 0
   printf("Running Scoring Benchmark:\n");

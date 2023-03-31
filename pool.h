@@ -157,14 +157,16 @@ typedef struct {
 #define POOL_RESULTS_FILE_NAME "results.txt"
 #define POOL_ENTRIES_DIR_NAME "entries"
 
-typedef enum { PoolScorerBasic,  PoolScorerUpset = 2, PoolScorerSeedDiff } PoolScorerType;
+typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerSeedDiff } PoolScorerType;
+typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson } PoolReportFormat;
 
 POOLDEF void pool_initialize(const char *dirPath);
 POOLDEF void pool_team_report();
 POOLDEF void pool_add_entries_in_dir(const char *dirPath);
 POOLDEF void pool_entries_report();
 POOLDEF void pool_score_report();
-POOLDEF void pool_possibilities_report();
+POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
+POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress);
 POOLDEF void pool_print_entry(PoolBracket *bracket);
 POOLDEF void pool_read_config_file(const char *filePath);
 POOLDEF void pool_read_team_file(const char *filePath);
@@ -236,6 +238,9 @@ POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength)
 }
 
 POOLDEF void pool_inc_progress(PoolProgress *prog) {
+  if (prog == NULL) {
+    return;
+  }
   prog->complete += 1;
   if (prog->nextPercent == 0) {
     printf("DFS BPS: %12.0f 0%% ETA: --\r", 0.0);
@@ -536,7 +541,7 @@ POOLDEF void pool_team_report() {
   }
 }
 
-POOLDEF void possibilities_dfs(
+POOLDEF void pool_possibilities_dfs(
     uint8_t gamesLeft[], int gamesLeftCount, uint8_t game,
     PoolBracket *possibleBracket,
     PoolStats stats[], uint32_t numBrackets,
@@ -607,7 +612,7 @@ POOLDEF void possibilities_dfs(
     }
     
     // RECURSE
-    possibilities_dfs(
+    pool_possibilities_dfs(
       gamesLeft, gamesLeftCount, game + 1,
       possibleBracket,
       stats, poolBracketsCount,
@@ -621,10 +626,21 @@ POOLDEF void possibilities_dfs(
   }
 }
 
-// TODO: optionally return report as json
+POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr) {
+  if (strcasecmp(fmtStr, "text") == 0) {
+    return PoolFormatText;
+  } else if (strcasecmp(fmtStr, "json") == 0) {
+    return PoolFormatJson;
+  } else {
+    fprintf(stderr,
+        "ERROR: Could not determine report format: %s\n",
+        fmtStr);
+  }
+  return PoolFormatInvalid;
+}
+
 // TODO: allow batching for parallelization in multiple processes
-// TODO: optional progress reporting
-POOLDEF void pool_possibilities_report() {
+POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress) {
   if (poolBracketsCount == 0) {
     fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
@@ -640,11 +656,13 @@ POOLDEF void pool_possibilities_report() {
     }
   }
   uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
-  printf("%s: Possibilities Report\n", poolConfiguration.poolName);
-  printf("There are %d teams and %d games remaining, ",
+  if (fmt == PoolFormatText) {
+    printf("%s: Possibilities Report\n", poolConfiguration.poolName);
+    printf("There are %d teams and %d games remaining, ",
       gamesLeftCount + 1, gamesLeftCount);
-  pool_print_humanized(stdout, possibleOutcomes, 6);
-  printf(" possible outcomes\n");
+    pool_print_humanized(stdout, possibleOutcomes, 6);
+    printf(" possible outcomes\n");
+  }
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
   uint16_t bracketScores[POOL_BRACKET_CAPACITY];
   for (size_t i = 0; i < poolBracketsCount; i++) {
@@ -668,52 +686,106 @@ POOLDEF void pool_possibilities_report() {
   prog.complete = 0;
   prog.nextPercent = 0;
 
-  possibilities_dfs(
+  pool_possibilities_dfs(
       gamesLeft, gamesLeftCount, 0,
       &possibleBracket,
       stats, poolBracketsCount,
-      &prog);
+      progress ? &prog : NULL);
 
-  printf("%10s %4s %4s %5s %5s %6s %6s %6s\n", "",
-      "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
-  printf("%10s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "Name  ",
-      "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
   qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
-  for (size_t i = 0; i < poolBracketsCount; i++) {
-    PoolStats *stat = &stats[i];
-    float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
-    printf("%10.10s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
-        stat->minRank, stat->maxRank, stat->bracket->score,
-        stat->maxScore, winChance);
-    pool_print_humanized(stdout, stat->timesWon, 5);
-    printf(" ");
-    pool_print_humanized(stdout, stat->timesTied, 5);
-    printf(" ");
-    if (winChance > 0.0) {
-      PoolTeamWins top5[5] = {0};
-      for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
-        if (stat->champCounts[t] > 0) {
-          for(size_t j = 0; j < 5; j++) {
-            if (stat->champCounts[t] > top5[j].count) {
-              for(size_t k = 4; k > j; k--) {
-                top5[k].team = top5[k-1].team;
-                top5[k].count = top5[k-1].count;
+
+  switch (fmt) {
+  case PoolFormatText:
+    {
+      printf("%10s %4s %4s %5s %5s %6s %6s %6s\n", "",
+          "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
+      printf("%10s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "Name  ",
+          "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
+      for (size_t i = 0; i < poolBracketsCount; i++) {
+        PoolStats *stat = &stats[i];
+        float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
+        printf("%10.10s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
+            stat->minRank, stat->maxRank, stat->bracket->score,
+            stat->maxScore, winChance);
+        pool_print_humanized(stdout, stat->timesWon, 5);
+        printf(" ");
+        pool_print_humanized(stdout, stat->timesTied, 5);
+        printf(" ");
+        if (winChance > 0.0) {
+          PoolTeamWins top5[5] = {0};
+          for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
+            if (stat->champCounts[t] > 0) {
+              for(size_t j = 0; j < 5; j++) {
+                if (stat->champCounts[t] > top5[j].count) {
+                  for(size_t k = 4; k > j; k--) {
+                    top5[k].team = top5[k-1].team;
+                    top5[k].count = top5[k-1].count;
+                  }
+                  top5[j].team = t + 1;
+                  top5[j].count = stat->champCounts[t];
+                  break;
+                }
               }
-              top5[j].team = t + 1;
-              top5[j].count = stat->champCounts[t];
-              break;
+            }
+          }
+          for (size_t w = 0; w < 5; w++) {
+            if (top5[w].team != 0) {
+              if (w > 0) { printf(","); }
+              printf("%s", POOL_TEAM_SHORT_NAME(top5[w].team));
             }
           }
         }
+        printf("\n");
       }
-      for (size_t w = 0; w < 5; w++) {
-        if (top5[w].team != 0) {
-          if (w > 0) { printf(","); }
-          printf("%s", POOL_TEAM_SHORT_NAME(top5[w].team));
+      break;
+    case PoolFormatJson:
+      printf("{");
+      printf("\"pool\": {");
+      printf("\"name\": \"%s\",", poolConfiguration.poolName);
+      printf("\"outcomes\": %lu,", possibleOutcomes);
+      printf("\"batch\": %d,", 0);
+      printf("\"numBatches\": %d", 1);
+      printf("},");
+      printf("\"entries\": [");
+      for (size_t i = 0; i < poolBracketsCount; i++) {
+        PoolStats *stat = &stats[i];
+        float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
+        if (i > 0) { printf(","); }
+        printf("{");
+        printf("\"name\": \"%s\",", stat->bracket->name);
+        printf("\"minRank\": %d,", stat->minRank);
+        printf("\"maxRank\": %d,", stat->maxRank);
+        printf("\"currentScore\": %d,", stat->bracket->score);
+        printf("\"maxScore\": %d,", stat->maxScore);
+        printf("\"winChance\": %.6f,", winChance);
+        printf("\"timesWon\": %lu,", stat->timesWon);
+        printf("\"timesTied\": %lu,", stat->timesTied);
+        printf("\"champs\": [");
+        bool first = true;
+        for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
+          if (stat->champCounts[t] > 0) {
+            if (!first) { printf(","); }
+            printf("{");
+            printf("\"team\": {");
+            printf("\"number\": %ld,", t + 1);
+            printf("\"shortName\": \"%s\"", POOL_TEAM_SHORT_NAME(t + 1));
+            printf("},");
+            printf("\"timesWon\": %lu", stat->champCounts[t]);
+            printf("}");
+            first = false;
+          }
         }
+        printf("]");
+        printf("}");
       }
+      printf("]");
+      printf("}\n");
+      break;
+    case PoolFormatInvalid:
+    default:
+      fprintf(stderr, "ERROR: Unreachable, unknown or invalid PoolReportFormat\n");
+      exit(1);
     }
-    printf("\n");
   }
 }
 

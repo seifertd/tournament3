@@ -6,9 +6,10 @@
 #include "pool.h"
 
 void usage(char *progName) {
-  fprintf(stderr, "Usage: %s [-h] -d DIR COMMAND\n", progName);
+  fprintf(stderr, "Usage: %s [-h] [-f FMT] -d DIR COMMAND\n", progName);
   fprintf(stderr, "   -h get extended help\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
+  fprintf(stderr, "   -f FMT: Format of report, one of 'text' or 'json'\n");
   fprintf(stderr, "   COMMAND: report to run\n");
   fprintf(stderr, "     teams: show configured teams\n");
   fprintf(stderr, "     results: show tournament bracket\n");
@@ -56,15 +57,23 @@ void help() {
 int main(int argc, char *argv[]) {
   int opt;
   bool initialized = false;
-  char *format = "text";
-  while ((opt = getopt(argc, argv, "d:f:h")) != -1) {
+  PoolReportFormat format = PoolFormatText;
+  bool progress = false;
+  while ((opt = getopt(argc, argv, "d:f:ph")) != -1) {
     switch (opt) {
+      case 'p':
+        progress = true;
+        break;
       case 'd':
         pool_initialize(optarg);
         initialized = true;
         break;
       case 'f':
-        format = optarg;
+        format = pool_str_to_format(optarg);
+        if (format == PoolFormatInvalid) {
+          usage(argv[0]);
+          exit(EXIT_FAILURE);
+        }
         break;
       case 'h':
         usage(argv[0]);
@@ -90,8 +99,7 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(command, "scores") == 0) {
     pool_score_report();
   } else if (strcmp(command, "poss") == 0) {
-    printf("FORMAT: %s\n", format);
-    pool_possibilities_report();
+    pool_possibilities_report(format, progress);
   } else if (strcmp(command, "entries") == 0) {
     pool_entries_report();
   } else if (strcmp(command, "results") == 0) {
