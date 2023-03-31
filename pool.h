@@ -243,7 +243,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
     prog->nextPercent += 1;
   } else if (prog->complete < prog->total) {
     double perc = (double) prog->complete / (double) prog->total * 100.0;
-    if ( perc > prog->nextPercent) {
+    if ( perc > prog->nextPercent || prog->complete == 10000000) {
       clock_t curr = clock();
       double elapsed_t = (double)(curr - prog->start)/CLOCKS_PER_SEC;
       double bps = elapsed_t > 0 ? prog->complete / elapsed_t : 9999999.99;
