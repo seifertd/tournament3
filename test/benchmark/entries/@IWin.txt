@@ -1,0 +1,70 @@
+# Round 1:
+TCC
+Mrl
+SDS
+Fur
+Cre
+Bay
+USt
+Pri
+FDU
+FAU
+Duk
+Lou
+Pro
+KSt
+MiS
+Ver
+Hou
+Aub
+MiF
+KeS
+IoS
+Xav
+A&M
+Tex
+Kan
+Ark
+VCU
+UCn
+ASt
+GCy
+NWn
+NCA
+# Round 2:
+TCC
+SDS
+Cre
+Pri
+FAU
+Duk
+Pro
+MiS
+Hou
+MiF
+Xav
+Tex
+Kan
+UCn
+GCy
+NCA
+# Round 3:
+SDS
+Cre
+FAU
+MiS
+MiF
+Tex
+UCn
+NCA
+# Round 4:
+SDS
+FAU
+MiF
+UCn
+# Final Four:
+FAU
+UCn
+# Championship:
+UCn
+123

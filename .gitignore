@@ -1,7 +1,7 @@
 # apps
-pool
-testpool
-benchmark
+/pool
+/testpool
+/benchmark
 
 # Prerequisites
 *.d
