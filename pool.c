@@ -21,8 +21,9 @@ bool is_power_of_2(int n) {
 void usage(char *progName) {
   fprintf(stderr, "Usage: %s [-hp] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR COMMAND\n", progName);
   fprintf(stderr, "   -h get extended help\n");
-  fprintf(stderr, "   -p show progress and ETA for possibilities report\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
+  fprintf(stderr, "   Options for the possibilities ('poss') report:\n");
+  fprintf(stderr, "   -p show progress and ETA for possibilities report\n");
   fprintf(stderr, "   -f FMT: Format of report, one of 'text' or 'json'\n");
   fprintf(stderr, "   -b BATCH: Batch number for multi process possibilities, should be less than numBatches\n");
   fprintf(stderr, "   -n NUMBATCHES: Number of batches, must be a power of 2\n");
