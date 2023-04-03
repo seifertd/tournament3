@@ -193,6 +193,25 @@ collected and combined.
 
 etc
 
+Example run with 8 processes:
+
+```console
+./pool -d test/fifty_entries -b 0 -n 8 -f json poss | jq . > /tmp/p1.json &
+./pool -d test/fifty_entries -b 1 -n 8 -f json poss | jq . > /tmp/p2.json &
+./pool -d test/fifty_entries -b 2 -n 8 -f json poss | jq . > /tmp/p3.json &
+./pool -d test/fifty_entries -b 3 -n 8 -f json poss | jq . > /tmp/p4.json &
+./pool -d test/fifty_entries -b 4 -n 8 -f json poss | jq . > /tmp/p5.json &
+./pool -d test/fifty_entries -b 5 -n 8 -f json poss | jq . > /tmp/p6.json &
+./pool -d test/fifty_entries -b 6 -n 8 -f json poss | jq . > /tmp/p7.json &
+./pool -d test/fifty_entries -b 7 -n 8 -f json poss | jq . > /tmp/p8.json &
+```
+
+Then the json files have to be combined and code written to generate a report based
+on it.
+
+TODO: investigate using relative pointers in the stats data and use a binary format
+for saving and restoring the statistics.
+
 Game Index
 -----------
 Game numbers by round and what game numbers teams will play in
