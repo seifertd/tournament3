@@ -1,16 +1,31 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define POOL_IMPLEMENTATION
 #include "pool.h"
 
+bool is_power_of_2(int n) {
+  if (n == 0) { return 0; }
+  while (n != 1) {
+    if (n % 2 != 0) {
+      return 0;
+    } else {
+      n = n / 2;
+    }
+  }
+  return 1;
+}
+
 void usage(char *progName) {
-  fprintf(stderr, "Usage: %s [-hp] [-f FMT] -d DIR COMMAND\n", progName);
+  fprintf(stderr, "Usage: %s [-hp] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR COMMAND\n", progName);
   fprintf(stderr, "   -h get extended help\n");
   fprintf(stderr, "   -p show progress and ETA for possibilities report\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
   fprintf(stderr, "   -f FMT: Format of report, one of 'text' or 'json'\n");
+  fprintf(stderr, "   -b BATCH: Batch number for multi process possibilities, should be less than numBatches\n");
+  fprintf(stderr, "   -n NUMBATCHES: Number of batches, must be a power of 2\n");
   fprintf(stderr, "   COMMAND: report to run\n");
   fprintf(stderr, "     teams: show configured teams\n");
   fprintf(stderr, "     results: show tournament bracket\n");
@@ -60,7 +75,9 @@ int main(int argc, char *argv[]) {
   bool initialized = false;
   PoolReportFormat format = PoolFormatText;
   bool progress = false;
-  while ((opt = getopt(argc, argv, "d:f:ph")) != -1) {
+  int batch = 0;
+  int numBatches = 1;
+  while ((opt = getopt(argc, argv, "d:f:b:n:ph")) != -1) {
     switch (opt) {
       case 'p':
         progress = true;
@@ -80,10 +97,27 @@ int main(int argc, char *argv[]) {
         usage(argv[0]);
         help();
         exit(EXIT_FAILURE);
+      case 'b':
+        batch = atoi(optarg);
+        break;
+      case 'n':
+        numBatches = atoi(optarg);
+        if (!is_power_of_2(numBatches)) {
+          fprintf(stderr, "[ERROR] numBatches %d is not a power of 2\n", numBatches);
+          usage(argv[0]);
+          exit(EXIT_FAILURE);
+        }
+        break;
       default:
         usage(argv[0]);
         exit(EXIT_FAILURE);
     }
+  }
+  if (batch >= numBatches) {
+    fprintf(stderr, "[ERROR] batch %d is not < numBatches %d\n",
+            batch, numBatches);
+    usage(argv[0]);
+    exit(EXIT_FAILURE);
   }
   if (!initialized) {
     usage(argv[0]);
@@ -100,7 +134,7 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(command, "scores") == 0) {
     pool_score_report();
   } else if (strcmp(command, "poss") == 0) {
-    pool_possibilities_report(format, progress);
+    pool_possibilities_report(format, progress, batch, numBatches);
   } else if (strcmp(command, "entries") == 0) {
     pool_entries_report();
   } else if (strcmp(command, "results") == 0) {

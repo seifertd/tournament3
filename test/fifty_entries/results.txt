@@ -32,9 +32,9 @@ rap
 ten
 Wis
 # Round 2
-foe
-can
-wid
-mor
-pos
-fan
+#foe
+#can
+#wid
+#mor
+#pos
+#fan

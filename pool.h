@@ -166,7 +166,9 @@ POOLDEF void pool_add_entries_in_dir(const char *dirPath);
 POOLDEF void pool_entries_report();
 POOLDEF void pool_score_report();
 POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
-POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress);
+POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches);
+POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
+             uint8_t gamesLeft[], int *gamesLeftCount, int batch, int numBatches);
 POOLDEF void pool_print_entry(PoolBracket *bracket);
 POOLDEF void pool_read_config_file(const char *filePath);
 POOLDEF void pool_read_team_file(const char *filePath);
@@ -243,7 +245,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
   }
   prog->complete += 1;
   if (prog->nextPercent == 0) {
-    printf("DFS BPS: %12.0f 0%% ETA: --\r", 0.0);
+    fprintf(stderr, "DFS BPS: %12.0f 0%% ETA: --\r", 0.0);
     fflush(stdout);
     prog->nextPercent += 1;
   } else if (prog->complete < prog->total) {
@@ -256,7 +258,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
       uint64_t hours = eta / 3600;
       uint64_t minutes = (eta - hours * 3600) / 60;
       uint64_t secs = eta % 60;
-      printf("DFS BPS: %12.0f %3.0f%% ETA: %02ld:%02ld:%02ld\r", bps, perc, hours, minutes, secs);
+      fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ETA: %02ld:%02ld:%02ld\r", bps, perc, hours, minutes, secs);
       fflush(stdout);
       prog->nextPercent += 1;
     }
@@ -267,7 +269,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
     uint64_t hours = elapsed_t / 3600;
     uint64_t minutes = (elapsed_t - hours * 3600) / 60;
     uint64_t secs = elapsed_t % 60;
-    printf("DFS BPS: %12.0f %3.0f%% ELAPSED: %02ld:%02ld:%02ld\n", bps, 100.0, hours, minutes, secs);
+    fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ELAPSED: %02ld:%02ld:%02ld\n", bps, 100.0, hours, minutes, secs);
     fflush(stdout);
   }
 }
@@ -541,6 +543,33 @@ POOLDEF void pool_team_report() {
   }
 }
 
+POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
+             uint8_t gamesLeft[], int *gamesLeftCount, int batch, int numBatches) {
+  if (numBatches > *gamesLeftCount) {
+    fprintf(stderr, "[ERROR] There are more batches %d than games left %d\n",
+            numBatches, *gamesLeftCount);
+    exit(1);
+  }
+  int gamesToDecide = numBatches / 2;
+  for (int g = 0; g < gamesToDecide; g++) {
+    uint8_t round = pool_round_of_game(gamesLeft[g]);
+    uint8_t team1, team2 = 0;
+    pool_teams_of_game(gamesLeft[g], round, possibleBracket, &team1, &team2);
+    possibleBracket->winners[gamesLeft[g]] = ( batch & (1 << g) ) == 0 ? team1 : team2;
+    /*
+    printf("Advancing bracket for game %d of %d : %d, choosing winner %s-%s => %s\n",
+           g, gamesToDecide, gamesLeft[g],
+           POOL_TEAM_SHORT_NAME(team1),
+           POOL_TEAM_SHORT_NAME(team2),
+           POOL_TEAM_SHORT_NAME(possibleBracket->winners[gamesLeft[g]]));
+    */
+  }
+  memmove(gamesLeft,
+          gamesLeft + gamesToDecide,
+          sizeof(uint8_t) * (*gamesLeftCount - gamesToDecide));
+  *gamesLeftCount -= gamesToDecide;
+}
+
 POOLDEF void pool_possibilities_dfs(
     uint8_t gamesLeft[], int gamesLeftCount, uint8_t game,
     PoolBracket *possibleBracket,
@@ -639,12 +668,21 @@ POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr) {
   return PoolFormatInvalid;
 }
 
-// TODO: allow batching for parallelization in multiple processes
-POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress) {
+POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches) {
   if (poolBracketsCount == 0) {
     fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
   }
+
+  // Set up posible bracket
+  PoolBracket possibleBracket = {
+    .winners = {0},
+    .tieBreak = poolTournamentBracket.tieBreak,
+    .name = "possible",
+    .maxScore = 0,
+    .roundScores = {0}
+  };
+  memcpy(possibleBracket.winners, poolTournamentBracket.winners, sizeof(uint8_t) * POOL_NUM_TEAMS);
 
   // Set up data for DFS
   uint8_t gamesLeft[POOL_NUM_GAMES];
@@ -655,30 +693,26 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress) {
       gamesLeftCount += 1;
     }
   }
+
+  // If we are running a batch advance possible bracket accordingly
+  pool_advance_bracket_for_batch(&possibleBracket, gamesLeft, &gamesLeftCount, batch, numBatches);
+
   uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
   if (fmt == PoolFormatText) {
-    printf("%s: Possibilities Report\n", poolConfiguration.poolName);
     printf("There are %d teams and %d games remaining, ",
       gamesLeftCount + 1, gamesLeftCount);
     pool_print_humanized(stdout, possibleOutcomes, 6);
     printf(" possible outcomes\n");
+    printf("%s: Possibilities Report\n", poolConfiguration.poolName);
   }
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
   uint16_t bracketScores[POOL_BRACKET_CAPACITY];
   for (size_t i = 0; i < poolBracketsCount; i++) {
     stats[i].bracket = &poolBrackets[i];
-    pool_bracket_score(&poolBrackets[i], &poolTournamentBracket);
+    pool_bracket_score(&poolBrackets[i], &possibleBracket);
     stats[i].possibleScore = poolBrackets[i].score;
     stats[i].minRank = poolBracketsCount + 1;
   }
-  PoolBracket possibleBracket = {
-    .winners = {0},
-    .tieBreak = poolTournamentBracket.tieBreak,
-    .name = "possible",
-    .maxScore = 0,
-    .roundScores = {0}
-  };
-  memcpy(possibleBracket.winners, poolTournamentBracket.winners, sizeof(uint8_t) * POOL_NUM_TEAMS);
 
   PoolProgress prog;
   prog.start = clock();
@@ -743,8 +777,8 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress) {
       printf("\"pool\": {");
       printf("\"name\": \"%s\",", poolConfiguration.poolName);
       printf("\"outcomes\": %lu,", possibleOutcomes);
-      printf("\"batch\": %d,", 0);
-      printf("\"numBatches\": %d", 1);
+      printf("\"batch\": %d,", batch);
+      printf("\"numBatches\": %d", numBatches);
       printf("},");
       printf("\"entries\": [");
       for (size_t i = 0; i < poolBracketsCount; i++) {
