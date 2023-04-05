@@ -953,9 +953,10 @@ POOLDEF void pool_add_entries_in_dir(const char *dirPath) {
   DIR *dfd;
 
   if ((dfd = opendir(dirPath)) == NULL) {
-    fprintf(stderr, "Can't open directory %s: %s\n",
-        dirPath, strerror(errno));
-    exit(1);
+    fprintf(stderr, "[WARN] Can't open directory %s: %s\n",
+      dirPath, strerror(errno));
+    fprintf(stderr, "[WARN] There are no entries in this pool\n");
+    return;
   }
 
   char entryFilePath[2048];
