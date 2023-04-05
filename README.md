@@ -157,11 +157,11 @@ against them. Set up a DFS with inputs:
 Algo:
 1. Initial setup as above
 1. Determine the two teams in games[game]
-2. Assume winner is the first team, calculate gameScore for each entry, add
+1. Assume winner is the first team, calculate gameScore for each entry, add
    to possibleScore = possibleScore + gameScore
-3. Recurse with game += 1. If game == gamesLeft, sort stats by possiblScore and update stats for this result, stop recursion.
-4. Subtract the gameScore from step 2 from each possibleScore of each entry
-5. Repeat 2-4 with winner assumed to be second team
+1. Recurse with game += 1. If game == gamesLeft, sort stats by possiblScore and update stats for this result, stop recursion.
+1. Subtract the gameScore from step 2 from each possibleScore of each entry
+1. Repeat 2-5 with winner assumed to be second team
 
 max recursion depth would be = number of games remaining
 
