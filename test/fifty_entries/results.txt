@@ -32,8 +32,8 @@ rap
 ten
 Wis
 # Round 2
-#foe
-#can
+foe
+can
 #wid
 #mor
 #pos

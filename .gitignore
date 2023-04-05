@@ -3,6 +3,9 @@
 /testpool
 /benchmark
 
+# Ignore score report .bin files
+*.bin
+
 # Prerequisites
 *.d
 

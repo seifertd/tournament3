@@ -158,7 +158,7 @@ typedef struct {
 #define POOL_ENTRIES_DIR_NAME "entries"
 
 typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerSeedDiff } PoolScorerType;
-typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson } PoolReportFormat;
+typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson, PoolFormatBin } PoolReportFormat;
 
 POOLDEF void pool_initialize(const char *dirPath);
 POOLDEF void pool_team_report();
@@ -166,7 +166,9 @@ POOLDEF void pool_add_entries_in_dir(const char *dirPath);
 POOLDEF void pool_entries_report();
 POOLDEF void pool_score_report();
 POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
-POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches);
+POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches, bool restore);
+POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCount);
+
 POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
              uint8_t gamesLeft[], int *gamesLeftCount, int batch, int numBatches);
 POOLDEF void pool_print_entry(PoolBracket *bracket);
@@ -194,6 +196,7 @@ typedef struct {
   uint32_t payouts[3];
   char poolName[POOL_NAME_LIMIT];
   PoolScorerFunction poolScorer;
+  char dirPath[1024];
 } PoolConfiguration;
 static PoolConfiguration poolConfiguration = {0};
 
@@ -382,7 +385,6 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
 }
 
 POOLDEF void pool_initialize(const char *dirPath) {
-  struct dirent *dp;
   DIR *dfd;
 
   if ((dfd = opendir(dirPath)) == NULL) {
@@ -390,6 +392,8 @@ POOLDEF void pool_initialize(const char *dirPath) {
         dirPath, strerror(errno));
     exit(1);
   }
+
+  strncpy(poolConfiguration.dirPath, dirPath, 1023);
 
   char filePath[1024];
 
@@ -545,6 +549,9 @@ POOLDEF void pool_team_report() {
 
 POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
              uint8_t gamesLeft[], int *gamesLeftCount, int batch, int numBatches) {
+  if (numBatches <= 1) {
+    return;
+  }
   if (numBatches > *gamesLeftCount) {
     fprintf(stderr, "[ERROR] There are more batches %d than games left %d\n",
             numBatches, *gamesLeftCount);
@@ -660,6 +667,8 @@ POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr) {
     return PoolFormatText;
   } else if (strcasecmp(fmtStr, "json") == 0) {
     return PoolFormatJson;
+  } else if (strcasecmp(fmtStr, "bin") == 0) {
+    return PoolFormatBin;
   } else {
     fprintf(stderr,
         "ERROR: Could not determine report format: %s\n",
@@ -668,7 +677,100 @@ POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr) {
   return PoolFormatInvalid;
 }
 
-POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches) {
+POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCount) {
+  struct dirent *dp;
+  DIR *dfd;
+
+  if ((dfd = opendir(poolConfiguration.dirPath)) == NULL) {
+    fprintf(stderr, "Can't open directory %s: %s\n",
+        poolConfiguration.dirPath, strerror(errno));
+    exit(1);
+  }
+
+  char entryFilePath[2048];
+
+  while ((dp = readdir(dfd)) != NULL) {
+    struct stat stbuf;
+    sprintf(entryFilePath, "%s/%s", poolConfiguration.dirPath, dp->d_name);
+    if ( stat(entryFilePath, &stbuf) == -1 ) {
+      // .. do nothing?
+      continue;
+    }
+    if ( (stbuf.st_mode & S_IFMT ) == S_IFDIR ) {
+      // skip directories
+      continue;
+    }
+    if (strncmp(dp->d_name, "poss_", 5) != 0) {
+      // skip non-bin files
+      continue;
+    }
+    char *ext = strrchr(entryFilePath, '.');
+    if (!ext || strncmp(ext+1, "bin", 3) != 0) {
+      // skip no extension or wrong extension
+      continue;
+    }
+    FILE *in = fopen(entryFilePath, "rb");
+    if (in == NULL) {
+      fprintf(stderr, "Could not open possibility report output bin file %s: %s\n",
+        entryFilePath, strerror(errno));
+      exit(1);
+    }
+    int batch, numBatches = 0;
+    uint64_t possibleOutcomes = 0;
+    uint32_t storedBracketCount = 0;
+    if (fread(&batch, sizeof(batch), 1, in) != 1) {
+      fprintf(stderr, "ERROR: Could not read batch from %s\n",
+              entryFilePath);
+      exit(1);
+    }
+    if (fread(&numBatches, sizeof(numBatches), 1, in) != 1) {
+      fprintf(stderr, "ERROR: Could not read numBatches from %s\n",
+              entryFilePath);
+      exit(1);
+    }
+    if (fread(&possibleOutcomes, sizeof(possibleOutcomes), 1, in) != 1) {
+      fprintf(stderr, "ERROR: Could not read possibleOutcomes from %s\n",
+              entryFilePath);
+      exit(1);
+    }
+    if (fread(&storedBracketCount, sizeof(storedBracketCount), 1, in) != 1) {
+      fprintf(stderr, "ERROR: Could not read bracketCount from %s\n",
+              entryFilePath);
+      exit(1);
+    }
+    assert(storedBracketCount == bracketCount);
+    for (size_t i = 0; i < bracketCount; i++) {
+      PoolStats partialStat = {0};
+      char bracketName[POOL_BRACKET_NAME_LIMIT];
+      size_t len = fread(bracketName, 1, POOL_BRACKET_NAME_LIMIT, in);
+      assert(len == POOL_BRACKET_NAME_LIMIT);
+      if (fread(&partialStat, sizeof(PoolStats), 1, in) != 1) {
+        fprintf(stderr, "ERROR: Could not read PoolStats from %s\n",
+            entryFilePath);
+        exit(1);
+      }
+      PoolStats *aggStats = NULL;
+      for (size_t b = 0; b < bracketCount; b++) {
+        if (strcmp(stats[b].bracket->name, bracketName) == 0) {
+          aggStats = &stats[b];
+        }
+      }
+      assert(aggStats);
+      // combine partial stats with aggregate aggStats
+      aggStats->maxRank = (aggStats->maxRank < partialStat.maxRank ? partialStat.maxRank : aggStats->maxRank);
+      aggStats->minRank = (aggStats->minRank > partialStat.minRank ? partialStat.minRank : aggStats->minRank);
+      aggStats->maxScore = (aggStats->maxScore < partialStat.maxScore ? partialStat.maxScore : aggStats->maxScore);
+      aggStats->timesWon += partialStat.timesWon;
+      aggStats->timesTied += partialStat.timesTied;
+      for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
+        aggStats->champCounts[t] += partialStat.champCounts[t];
+      }
+    }
+    fclose(in);
+  }
+}
+
+POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches, bool restore) {
   if (poolBracketsCount == 0) {
     fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
@@ -705,8 +807,9 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
     printf(" possible outcomes\n");
     printf("%s: Possibilities Report\n", poolConfiguration.poolName);
   }
+
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
-  uint16_t bracketScores[POOL_BRACKET_CAPACITY];
+
   for (size_t i = 0; i < poolBracketsCount; i++) {
     stats[i].bracket = &poolBrackets[i];
     pool_bracket_score(&poolBrackets[i], &possibleBracket);
@@ -714,17 +817,21 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
     stats[i].minRank = poolBracketsCount + 1;
   }
 
-  PoolProgress prog;
-  prog.start = clock();
-  prog.total = possibleOutcomes;
-  prog.complete = 0;
-  prog.nextPercent = 0;
+  if (!restore) {
+    PoolProgress prog;
+    prog.start = clock();
+    prog.total = possibleOutcomes;
+    prog.complete = 0;
+    prog.nextPercent = 0;
 
-  pool_possibilities_dfs(
+    pool_possibilities_dfs(
       gamesLeft, gamesLeftCount, 0,
       &possibleBracket,
       stats, poolBracketsCount,
       progress ? &prog : NULL);
+  } else {
+    pool_restore_stats_from_files(stats, poolBracketsCount);
+  }
 
   qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
 
@@ -814,6 +921,26 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
       }
       printf("]");
       printf("}\n");
+      break;
+    case PoolFormatBin:
+      char filePath[2048];
+      sprintf(filePath, "%s/poss_%d_of_%d.bin", poolConfiguration.dirPath, batch, numBatches);
+      FILE * out = fopen(filePath, "wb");
+      if (out == NULL) {
+        fprintf(stderr, "Could not open possibility report output bin file %s: %s\n",
+          filePath, strerror(errno));
+        exit(1);
+      }
+      fwrite(&batch, sizeof(batch), 1, out);
+      fwrite(&numBatches, sizeof(numBatches), 1, out);
+      fwrite(&possibleOutcomes, sizeof(possibleOutcomes), 1, out);
+      fwrite(&poolBracketsCount, sizeof(poolBracketsCount), 1, out);
+      for (size_t i = 0; i < poolBracketsCount; i++) {
+        PoolStats *stat = &stats[i];
+        fwrite(stat->bracket->name, 1, POOL_BRACKET_NAME_LIMIT, out);
+        fwrite(stat, sizeof(PoolStats), 1, out);
+      }
+      fclose(out);
       break;
     case PoolFormatInvalid:
     default:

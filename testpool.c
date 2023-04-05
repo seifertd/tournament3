@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
   pool_score_report();
   printf("Tournament Results:\n");
   pool_print_entry(&poolTournamentBracket);
-  pool_possibilities_report(PoolFormatText, true, 0, 1);
+  pool_possibilities_report(PoolFormatText, true, 0, 1, false);
 
 #if 0
   printf("Running Scoring Benchmark:\n");

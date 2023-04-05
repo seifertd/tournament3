@@ -19,12 +19,13 @@ bool is_power_of_2(int n) {
 }
 
 void usage(char *progName) {
-  fprintf(stderr, "Usage: %s [-hp] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR COMMAND\n", progName);
+  fprintf(stderr, "Usage: %s [-hpr] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR COMMAND\n", progName);
   fprintf(stderr, "   -h get extended help\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
   fprintf(stderr, "   Options for the possibilities ('poss') report:\n");
   fprintf(stderr, "   -p show progress and ETA for possibilities report\n");
-  fprintf(stderr, "   -f FMT: Format of report, one of 'text' or 'json'\n");
+  fprintf(stderr, "   -r generate possibilities report from saved bin files\n");
+  fprintf(stderr, "   -f FMT: Format of report, one of 'text', 'bin' or 'json'\n");
   fprintf(stderr, "   -b BATCH: Batch number for multi process possibilities, should be less than numBatches\n");
   fprintf(stderr, "   -n NUMBATCHES: Number of batches, must be a power of 2\n");
   fprintf(stderr, "   COMMAND: report to run\n");
@@ -76,10 +77,14 @@ int main(int argc, char *argv[]) {
   bool initialized = false;
   PoolReportFormat format = PoolFormatText;
   bool progress = false;
+  bool restore = false;
   int batch = 0;
   int numBatches = 1;
-  while ((opt = getopt(argc, argv, "d:f:b:n:ph")) != -1) {
+  while ((opt = getopt(argc, argv, "d:f:b:n:prh")) != -1) {
     switch (opt) {
+      case 'r':
+        restore = true;
+        break;
       case 'p':
         progress = true;
         break;
@@ -135,7 +140,7 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(command, "scores") == 0) {
     pool_score_report();
   } else if (strcmp(command, "poss") == 0) {
-    pool_possibilities_report(format, progress, batch, numBatches);
+    pool_possibilities_report(format, progress, batch, numBatches, restore);
   } else if (strcmp(command, "entries") == 0) {
     pool_entries_report();
   } else if (strcmp(command, "results") == 0) {

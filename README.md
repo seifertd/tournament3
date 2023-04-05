@@ -171,46 +171,56 @@ We can parallelize the above to a power of 2 processes/servers/cores/etc if the
 current tournament bracket is advanced and the algo run from there, then results
 collected and combined.
 
-2 cores:
-  * 1st core assumes game 1 winner is team1
-  * 2nd core assumes game 1 winner is team2
+2 runners:
+  * 1st runner assumes game 1 winner is team1
+  * 2nd runner assumes game 1 winner is team2
 
-4 cores:
-  * 1st core assumes game 1 winner is team1, game 2 winner is team1
-  * 2nd core assumes game 1 winner is team2, game 2 winner is team1
-  * 3nd core assumes game 1 winner is team1, game 2 winner is team2
-  * 4th core assumes game 1 winner is team2, game 2 winner is team2
+4 runners:
+  * 1st runner assumes game 1 winner is team1, game 2 winner is team1
+  * 2nd runner assumes game 1 winner is team2, game 2 winner is team1
+  * 3nd runner assumes game 1 winner is team1, game 2 winner is team2
+  * 4th runner assumes game 1 winner is team2, game 2 winner is team2
 
-8 cores:
-  * 1st core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team1
-  * 2nd core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team1
-  * 3nd core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team1
-  * 4th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team1
-  * 5th core assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team2
-  * 6th core assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team2
-  * 7th core assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team2
-  * 8th core assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team2
+8 runners:
+  * 1st runner assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team1
+  * 2nd runner assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team1
+  * 3nd runner assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team1
+  * 4th runner assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team1
+  * 5th runner assumes game 1 winner is team1, game 2 winner is team1, game 3 winner is team2
+  * 6th runner assumes game 1 winner is team2, game 2 winner is team1, game 3 winner is team2
+  * 7th runner assumes game 1 winner is team1, game 2 winner is team2, game 3 winner is team2
+  * 8th runner assumes game 1 winner is team2, game 2 winner is team2, game 3 winner is team2
 
 etc
 
-Example run with 8 processes:
+Example run with 8 processes, collecting results into binary files in the pool directory:
 
 ```console
-./pool -d test/fifty_entries -b 0 -n 8 -f json poss | jq . > /tmp/p1.json &
-./pool -d test/fifty_entries -b 1 -n 8 -f json poss | jq . > /tmp/p2.json &
-./pool -d test/fifty_entries -b 2 -n 8 -f json poss | jq . > /tmp/p3.json &
-./pool -d test/fifty_entries -b 3 -n 8 -f json poss | jq . > /tmp/p4.json &
-./pool -d test/fifty_entries -b 4 -n 8 -f json poss | jq . > /tmp/p5.json &
-./pool -d test/fifty_entries -b 5 -n 8 -f json poss | jq . > /tmp/p6.json &
-./pool -d test/fifty_entries -b 6 -n 8 -f json poss | jq . > /tmp/p7.json &
-./pool -d test/fifty_entries -b 7 -n 8 -f json poss | jq . > /tmp/p8.json &
+./pool -d test/fifty_entries -b 0 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 1 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 2 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 3 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 4 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 5 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 6 -n 8 -f bin poss &
+./pool -d test/fifty_entries -b 7 -n 8 -f bin poss &
 ```
 
-Then the json files have to be combined and code written to generate a report based
-on it.
+When `-f bin` is used, a binary file with partial stats is writtin to the pool directory.
+The partial stats file names are `poss_N_of_M.bin`.
 
-TODO: investigate using relative pointers in the stats data and use a binary format
-for saving and restoring the statistics.
+After producing the files (possibly on different machines), collect them into the
+pool directory, then generate the possibilities report:
+
+```console
+./pool -d test/fifty_entries -r poss
+```
+
+Using this method and a compute cloud of 8,192 machines, we can generate a possibilities
+report after Day 1 is complete in less than 1 hour. LOL.
+
+On a single machine, the best you are going to be able to do is generate the report
+in less than 1 hour by running 8 processes once there are about 38 teams remaining.
 
 Game Index
 -----------
