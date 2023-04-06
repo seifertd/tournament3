@@ -216,6 +216,18 @@ typedef struct {
   uint64_t count;
 } PoolTeamWins;
 
+POOLDEF int LOG2(int n) {
+  if (n <= 0) {
+    return 0;
+  }
+  int val = -1;
+  while (n) {
+    val++;
+    n >>= 1;
+  }
+  return val;
+}
+
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength) {
   if (num < 10000) {
     fprintf(f_stream, "%*ld", fieldLength+1, num);
@@ -557,7 +569,7 @@ POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
             numBatches, *gamesLeftCount);
     exit(1);
   }
-  int gamesToDecide = numBatches / 2;
+  int gamesToDecide = LOG2(numBatches);
   for (int g = 0; g < gamesToDecide; g++) {
     uint8_t round = pool_round_of_game(gamesLeft[g]);
     uint8_t team1, team2 = 0;

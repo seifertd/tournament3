@@ -26,14 +26,14 @@ Tex
 Kan
 Ark
 StM
-#UCn
-#TCU
-#Gon
-#NWn
-#UCL
+UCn
+TCU
+Gon
+NWn
+UCL
 # Round 2
-#SDS
-#Ten
+SDS
+Ten
 #Pri
 #Ark
 #Hou
