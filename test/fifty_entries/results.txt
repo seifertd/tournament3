@@ -34,7 +34,7 @@ Wis
 # Round 2
 foe
 can
-#wid
-#mor
-#pos
-#fan
+wid
+mor
+pos
+fan
