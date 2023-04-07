@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -119,6 +120,7 @@ static uint8_t poolGameNumber[POOL_NUM_TEAMS][POOL_ROUNDS] = {
 typedef struct {
   uint8_t winners[POOL_NUM_TEAMS];
   uint8_t tieBreak;
+  uint8_t tieBreakDiff;
   char name[POOL_BRACKET_NAME_LIMIT];
   uint32_t score;
   uint32_t maxScore;
@@ -203,6 +205,8 @@ static PoolConfiguration poolConfiguration = {0};
 #endif // POOL_C_ IMPLEMENTATION
 
 #ifdef POOL_IMPLEMENTATION
+
+#define UNUSED(x) (void)x
 
 typedef struct {
   clock_t start;
@@ -328,6 +332,9 @@ POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket) {
 }
 
 POOLDEF uint32_t pool_basic_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
+  UNUSED(bracket);
+  UNUSED(results);
+  UNUSED(game);
   return poolConfiguration.roundMultipliers[round];
 }
 POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
@@ -343,6 +350,7 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
   return poolConfiguration.roundMultipliers[round] + bonus;
 }
 POOLDEF uint32_t pool_upset_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
+  UNUSED(results);
   uint8_t winner = bracket->winners[game];
   PoolTeam *winningTeam = &poolTeams[winner-1];
   return poolConfiguration.roundMultipliers[round] + winningTeam->seed;
@@ -394,6 +402,9 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
       }
     }
   }
+  if (results->tieBreak > 0) {
+    bracket->tieBreakDiff = abs(results->tieBreak - bracket->tieBreak);
+  }
 }
 
 POOLDEF void pool_initialize(const char *dirPath) {
@@ -423,12 +434,12 @@ POOLDEF void pool_initialize(const char *dirPath) {
 
   // Read results
   sprintf(filePath, "%s/%s", dirPath, POOL_RESULTS_FILE_NAME);
-  uint8_t gamesPlayed = pool_read_entry_to_bracket(filePath, "Tourney", 7, &poolTournamentBracket, true);
+  pool_read_entry_to_bracket(filePath, "Tourney", 7, &poolTournamentBracket, true);
 
   closedir(dfd);
 }
 
-#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\e[9m" f "\e[0m" : f )
+#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m" f "\033[0m" : f )
 
 POOLDEF void pool_print_entry(PoolBracket *bracket) {
   printf("%s\n", bracket->name);
@@ -497,17 +508,24 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
   }
   printf("\n");
   uint8_t w = bracket->winners[62];
-  uint8_t pw = poolTournamentBracket.winners[62];
   printf("6: Champion: %s%s%s Tie Breaker: %d\n",
-    ( poolTeams[w-1].eliminated ? "\e[9m" : "" ),
+    ( poolTeams[w-1].eliminated ? "\033[9m" : "" ),
     POOL_TEAM_NAME(w),
-    ( poolTeams[w-1].eliminated ? "\e[0m" : "" ),
+    ( poolTeams[w-1].eliminated ? "\033[0m" : "" ),
     bracket->tieBreak);
   printf("\n\n");
 }
 
 POOLDEF int pool_score_cmpfunc (const void * a, const void * b) {
-  return ( ((PoolBracket*)b)->score - ((PoolBracket*)a)->score );
+  PoolBracket *bracket_b = (PoolBracket *) b;
+  PoolBracket *bracket_a = (PoolBracket *) a;
+  int diff = bracket_b->score - bracket_a->score;
+  if (diff == 0) {
+    if (poolTournamentBracket.tieBreak > 0) {
+      diff = bracket_a->tieBreakDiff - bracket_b->tieBreakDiff;
+    }
+  }
+  return diff;
 }
 
 POOLDEF int pool_champ_counts_cmpfunc (const void * a, const void * b) {
@@ -528,19 +546,14 @@ POOLDEF int pool_stats_possible_score_cmpfunc (const void * a, const void * b) {
 POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
   PoolStats *aStats = (PoolStats *) a;
   PoolStats *bStats = (PoolStats *) b;
-  int64_t cmp = ( bStats->timesWon - aStats->timesWon );
+  int cmp = ( bStats->timesWon - aStats->timesWon );
   if (cmp == 0) {
     cmp = bStats->timesTied - aStats->timesTied;
     if (cmp == 0) {
       cmp = bStats->maxScore - aStats->maxScore;
     }
   }
-  if (cmp < 0) {
-    return -1;
-  } else if (cmp > 0) {
-    return 1;
-  }
-  return 0;
+  return cmp;
 }
 
 
@@ -597,7 +610,7 @@ POOLDEF void pool_possibilities_dfs(
   if (game >= gamesLeftCount) {
     pool_inc_progress(prog);
     PoolScoreStats copyStats[numBrackets];
-    for (int i = 0; i < numBrackets; i++) {
+    for (uint32_t i = 0; i < numBrackets; i++) {
       copyStats[i].stats = &stats[i];
       copyStats[i].possibleScore = stats[i].possibleScore;
     }
@@ -606,7 +619,7 @@ POOLDEF void pool_possibilities_dfs(
     uint32_t lastScore = 0;
     uint16_t lastRank = 0;
     uint8_t champ = possibleBracket->winners[POOL_NUM_GAMES - 1] - 1;
-    for (int i = 0; i < numBrackets; i++) {
+    for (uint32_t i = 0; i < numBrackets; i++) {
       PoolStats *stat = copyStats[i].stats;
       uint16_t realRank = i + 1;
       if (i == 0 || stat->possibleScore != lastScore) {
@@ -708,7 +721,7 @@ POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCo
       // .. do nothing?
       continue;
     }
-    if ( (stbuf.st_mode & S_IFMT ) == S_IFDIR ) {
+    if ( S_ISDIR(stbuf.st_mode) ) {
       // skip directories
       continue;
     }
@@ -808,6 +821,11 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
       gamesLeft[gamesLeftCount] = g;
       gamesLeftCount += 1;
     }
+  }
+
+  if (gamesLeftCount == 0) {
+    fprintf(stderr, ">>>> There are no games left in this pool. <<<<\n");
+    return;
   }
 
   // If we are running a batch advance possible bracket accordingly
@@ -976,30 +994,48 @@ POOLDEF void pool_score_report() {
   uint32_t lastScore = 0;
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
   printf("%s: Leaderboard\n", poolConfiguration.poolName);
-  printf("                 Curr  Max  Champ/        Round Scores\n");
-  printf("Rank    Name    Score Score  Live?   1   2   3   4   5   6\n");
-  printf("---- ---------- ----- ----- ------ --- --- --- --- --- ---\n");
+  if (poolTournamentBracket.winners[62] > 0) {
+    printf("Champion: %s Final Points: ", POOL_TEAM_NAME(poolTournamentBracket.winners[62]));
+    if (poolTournamentBracket.tieBreak > 0) {
+      printf("%d\n", poolTournamentBracket.tieBreak);
+    } else {
+      printf("UNK\n");
+    }
+  }
+  printf("                 Curr  Max  Champ/  Tie            Round Scores\n");
+  printf("Rank    Name    Score Score  Live? Break Diff  1   2   3   4   5   6\n");
+  printf("---- ---------- ----- ----- ------ ----- ---- --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
     if (i > 0) {
-      if (poolBrackets[i].score != lastScore) {
+      if (poolBrackets[i].score != lastScore || poolTournamentBracket.tieBreak > 0) {
         rank = i + 1;
         lastScore = poolBrackets[i].score;
       }
+    } else {
+      lastScore = poolBrackets[i].score;
     }
-    printf("%4d %10.10s %5d %5d  %3s %c %3d %3d %3d %3d %3d %3d\n",
-        rank,
-        poolBrackets[i].name,
-        poolBrackets[i].score,
-        poolBrackets[i].maxScore,
-        POOL_TEAM_SHORT_NAME(poolBrackets[i].winners[62]),
-        poolTeams[poolBrackets[i].winners[62] - 1].eliminated ? 'N' : 'Y',
-        poolBrackets[i].roundScores[0],
-        poolBrackets[i].roundScores[1],
-        poolBrackets[i].roundScores[2],
-        poolBrackets[i].roundScores[3],
-        poolBrackets[i].roundScores[4],
-        poolBrackets[i].roundScores[5]
-        );
+    printf("%4d %10.10s %5d %5d  %3s %c %5d ",
+      rank,
+      poolBrackets[i].name,
+      poolBrackets[i].score,
+      poolBrackets[i].maxScore,
+      POOL_TEAM_SHORT_NAME(poolBrackets[i].winners[62]),
+      poolTeams[poolBrackets[i].winners[62] - 1].eliminated ? 'N' : 'Y',
+      poolBrackets[i].tieBreak
+    );
+    if (poolTournamentBracket.tieBreak > 0) {
+      printf("%4d ", poolBrackets[i].tieBreakDiff);
+    } else {
+      printf("  ?  ");
+    }
+    printf("%3d %3d %3d %3d %3d %3d\n",
+      poolBrackets[i].roundScores[0],
+      poolBrackets[i].roundScores[1],
+      poolBrackets[i].roundScores[2],
+      poolBrackets[i].roundScores[3],
+      poolBrackets[i].roundScores[4],
+      poolBrackets[i].roundScores[5]
+    );
   }
 }
 
@@ -1108,7 +1144,7 @@ POOLDEF void pool_add_entries_in_dir(const char *dirPath) {
       // .. do nothing?
       continue;
     }
-    if ( (stbuf.st_mode & S_IFMT ) == S_IFDIR ) {
+    if ( S_ISDIR(stbuf.st_mode) ) {
       // skip directories
       continue;
     }
@@ -1150,6 +1186,7 @@ POOLDEF void pool_read_config_file(const char *filePath) {
   poolConfiguration.roundMultipliers[4] = 16;
   poolConfiguration.roundMultipliers[5] = 32;
   poolConfiguration.scorerType = PoolScorerBasic;
+  poolConfiguration.poolScorer = pool_get_scorer_function(poolConfiguration.scorerType);
 
   FILE *f = fopen(filePath, "rb");
   if (f == NULL) {
@@ -1158,7 +1195,6 @@ POOLDEF void pool_read_config_file(const char *filePath) {
     return;
   }
   char buffer[1024];
-  bool readTitle, readMultipliers, readName = false;
   char * line = fgets(buffer, 1023, f);
   while (line != NULL) {
     buffer[strlen(buffer)- 1] = 0;
@@ -1166,7 +1202,7 @@ POOLDEF void pool_read_config_file(const char *filePath) {
       strncpy(poolConfiguration.poolName, line + 5, POOL_NAME_LIMIT);
     }
     if (strncmp(line, "roundMultipliers=", strlen("roundMultipliers=")) == 0) {
-      if (sscanf(line, "roundMultipliers=%d,%d,%d,%d,%d,%d",
+      if (sscanf(line, "roundMultipliers=%u,%u,%u,%u,%u,%u",
         &poolConfiguration.roundMultipliers[0],
         &poolConfiguration.roundMultipliers[1],
         &poolConfiguration.roundMultipliers[2],
