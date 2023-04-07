@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+shi
+par
+dis
+ane
+bar
+spl
+Pai
+mor
+pyl
+pos
+ext
+fan
+aba
+end
+chu
+max
+Mao
+sid
+Cha
+hea
+gri
+moo
+Tor
+Cat
+lan
+cla
+sli
+slu
+pkd
+sec
+Wis
+# ROUND: 2
+ram
+dis
+ane
+spl
+mor
+ext
+aba
+chu
+max
+Cha
+hea
+Tor
+lan
+cla
+slu
+Wis
+# ROUND: 3
+dis
+spl
+ext
+aba
+Cha
+Tor
+lan
+slu
+# ROUND: 4
+dis
+aba
+Cha
+lan
+# ROUND: 5
+aba
+lan
+# ROUND: 6
+lan
+136

@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+shi
+can
+dis
+ane
+bar
+spl
+cir
+Sau
+dee
+pos
+sac
+fan
+aba
+end
+chu
+dum
+Mao
+sid
+Cha
+hea
+gri
+plo
+pin
+gre
+sky
+Big
+mas
+slu
+rap
+ten
+amp
+# ROUND: 2
+sho
+can
+ane
+cir
+Sau
+pos
+fan
+chu
+dum
+sid
+hea
+plo
+sky
+mas
+slu
+ten
+# ROUND: 3
+can
+ane
+pos
+fan
+dum
+hea
+sky
+ten
+# ROUND: 4
+can
+fan
+dum
+ten
+# ROUND: 5
+can
+dum
+# ROUND: 6
+dum
+111

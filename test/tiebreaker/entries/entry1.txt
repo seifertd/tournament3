@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+ane
+wid
+spl
+Pai
+mor
+dee
+pos
+ext
+fan
+Cle
+end
+mus
+max
+Mao
+ove
+wor
+coe
+gri
+plo
+Tor
+gre
+lan
+cla
+sli
+san
+rap
+sec
+amp
+# ROUND: 2
+ram
+par
+ane
+Pai
+mor
+pos
+Cle
+end
+max
+wor
+gri
+plo
+lan
+sli
+san
+sec
+# ROUND: 3
+ram
+Pai
+pos
+end
+max
+gri
+lan
+sec
+# ROUND: 4
+Pai
+end
+max
+lan
+# ROUND: 5
+end
+lan
+# ROUND: 6
+lan
+122

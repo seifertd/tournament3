@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+foe
+can
+dis
+Pru
+bar
+opi
+cir
+Sau
+pyl
+bla
+ext
+fan
+Cle
+end
+chu
+max
+dur
+sid
+wor
+hea
+sca
+plo
+pin
+Cat
+sky
+cla
+sli
+slu
+pkd
+ten
+amp
+# ROUND: 2
+foe
+dis
+bar
+cir
+pyl
+ext
+Cle
+end
+dur
+wor
+hea
+pin
+Cat
+cla
+pkd
+ten
+# ROUND: 3
+foe
+cir
+ext
+end
+dur
+hea
+Cat
+ten
+# ROUND: 4
+foe
+end
+dur
+ten
+# ROUND: 5
+end
+ten
+# ROUND: 6
+ten
+109

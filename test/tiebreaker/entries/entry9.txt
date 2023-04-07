@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+shi
+par
+dis
+ane
+wid
+opi
+cir
+mor
+dee
+pos
+sac
+blo
+Cle
+end
+mus
+dum
+dur
+ove
+Cha
+hea
+gri
+moo
+Tor
+Cat
+lan
+Big
+sli
+san
+rap
+sec
+amp
+# ROUND: 2
+ram
+par
+ane
+cir
+mor
+pos
+Cle
+mus
+dum
+Cha
+hea
+Tor
+Cat
+sli
+san
+amp
+# ROUND: 3
+ram
+ane
+mor
+mus
+Cha
+Tor
+Cat
+san
+# ROUND: 4
+ram
+mus
+Cha
+san
+# ROUND: 5
+ram
+Cha
+# ROUND: 6
+Cha
+119

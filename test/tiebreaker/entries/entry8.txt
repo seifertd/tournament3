@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+foe
+can
+mar
+Pru
+wid
+spl
+Pai
+mor
+dee
+pos
+sac
+blo
+Cle
+wil
+chu
+max
+Mao
+sid
+wor
+coe
+gri
+plo
+pin
+gre
+lan
+Big
+sli
+san
+rap
+sec
+Wis
+# ROUND: 2
+sho
+can
+Pru
+Pai
+dee
+pos
+Cle
+chu
+Mao
+sid
+gri
+pin
+lan
+sli
+rap
+Wis
+# ROUND: 3
+can
+Pru
+pos
+Cle
+sid
+pin
+sli
+rap
+# ROUND: 4
+can
+pos
+pin
+rap
+# ROUND: 5
+pos
+rap
+# ROUND: 6
+rap
+102
