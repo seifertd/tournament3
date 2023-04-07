@@ -1,7 +1,12 @@
 #!/bin/bash -xe
 
 CC=${CC:-cc}
-CFLAGS="-Wall -Wextra -Wno-stringop-truncation -pedantic -std=c99 -O3"
+
+if [ "${CC}" = "clang" ]; then
+  CFLAGS="-Wall -Wextra -Wno-string-concatenation -pedantic -std=c99 -O3"
+else
+  CFLAGS="-Wall -Wextra -Wno-stringop-truncation -pedantic -std=c99 -O3"
+fi
 
 rm -rf pool testpool benchmark
 ${CC} ${CFLAGS} -o pool pool.c

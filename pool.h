@@ -163,10 +163,10 @@ typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerSeedDiff } PoolS
 typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson, PoolFormatBin } PoolReportFormat;
 
 POOLDEF void pool_initialize(const char *dirPath);
-POOLDEF void pool_team_report();
+POOLDEF void pool_team_report(void);
 POOLDEF void pool_add_entries_in_dir(const char *dirPath);
-POOLDEF void pool_entries_report();
-POOLDEF void pool_score_report();
+POOLDEF void pool_entries_report(void);
+POOLDEF void pool_score_report(void);
 POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
 POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches, bool restore);
 POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCount);
@@ -557,7 +557,7 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
 }
 
 
-POOLDEF void pool_team_report() {
+POOLDEF void pool_team_report(void) {
   printf("%s: Team Report\n", poolConfiguration.poolName);
   printf("%2s %32s %5s %4s %11s\n", "No", "Name", "Short", "Seed", "Eliminated?");
   printf("%2s %32s %5s %4s %11s\n", "--", "----", "-----", "----", "-----------");
@@ -981,7 +981,7 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
   }
 }
 
-POOLDEF void pool_score_report() {
+POOLDEF void pool_score_report(void) {
   if (poolBracketsCount == 0) {
     fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
@@ -1047,7 +1047,7 @@ POOLDEF int pool_name_cmpfunc (const void * a, const void * b) {
   return strcmp(alower, blower);
 }
 
-POOLDEF void pool_entries_report() {
+POOLDEF void pool_entries_report(void) {
   printf("%s: Entries Report\n", poolConfiguration.poolName);
   pool_print_entry(&poolTournamentBracket);
   qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_name_cmpfunc);

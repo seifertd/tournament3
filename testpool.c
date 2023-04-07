@@ -4,7 +4,7 @@
 #define POOL_IMPLEMENTATION
 #include "pool.h"
 
-int main() {
+int main(void) {
   pool_initialize("test/fifty_entries");
   printf("Initialized pool, there are %d entries\n", poolBracketsCount);
   printf("Pool Name: %s\n", poolConfiguration.poolName);

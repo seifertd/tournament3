@@ -37,7 +37,7 @@ void usage(char *progName) {
   fprintf(stderr, "     poss: show possiblities stats scores. Don't run until round 1 is over.\n");
 }
 
-void help() {
+void help(void) {
   fprintf(stderr, "\nThe pool configuration directory DIR must contain the following:\n");
   fprintf(stderr, "     config.txt: file containing basic configuration in name=value format\n");
   fprintf(stderr, "          name: The name of the pool, default: 'NCAA Tournament'\n");
