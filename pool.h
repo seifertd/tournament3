@@ -230,7 +230,7 @@ POOLDEF int LOG2(int n) {
 
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength) {
   if (num < 10000) {
-    fprintf(f_stream, "%*ld", fieldLength+1, num);
+    fprintf(f_stream, "%*" PRIu64, fieldLength+1, num);
     return;
   }
   static uint64_t factors[5] = {1e15, 1e12, 1e9, 1e6, 1e3};
@@ -273,7 +273,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
       uint64_t hours = eta / 3600;
       uint64_t minutes = (eta - hours * 3600) / 60;
       uint64_t secs = eta % 60;
-      fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ETA: %02ld:%02ld:%02ld\r", bps, perc, hours, minutes, secs);
+      fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ETA: %02" PRIu64 ":%02" PRIu64 ":%02" PRIu64 "\r", bps, perc, hours, minutes, secs);
       fflush(stdout);
       prog->nextPercent += 1;
     }
@@ -284,7 +284,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
     uint64_t hours = elapsed_t / 3600;
     uint64_t minutes = (elapsed_t - hours * 3600) / 60;
     uint64_t secs = elapsed_t % 60;
-    fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ELAPSED: %02ld:%02ld:%02ld\n", bps, 100.0, hours, minutes, secs);
+    fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ELAPSED: %02" PRIu64 ":%02" PRIu64 ":%02" PRIu64 "\n", bps, 100.0, hours, minutes, secs);
     fflush(stdout);
   }
 }
@@ -788,6 +788,8 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
     return;
   }
 
+  char filePath[2048];
+
   // Set up posible bracket
   PoolBracket possibleBracket = {
     .winners = {0},
@@ -895,7 +897,7 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
       printf("{");
       printf("\"pool\": {");
       printf("\"name\": \"%s\",", poolConfiguration.poolName);
-      printf("\"outcomes\": %lu,", possibleOutcomes);
+      printf("\"outcomes\": %" PRIu64 ",", possibleOutcomes);
       printf("\"batch\": %d,", batch);
       printf("\"numBatches\": %d", numBatches);
       printf("},");
@@ -911,8 +913,8 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
         printf("\"currentScore\": %d,", stat->bracket->score);
         printf("\"maxScore\": %d,", stat->maxScore);
         printf("\"winChance\": %.6f,", winChance);
-        printf("\"timesWon\": %lu,", stat->timesWon);
-        printf("\"timesTied\": %lu,", stat->timesTied);
+        printf("\"timesWon\": %" PRIu64 ",", stat->timesWon);
+        printf("\"timesTied\": %" PRIu64 ",", stat->timesTied);
         printf("\"champs\": [");
         bool first = true;
         for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
@@ -923,7 +925,7 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
             printf("\"number\": %ld,", t + 1);
             printf("\"shortName\": \"%s\"", POOL_TEAM_SHORT_NAME(t + 1));
             printf("},");
-            printf("\"timesWon\": %lu", stat->champCounts[t]);
+            printf("\"timesWon\": %" PRIu64, stat->champCounts[t]);
             printf("}");
             first = false;
           }
@@ -935,7 +937,6 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
       printf("}\n");
       break;
     case PoolFormatBin:
-      char filePath[2048];
       sprintf(filePath, "%s/poss_%d_of_%d.bin", poolConfiguration.dirPath, batch, numBatches);
       FILE * out = fopen(filePath, "wb");
       if (out == NULL) {
@@ -1035,7 +1036,7 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
         POOL_BRACKET_NAME_LIMIT, filePath);
     exit(1);
   }
-  uint8_t buffer[1024];
+  char buffer[1024];
   strncpy(bracket->name, entryName, entryNameSize);
   strncpy(bracket->name + entryNameSize, "", 1);
   char * line = fgets(buffer, 1023, f);
@@ -1156,7 +1157,7 @@ POOLDEF void pool_read_config_file(const char *filePath) {
     fprintf(stderr, "[WARN] No config.txt in pool directory, using defaults.\n");
     return;
   }
-  uint8_t buffer[1024];
+  char buffer[1024];
   bool readTitle, readMultipliers, readName = false;
   char * line = fgets(buffer, 1023, f);
   while (line != NULL) {
@@ -1200,7 +1201,7 @@ POOLDEF void pool_read_team_file(const char *filePath) {
         filePath, strerror(errno));
     exit(1);
   }
-  uint8_t buffer[1024];
+  char buffer[1024];
   for (uint8_t i = 0; i < POOL_NUM_TEAMS; i++) {
     if (fgets(buffer, 1023, f) == NULL) {
       fprintf(stderr, "Could not read a line from file %s: %s\n",

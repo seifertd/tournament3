@@ -32,8 +32,8 @@ Gon
 NWn
 UCL
 # Round 2
-SDS
-Ten
+#SDS
+#Ten
 #Pri
 #Ark
 #Hou
