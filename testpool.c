@@ -4,7 +4,7 @@
 #define POOL_IMPLEMENTATION
 #include "pool.h"
 
-int main(int argc, const char* argv[]) {
+int main() {
   pool_initialize("test/fifty_entries");
   printf("Initialized pool, there are %d entries\n", poolBracketsCount);
   printf("Pool Name: %s\n", poolConfiguration.poolName);
@@ -43,4 +43,5 @@ int main(int argc, const char* argv[]) {
   printf("%d scores of %d brackets in %f seconds, %f scores/sec\n",
       iters, pool_brackets_count, total_t, scores_per_sec);
 #endif
+  return 0;
 }

@@ -1,10 +1,11 @@
 #!/bin/bash -xe
 
 CC=${CC:-cc}
+CFLAGS="-Wall -Wextra -Wno-stringop-truncation -pedantic -std=c99 -O3"
 
 rm -rf pool testpool benchmark
-${CC} -O3 -o pool pool.c
-${CC} -O3 -o testpool testpool.c
-${CC} -O3 -o benchmark benchmark.c
+${CC} ${CFLAGS} -o pool pool.c
+${CC} ${CFLAGS} -o testpool testpool.c
+${CC} ${CFLAGS} -o benchmark benchmark.c
 
 

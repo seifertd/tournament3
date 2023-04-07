@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <getopt.h>
 #include <unistd.h>
 #include <stdbool.h>
 
