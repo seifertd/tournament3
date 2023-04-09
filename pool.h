@@ -162,6 +162,7 @@ typedef struct {
 typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerSeedDiff } PoolScorerType;
 typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson, PoolFormatBin } PoolReportFormat;
 
+POOLDEF void pool_defaults();
 POOLDEF void pool_initialize(const char *dirPath);
 POOLDEF void pool_team_report(void);
 POOLDEF void pool_add_entries_in_dir(const char *dirPath);
@@ -181,6 +182,7 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
     PoolBracket *bracket, bool recordEliminations);
 POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results);
 POOLDEF uint8_t pool_round_of_game(uint8_t gameNum);
+POOLDEF void pool_teams_of_game(uint8_t gameNum, uint8_t round, PoolBracket *bracket, uint8_t *team1, uint8_t *team2);
 typedef uint32_t (*PoolScorerFunction)(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_basic_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_upset_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
@@ -189,6 +191,7 @@ POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType);
 POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket);
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength);
 
+#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m" f "\033[0m" : f )
 #define POOL_TEAM_SHORT_NAME(w) ( w == 0 ? "Unk" : poolTeams[w-1].shortName )
 #define POOL_TEAM_NAME(w) ( w == 0 ? "Unknown" : poolTeams[w-1].name )
 
@@ -341,12 +344,12 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
   uint8_t winner = bracket->winners[game];
   uint8_t bracketLoser = pool_loser_of_game(game, bracket);
   uint8_t resultsLoser = pool_loser_of_game(game, results);
-  if (bracketLoser != resultsLoser) {
+  if (resultsLoser != 0 && bracketLoser != resultsLoser) {
     return poolConfiguration.roundMultipliers[round];
   }
   PoolTeam *winningTeam = &poolTeams[winner-1];
   PoolTeam *losingTeam = &poolTeams[bracketLoser-1];
-  uint8_t bonus = winningTeam->seed > losingTeam->seed ? winningTeam->seed - losingTeam->seed : 0;
+  uint8_t bonus = !losingTeam->eliminated && winningTeam->seed > losingTeam->seed ? winningTeam->seed - losingTeam->seed : 0;
   return poolConfiguration.roundMultipliers[round] + bonus;
 }
 POOLDEF uint32_t pool_upset_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
@@ -407,6 +410,19 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
   }
 }
 
+POOLDEF void pool_defaults() {
+  // Set defaults
+  strcpy(poolConfiguration.poolName, "NCAA Tournament");
+  poolConfiguration.roundMultipliers[0] = 1;
+  poolConfiguration.roundMultipliers[1] = 2;
+  poolConfiguration.roundMultipliers[2] = 4;
+  poolConfiguration.roundMultipliers[3] = 8;
+  poolConfiguration.roundMultipliers[4] = 16;
+  poolConfiguration.roundMultipliers[5] = 32;
+  poolConfiguration.scorerType = PoolScorerBasic;
+  poolConfiguration.poolScorer = pool_get_scorer_function(poolConfiguration.scorerType);
+}
+
 POOLDEF void pool_initialize(const char *dirPath) {
   DIR *dfd;
 
@@ -439,7 +455,6 @@ POOLDEF void pool_initialize(const char *dirPath) {
   closedir(dfd);
 }
 
-#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m" f "\033[0m" : f )
 
 POOLDEF void pool_print_entry(PoolBracket *bracket) {
   printf("%s\n", bracket->name);
@@ -621,6 +636,11 @@ POOLDEF void pool_possibilities_dfs(
     uint8_t champ = possibleBracket->winners[POOL_NUM_GAMES - 1] - 1;
     for (uint32_t i = 0; i < numBrackets; i++) {
       PoolStats *stat = copyStats[i].stats;
+      if (strcmp(stat->bracket->name, "entry32") == 0 && stat->possibleScore == 202) {
+        printf("\n\nentry 32 possible score 202, possible bracket:\n");
+        pool_print_entry(possibleBracket);
+        printf("\n\n");
+      }
       uint16_t realRank = i + 1;
       if (i == 0 || stat->possibleScore != lastScore) {
         lastRank = realRank;
@@ -1177,16 +1197,8 @@ POOLDEF uint8_t pool_team_num_for_short_name(const char *shortName) {
 }
 
 POOLDEF void pool_read_config_file(const char *filePath) {
-  // Set defaults
-  strcpy(poolConfiguration.poolName, "NCAA Tournament");
-  poolConfiguration.roundMultipliers[0] = 1;
-  poolConfiguration.roundMultipliers[1] = 2;
-  poolConfiguration.roundMultipliers[2] = 4;
-  poolConfiguration.roundMultipliers[3] = 8;
-  poolConfiguration.roundMultipliers[4] = 16;
-  poolConfiguration.roundMultipliers[5] = 32;
-  poolConfiguration.scorerType = PoolScorerBasic;
-  poolConfiguration.poolScorer = pool_get_scorer_function(poolConfiguration.scorerType);
+  // set defaults
+  pool_defaults();
 
   FILE *f = fopen(filePath, "rb");
   if (f == NULL) {

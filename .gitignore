@@ -2,6 +2,7 @@
 /pool
 /testpool
 /benchmark
+/sd
 
 # Ignore score report .bin files
 *.bin

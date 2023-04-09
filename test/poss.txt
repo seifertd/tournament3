@@ -1,0 +1,77 @@
+#   sho shi can dis Pru wid spl Pai Sau pyl bla ext blo aba wil chu dum dur ove Cha coe gri moo pin gre lan cla sli slu rap sec Wis
+#   ram foe par mar ane bar opi cir mor dee pos sac fan Cle end mus max Mao sid wor hea sca plo Tor Cat sky Big mas san pkd ten amp
+#1: sho foe can dis ane wid spl cir mor dee pos ext fan aba wil mus dum dur ove Cha hea gri moo pin Cat lan cla mas slu rap ten Wis
+#2:   foe     can     wid     cir     mor     pos     fan     mus     dur     Cha     gri     pin     lan     mas     rap     Wis  
+#3:       can             cir             pos             mus             dur             pin             lan             Wis      
+#4:               cir                             pos                             pin                             lan              
+#5:                               pos                                                            lan                             
+#6: Champion: lane Tie Breaker: 0
+#Round 1
+sho
+foe
+can
+dis
+ane
+wid
+spl
+cir
+mor
+dee
+pos
+ext
+fan
+aba
+wil
+mus
+dum
+dur
+ove
+Cha
+hea
+gri
+moo
+pin
+Cat
+lan
+cla
+mas
+slu
+rap
+ten
+Wis
+#Round 2
+foe
+can
+wid
+cir
+mor
+pos
+fan
+mus
+dur
+Cha
+gri
+pin
+lan
+mas
+rap
+Wis
+#Round 3:
+can
+cir
+pos
+mus
+dur
+pin
+lan
+Wis
+# Round 4:
+cir
+pos
+pin
+lan
+# Round 5:
+pos
+lan
+#Champion:
+lan
