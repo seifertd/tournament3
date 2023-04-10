@@ -636,11 +636,6 @@ POOLDEF void pool_possibilities_dfs(
     uint8_t champ = possibleBracket->winners[POOL_NUM_GAMES - 1] - 1;
     for (uint32_t i = 0; i < numBrackets; i++) {
       PoolStats *stat = copyStats[i].stats;
-      if (strcmp(stat->bracket->name, "entry32") == 0 && stat->possibleScore == 202) {
-        printf("\n\nentry 32 possible score 202, possible bracket:\n");
-        pool_print_entry(possibleBracket);
-        printf("\n\n");
-      }
       uint16_t realRank = i + 1;
       if (i == 0 || stat->possibleScore != lastScore) {
         lastRank = realRank;
