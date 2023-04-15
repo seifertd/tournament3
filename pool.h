@@ -1107,7 +1107,7 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
   uint8_t resultsCount = 0;
   while (line != NULL) {
     // Turn the new line into a 0
-    buffer[strlen(buffer)- 1] = 0;
+    if ( buffer[strlen(buffer) - 1] == 10 ) { buffer[strlen(buffer)- 1] = 0; }
 
     // Skip lines starting with '#'
     if (buffer[0] == '#') {
@@ -1216,7 +1216,8 @@ POOLDEF void pool_read_config_file(const char *filePath) {
   char buffer[1024];
   char * line = fgets(buffer, 1023, f);
   while (line != NULL) {
-    buffer[strlen(buffer)- 1] = 0;
+    // turn new lines into 0
+    if ( buffer[strlen(buffer) - 1] == 10 ) { buffer[strlen(buffer)- 1] = 0; }
     if (strncmp(line, "name=", 5) == 0) {
       strncpy(poolConfiguration.poolName, line + 5, POOL_NAME_LIMIT);
     }
@@ -1267,7 +1268,7 @@ POOLDEF void pool_read_team_file(const char *filePath) {
     }
 
     // Turn new line into end of string marker
-    buffer[strlen(buffer)- 1] = 0;
+    if ( buffer[strlen(buffer) - 1] == 10 ) { buffer[strlen(buffer)- 1] = 0; }
 
     PoolTeam *team = &poolTeams[i];
     team->seed = poolSeeds[i];
