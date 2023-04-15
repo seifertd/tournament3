@@ -1,2 +1,2 @@
 name=2023 CBS Experts
-scorerType=JoshP
+scorerType=SeedDiff

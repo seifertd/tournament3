@@ -159,7 +159,7 @@ typedef struct {
 #define POOL_RESULTS_FILE_NAME "results.txt"
 #define POOL_ENTRIES_DIR_NAME "entries"
 
-typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerJoshP } PoolScorerType;
+typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerJoshP, PoolScorerSeedDiff } PoolScorerType;
 typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson, PoolFormatBin } PoolReportFormat;
 
 POOLDEF void pool_defaults();
@@ -187,6 +187,7 @@ typedef uint32_t (*PoolScorerFunction)(PoolBracket *bracket, PoolBracket *result
 POOLDEF uint32_t pool_basic_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_upset_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_josh_p_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
+POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType);
 POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket);
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength);
@@ -333,12 +334,23 @@ POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket) {
   return bracket->winners[prevGame1] == winner ? 
     bracket->winners[prevGame2] : bracket->winners[prevGame1];
 }
-
 POOLDEF uint32_t pool_basic_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
   UNUSED(bracket);
   UNUSED(results);
   UNUSED(game);
   return poolConfiguration.roundScores[round];
+}
+POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
+  uint8_t resultsLoser = pool_loser_of_game(game, results);
+  uint8_t bracketLoser = pool_loser_of_game(game, bracket);
+  uint8_t bonus = 0;
+  if ( (resultsLoser == 0 && !poolTeams[bracketLoser-1].eliminated) || resultsLoser == bracketLoser) {
+    PoolTeam *losingTeam = &poolTeams[bracketLoser-1];
+    uint8_t winner = bracket->winners[game];
+    PoolTeam *winningTeam = &poolTeams[winner-1];
+    bonus = winningTeam->seed > losingTeam->seed ? winningTeam->seed - losingTeam->seed : 0;
+  }
+  return poolConfiguration.roundScores[round] + bonus;
 }
 POOLDEF uint32_t pool_josh_p_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
   UNUSED(results);
@@ -362,6 +374,9 @@ POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType) {
       break;
     case PoolScorerJoshP:
       return &pool_josh_p_scorer;
+      break;
+    case PoolScorerSeedDiff:
+      return &pool_seed_diff_scorer;
       break;
     default:
       fprintf(stderr, "Error, unknown PoolScorerType: %d\n", scorerType);
@@ -1222,8 +1237,10 @@ POOLDEF void pool_read_config_file(const char *filePath) {
         // do nothing, default is basic
       } else if (strncmp(line+11, "Upset", 5) == 0) {
         poolConfiguration.scorerType = PoolScorerUpset;
-      } else if (strncmp(line+11, "JoshP", 8) == 0) {
+      } else if (strncmp(line+11, "JoshP", 5) == 0) {
         poolConfiguration.scorerType = PoolScorerJoshP;
+      } else if (strncmp(line+11, "SeedDiff", 8) == 0) {
+        poolConfiguration.scorerType = PoolScorerSeedDiff;
       } else {
         fprintf(stderr, "config.txt scorerType %s is not known\n", line+11);
         exit(1);
