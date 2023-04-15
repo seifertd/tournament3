@@ -911,7 +911,7 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
         printf(" ");
         pool_print_humanized(stdout, stat->timesTied, 5);
         printf(" ");
-        if (winChance > 0.0) {
+        if (stat->timesWon > 0 || stat->timesTied > 0) {
           PoolTeamWins top5[5] = {0};
           for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
             if (stat->champCounts[t] > 0) {
