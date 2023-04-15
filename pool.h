@@ -334,7 +334,6 @@ POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket) {
   return bracket->winners[prevGame1] == winner ? 
     bracket->winners[prevGame2] : bracket->winners[prevGame1];
 }
-
 POOLDEF uint32_t pool_basic_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
   UNUSED(bracket);
   UNUSED(results);
@@ -345,8 +344,8 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
   uint8_t resultsLoser = pool_loser_of_game(game, results);
   uint8_t bracketLoser = pool_loser_of_game(game, bracket);
   uint8_t bonus = 0;
-  if ( (bracketLoser == 0 && !poolTeams[resultsLoser-1].eliminated) || resultsLoser == bracketLoser) {
-    PoolTeam *losingTeam = &poolTeams[resultsLoser-1];
+  if ( (resultsLoser == 0 && !poolTeams[bracketLoser-1].eliminated) || resultsLoser == bracketLoser) {
+    PoolTeam *losingTeam = &poolTeams[bracketLoser-1];
     uint8_t winner = bracket->winners[game];
     PoolTeam *winningTeam = &poolTeams[winner-1];
     bonus = winningTeam->seed > losingTeam->seed ? winningTeam->seed - losingTeam->seed : 0;
