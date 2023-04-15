@@ -1,0 +1,64 @@
+Alabama,Ala
+Texas A&M CC,TCC
+Maryland,Mrl
+West Virginia,WVa
+San Diego St,SDS
+Charleston,Cha
+Virginia,UVa
+Furman,Fur
+Creighton,Cre
+NC State,NCS
+Baylor,Bay
+UCSB,USB
+Missouri,Mis
+Utah St,USt
+Arizona,Ari
+Princeton,Pri
+Purdue,Pur
+FDU,FDU
+Memphis,Mem
+FAU,FAU
+Duke,Duk
+Oral Roberts,ORo
+Tennessee,Ten
+Louisiana,Lou
+Kentucky,Ken
+Providence,Pro
+Kansas St,KSt
+Montana St,MSt
+Michigan St,MiS
+USC,USC
+Marquette,Mar
+Vermont,Ver
+Houston,Hou
+N Kentucky,NKy
+Iowa,Iow
+Auburn,Aub
+Miami FL,MiF
+Drake,Dra
+Indiana,Ind
+Kent St,KeS
+Iowa St,IoS
+Pitt,Pit
+Xavier,Xav
+Kennesaw St,KnS
+Texas A&M,A&M
+Penn St,PSt
+Texas,Tex
+Colgate,Col
+Kansas,Kan
+Howard,How
+Arkansas,Ark
+Illinois,Ill
+Saint Mary's,StM
+VCU,VCU
+UConn,UCn
+Iona,Ion
+TCU,TCU
+Arizona St,ASt
+Gonzaga,Gon
+Grand Canyon,GCy
+Northwestern,NWn
+Boise St,BoS
+UCLA,UCL
+UNC Asheville,NCA

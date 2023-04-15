@@ -41,8 +41,8 @@ void help(void) {
   fprintf(stderr, "\nThe pool configuration directory DIR must contain the following:\n");
   fprintf(stderr, "     config.txt: file containing basic configuration in name=value format\n");
   fprintf(stderr, "          name: The name of the pool, default: 'NCAA Tournament'\n");
-  fprintf(stderr, "          scorerType: One of Basic, Upset or SeedDiff (see Scorers below)\n");
-  fprintf(stderr, "          roundMultipliers: 6 numeric round multipliers for the Scorer (See below)\n");
+  fprintf(stderr, "          scorerType: One of Basic, Upset or JoshP (see Scorers below)\n");
+  fprintf(stderr, "          roundScores: 6 numeric round scores for the Scorer (See below)\n");
   fprintf(stderr, "     teams.txt: file containing the teams in the tournament in matchup order\n");
   fprintf(stderr, "          1 team per line in the form 'Name,shortName'\n");
   fprintf(stderr, "              name can be at most 32 chars, short name 3 chars\n");
@@ -61,14 +61,12 @@ void help(void) {
   fprintf(stderr, "          total points of the championship and is used to break ties.\n");
   fprintf(stderr, "\nScorers:\n");
   fprintf(stderr, "There are 3 supported scorers. Each scorer uses the configured\n");
-  fprintf(stderr, "roundMultipliers as follows:\n");
-  fprintf(stderr, "    Basic: each correct pick is worth the roundMultiplier of the round\n");
-  fprintf(stderr, "           the game was played in.\n");
-  fprintf(stderr, "    Upset: same as Basic except the seed number of the victor is added\n");
-  fprintf(stderr, "    SeedDiff: each correct winner is worth the roundMultiplier of the round\n");
-  fprintf(stderr, "           If the loser is picked as well, the difference between the seeds is added as a bonus\n");
+  fprintf(stderr, "roundScores as follows:\n");
+  fprintf(stderr, "    Basic: each correct pick is worth the roundScore of the round\n");
+  fprintf(stderr, "    Upset: same as Basic except the seed number of the victor is added to the round score\n");
+  fprintf(stderr, "    JoshP: Like upset except the seed number of the victor is multiplied by the round score\n");
   fprintf(stderr, "\nExample Configuration File:\n");
-  fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundMultipliers=1,2,4,8,11,15\n");
+  fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundScores=1,2,4,8,11,15\n");
   fprintf(stderr, "\nSample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2023/teams.txt\n");
   fprintf(stderr, "\nSample results.txt file: https://github.com/seifertd/tournament3/blob/main/2023/results.txt\n");
 }

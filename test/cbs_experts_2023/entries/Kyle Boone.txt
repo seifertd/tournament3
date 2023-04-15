@@ -1,0 +1,70 @@
+# Round 1:
+Ala
+WVa
+SDS
+Fur
+Cre
+Bay
+USt
+Ari
+Pur
+FAU
+Duk
+Ten
+Ken
+KSt
+MiS
+Mar
+Hou
+Aub
+MiF
+Ind
+IoS
+Xav
+PSt
+Tex
+Kan
+Ill
+StM
+UCn
+TCU
+Gon
+NWn
+UCL
+# Round 2:
+Ala
+SDS
+Cre
+Ari
+FAU
+Duk
+Ken
+MiS
+Hou
+Ind
+Xav
+Tex
+Kan
+UCn
+Gon
+NWn
+# Round 3:
+Ala
+Ari
+Duk
+Ken
+Hou
+Tex
+Kan
+Gon
+# Round 4:
+Ala
+Duk
+Hou
+Kan
+# Final Four:
+Ala
+Hou
+# Championship:
+Hou
+123

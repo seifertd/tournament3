@@ -1,3 +1,3 @@
 name=Supercalifragilistic Pool
-scorerType=Upset
-roundMultipliers=1,2,4,8,11,15
+scorerType=JoshP
+roundScores=1,2,4,8,11,15

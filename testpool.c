@@ -10,12 +10,12 @@ int main(void) {
   printf("Pool Name: %s\n", poolConfiguration.poolName);
   printf("Pool Scorer: %d\n", poolConfiguration.scorerType);
   printf("Pool Round Multipliers: %d %d %d %d %d %d\n", 
-      poolConfiguration.roundMultipliers[0],
-      poolConfiguration.roundMultipliers[1],
-      poolConfiguration.roundMultipliers[2],
-      poolConfiguration.roundMultipliers[3],
-      poolConfiguration.roundMultipliers[4],
-      poolConfiguration.roundMultipliers[5]);
+      poolConfiguration.roundScores[0],
+      poolConfiguration.roundScores[1],
+      poolConfiguration.roundScores[2],
+      poolConfiguration.roundScores[3],
+      poolConfiguration.roundScores[4],
+      poolConfiguration.roundScores[5]);
   pool_team_report();
   pool_entries_report();
   pool_score_report();

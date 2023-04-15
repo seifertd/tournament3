@@ -1,0 +1,70 @@
+# Round 1:
+Ala
+Mrl
+SDS
+UVa
+NCS
+Bay
+USt
+Ari
+Pur
+Mem
+Duk
+Ten
+Ken
+KSt
+MiS
+Mar
+Hou
+Iow
+MiF
+Ind
+Pit
+Xav
+A&M
+Tex
+Kan
+Ark
+StM
+UCn
+TCU
+Gon
+NWn
+UCL
+# Round 2:
+Mrl
+UVa
+Bay
+USt
+Pur
+Duk
+Ken
+Mar
+Iow
+MiF
+Xav
+Tex
+Kan
+StM
+Gon
+UCL
+# Round 3:
+UVa
+Bay
+Duk
+Ken
+MiF
+Xav
+StM
+Gon
+# Round 4:
+Bay
+Duk
+Xav
+Gon
+# Final Four:
+Bay
+Gon
+# Championship:
+Bay
+139
