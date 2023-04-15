@@ -60,8 +60,7 @@ void help(void) {
   fprintf(stderr, "          same format as the results.txt file, except last line is the predicted\n");
   fprintf(stderr, "          total points of the championship and is used to break ties.\n");
   fprintf(stderr, "\nScorers:\n");
-  fprintf(stderr, "There are 3 supported scorers. Each scorer uses the configured\n");
-  fprintf(stderr, "roundScores as follows:\n");
+  fprintf(stderr, "Each scorer uses the configured roundScores as follows:\n");
   fprintf(stderr, "    Basic: each correct pick is worth the roundScore of the round\n");
   fprintf(stderr, "    Upset: each correct pick is worth the roundScore plus the seed of the winner\n");
   fprintf(stderr, "    JoshP: each correct pick is worth the roundScore multiplied by the seed of the winner\n");
