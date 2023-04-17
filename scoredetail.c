@@ -33,7 +33,6 @@ int main(void) {
         maxScore += score;
       }
     } else {
-      uint8_t loser = entry.winners[g] == team1 ? team2 : team1;
       if (!poolTeams[entry.winners[g] - 1].eliminated) {
         maxScore += (*poolConfiguration.poolScorer)(&entry, &poolTournamentBracket, round, g);
       }

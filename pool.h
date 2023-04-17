@@ -162,7 +162,7 @@ typedef struct {
 typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerJoshP, PoolScorerSeedDiff } PoolScorerType;
 typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson, PoolFormatBin } PoolReportFormat;
 
-POOLDEF void pool_defaults();
+POOLDEF void pool_defaults(void);
 POOLDEF void pool_initialize(const char *dirPath);
 POOLDEF void pool_team_report(void);
 POOLDEF void pool_add_entries_in_dir(const char *dirPath);
@@ -419,7 +419,7 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
   }
 }
 
-POOLDEF void pool_defaults() {
+POOLDEF void pool_defaults(void) {
   // Set defaults
   strcpy(poolConfiguration.poolName, "NCAA Tournament");
   poolConfiguration.roundScores[0] = 1;
@@ -611,7 +611,10 @@ POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
     uint8_t round = pool_round_of_game(gamesLeft[g]);
     uint8_t team1, team2 = 0;
     pool_teams_of_game(gamesLeft[g], round, possibleBracket, &team1, &team2);
-    possibleBracket->winners[gamesLeft[g]] = ( batch & (1 << g) ) == 0 ? team1 : team2;
+    uint8_t winner = ( batch & (1 << g) ) == 0 ? team1 : team2;
+    uint8_t loser = ( batch & (1 << g) ) == 0 ? team2 : team1;
+    possibleBracket->winners[gamesLeft[g]] = winner;
+    poolTeams[loser-1].eliminated = true;
     /*
     printf("Advancing bracket for game %d of %d : %d, choosing winner %s-%s => %s\n",
            g, gamesToDecide, gamesLeft[g],

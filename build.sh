@@ -12,5 +12,4 @@ rm -rf pool testpool benchmark
 ${CC} ${CFLAGS} -o pool pool.c
 ${CC} ${CFLAGS} -o testpool testpool.c
 ${CC} ${CFLAGS} -o benchmark benchmark.c
-
-
+${CC} ${CFLAGS} -o sd scoredetail.c
