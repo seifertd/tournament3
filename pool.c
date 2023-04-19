@@ -20,7 +20,7 @@ bool is_power_of_2(int n) {
 }
 
 void usage(char *progName) {
-  fprintf(stderr, "Usage: %s [-hpr] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR COMMAND\n", progName);
+  fprintf(stderr, "Usage: %s [-hpr] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR REPORT\n", progName);
   fprintf(stderr, "   -h get extended help\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
   fprintf(stderr, "   Options for the possibilities ('poss') report:\n");
@@ -29,12 +29,12 @@ void usage(char *progName) {
   fprintf(stderr, "   -f FMT: Format of report, one of 'text', 'bin' or 'json'\n");
   fprintf(stderr, "   -b BATCH: Batch number for multi process possibilities, should be less than numBatches\n");
   fprintf(stderr, "   -n NUMBATCHES: Number of batches, must be a power of 2\n");
-  fprintf(stderr, "   COMMAND: report to run\n");
+  fprintf(stderr, "   REPORT: report to run\n");
   fprintf(stderr, "     teams: show configured teams\n");
   fprintf(stderr, "     results: show tournament bracket\n");
   fprintf(stderr, "     entries: show tournament entry brackets\n");
   fprintf(stderr, "     scores: show current scores\n");
-  fprintf(stderr, "     poss: show possiblities stats scores. Don't run until round 1 is over.\n");
+  fprintf(stderr, "     poss: show possiblities stats scores.\n");
 }
 
 void help(void) {
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   if (optind >= argc) {
-    fprintf(stderr, "Please specify a COMMAND.\n");
+    fprintf(stderr, "Please specify a REPORT.\n");
     usage(argv[0]);
     exit(EXIT_FAILURE);
   }
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     printf("%s: Results\n", poolConfiguration.poolName);
     pool_print_entry(&poolTournamentBracket);
   } else {
-    fprintf(stderr, "Unknown COMMAND: %s\n", command);
+    fprintf(stderr, "Unknown REPORT: %s\n", command);
     usage(argv[0]);
   }
   return 0;
