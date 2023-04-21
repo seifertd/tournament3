@@ -1264,10 +1264,19 @@ POOLDEF void pool_read_team_file(const char *filePath) {
   }
   char buffer[1024];
   for (uint8_t i = 0; i < POOL_NUM_TEAMS; i++) {
-    if (fgets(buffer, 1023, f) == NULL) {
+    char *line = fgets(buffer, 1023, f);
+    if (line == NULL) {
       fprintf(stderr, "Could not read a line from file %s: %s\n",
           filePath, strerror(errno));
       exit(1);
+    }
+    while (buffer[0] == '#') {
+      line = fgets(buffer, 1023, f);
+      if (line == NULL) {
+        fprintf(stderr, "Could not read a line from file %s: %s\n",
+          filePath, strerror(errno));
+        exit(1);
+      }
     }
 
     // Turn new line into end of string marker

@@ -1,3 +1,4 @@
+# South
 Alabama,Ala
 Texas A&M CC,TCC
 Maryland,Mrl
@@ -14,6 +15,7 @@ Missouri,Mis
 Utah St,USt
 Arizona,Ari
 Princeton,Pri
+# East
 Purdue,Pur
 FDU,FDU
 Memphis,Mem
@@ -30,6 +32,7 @@ Michigan St,MiS
 USC,USC
 Marquette,Mar
 Vermont,Ver
+# Midwest
 Houston,Hou
 N Kentucky,NKy
 Iowa,Iow
@@ -46,6 +49,7 @@ Texas A&M,A&M
 Penn St,PSt
 Texas,Tex
 Colgate,Col
+# West
 Kansas,Kan
 Howard,How
 Arkansas,Ark
