@@ -1,6 +1,6 @@
 Tournament 3
 -------------
-Back to basics NCAA basketball pool software implemented in pure C for speed.
+Back to basics NCAA march madness basketball pool software implemented in pure C for speed.
 No nonsensical bit twiddling.  40.2M bracket scores per second. 
 
 Implemented as a single file header for command line pool management.
