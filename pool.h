@@ -19,7 +19,6 @@
 #define POOLDEF static inline
 #endif
 
-// TODO: Turn on all compiler warnings and fix
 // Public API
 #define POOL_NUM_TEAMS 64
 #define POOL_NUM_GAMES 63
