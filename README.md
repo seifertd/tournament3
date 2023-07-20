@@ -228,9 +228,9 @@ Game numbers by round and what game numbers teams will play in
 as they advance. Read across and up.
 
 ```
-      Game indexes
+                    Game indexes
                       Round
-      Teams     1  2   3   4   5   6
+Seeds Teams     1  2   3   4   5  Championship
 1-16  t1 t2:    0 32--48--56--60--62
 8-9   t3 t4:    1--+   |   |   |   |
 5-12  t5 t6:    2 33---+   |   |   |
@@ -247,21 +247,21 @@ as they advance. Read across and up.
 3-14  t27 t28: 13                  |
 7-10  t29 t30: 14 39               |
 2-15  t31 t32: 15                  |
-                                 |
-      t33 t34: 16 40  52  58  61---+
-      t35 t36: 17
-      t37 t38: 18 41
-      t39 t40: 19
-      t41 t42: 20 42  53
-      t43 t44: 21
-      t45 t46: 22 43
-      t47 t48: 23
-      t49 t50: 24 44  54  59
-      t51 t52: 25
-      t53 t54: 26 45
-      t55 t56: 27
-      t57 t58: 28 46  55
-      t59 t60: 29
-      t61 t62: 30 47
-      t63 t64: 31
+                                   |
+1-16  t33 t34: 16 40  52  58  61---+
+8-9   t35 t36: 17
+5-12  t37 t38: 18 41
+4-13  t39 t40: 19
+6-11  t41 t42: 20 42  53
+3-14  t43 t44: 21
+7-10  t45 t46: 22 43
+2-15  t47 t48: 23
+1-16  t49 t50: 24 44  54  59
+8-9   t51 t52: 25
+5-12  t53 t54: 26 45
+4-13  t55 t56: 27
+6-11  t57 t58: 28 46  55
+3-14  t59 t60: 29
+7-10  t61 t62: 30 47
+2-15  t63 t64: 31
 ```
