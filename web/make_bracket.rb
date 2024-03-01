@@ -36,10 +36,12 @@ seed_idx = 0
 
 teams_file = ARGV[0]
 output_file = ARGV[1]
-if teams_file.nil? || output_file.nil?
-  puts "Usage: ruby #{$0} <teams.txt> <output.html>"
+svg_logo_file = ARGV[2]
+if teams_file.nil? || output_file.nil? || svg_logo_file.nil?
+  puts "Usage: ruby #{$0} <teams.txt> <output.html> <svg_logo.svg>"
   exit 1
 end
+
 teams = File.readlines(teams_file).each do |line|
   line.chomp!
   if line.start_with?("#")
@@ -57,6 +59,7 @@ teams = File.readlines(teams_file).each do |line|
   end
 end
 
+svg_logo = File.read(svg_logo_file)
 template = File.read("#{__dir__}/bracket.html.erb")
 erb = ERB.new(template, trim_mode: "%<>")
 File.write(output_file, erb.result(binding))
