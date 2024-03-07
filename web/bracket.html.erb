@@ -614,6 +614,10 @@ ul.game li.team {
       <li style="padding: 5px">
         <button id="random-picks">Random Picks</button>
       </li>
+      <li style="padding: 5px">
+	<label for="load-entry">Load Entry:</label>
+	<input type="file" id="load-entry" name="loadfile" size="20" title="Load Entry">
+      </li>
 		</ul>
 	</div>
 </div>
@@ -736,6 +740,40 @@ ul.game li.team {
         }
       }
     };
+    document.getElementById("load-entry").addEventListener('change', (event) => {
+      if (event.target.files[0]) {
+	const file = event.target.files[0];
+	const entryName = file.name.split(".")[0];
+	document.getElementById("entry-name").value = entryName;
+	const reader = new FileReader();
+	reader.readAsText(file, 'UTF-8');
+	reader.onload = (subEvent) => {
+	  const picks = subEvent.target.result.split("\n");
+	  if (picks.length < 70) {
+	    alert(`Entry ${file.name} was incomplete`);
+	    return;
+	  }
+	  document.getElementById("tie-break").value = picks.pop();
+	  let picksMade = 0;
+	  while (picks.length > 0) {
+	    while (picks[0].startsWith("#")) {
+	      picks.shift();
+	    }
+	    let pick = picks.shift();
+	    let uiEntries = document.querySelectorAll(`[data-sn="${pick}"]`);
+	    if (uiEntries.length == 0) {
+	      alert(`Could not find team with short name ${pick}`);
+	      return;
+	    }
+	    uiEntries[uiEntries.length-1].click();
+	    picksMade += 1;
+	  }
+	};
+	reader.onerror = (subEvent) => {
+	  alert("Got an error reading the file");
+	};
+      }
+    });
     document.getElementById("generate-entry").onclick = (event) => {
       const entryName = document.getElementById("entry-name");
       if (!entryName.value || entryName.value === "") {
