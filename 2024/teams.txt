@@ -1,68 +1,68 @@
 # Midwest
 Purdue,Pur
-NorfSt/CConn,PI1
-Texas,Tex
-Mississippi St,MiS
+LRock/GramSt,PI1
+Texas Tech,TTU
+Boise St,BoS
 Clemson,Cle
-Richmond,Rch
+Princeton,Pri
 Kentucky,Ken
 Appalachian St,ApS
 Wisconsin,Wis
-South Florida,SFl
-Baylor,Bay
-Oakland,Oak
-Dayton,Day
-Oklahoma,Okl
+Indiana St,ISt
 Marquette,Mar
+Vermont,Ver
+Nevada,Nev
+Mississippi St,MiS
+Iowa St,IoS
 Sam Houston,SHo
 # West
-Arizona,Ari
-LRock/GrambSt,PI2
-Nevada,Nev
-Michigan St,MSU
-BYU,BYU
+Tennessee,Ten
+NorfSt/CConn,PI2
+Texas,Tex
+Nebraska,Neb
+San Diego St,SDS
 Grand Canyon,GCy
 Illinois,Ill
-Samford,Sam
-Florida,Fla
-NewMex/WakeF,PI3
-Creighton,Cre
-High Point,HPt
-Boise St,BoS
-Fla Atlantic,FlA
-Iowa St,IoS
+UC Irvine,UCI
+Utah St,USt
+StJohn/Virg,PI3
+Baylor,Bay
+Colgate,Col
+Gonzaga,Gon
+Colorado St,CSt
+Arizona,Ari
 E. Washington,EWa
 # East
 UConn,UCn
-East Kentucky,EKe
-Texas Tech,TTU
-Nebraska,Neb
-Washington St,WSt
-Princeton,Pri
-Alabama,Ala
-UC Irvine,UCI
+Stetson,Ste
+Northwestern,Nwn
+Oklahoma,Okl
+BYU,BYU
+Richmond,Rch
+Auburn,Aub
+Samford,Sam
 South Carolina,SCa
-SHall/Virg,PI4
+Vill/NewMex,PI4
 Kansas,Kan
-Vermont,Ver
-Gonzaga,Gon
-Villanova,Vnv
+High Point,HPt
+Saint Mary's,StM
+Seton Hall,SeH
 North Carolina,NCU
-Colgate,Col
+Quinnipiac,Qui
 # South
 Houston,Hou
 South Dakota St,SDk
-Northwestern,Nwn
-Colorado St,CSt
-Auburn,Aub
+Michigan St,MSU
+Fla Atlantic,FlA
+Washington St,WSt
 McNeese St,McN
-San Diego St,SDS
+Alabama,Ala
 Charleston,Cha
-Utah St,USt
-Indiana St,ISt
-Duke,Duk
-Akron,Akr
-Saint Mary's,StM
+Florida,Fla
+South Florida,SFl
+Creighton,Cre
+Oakland,Oak
+Dayton,Day
 TCU,TCU
-Tennessee,Ten
-Quinnipiac,Qui
+Duke,Duk
+Toledo,Tol
