@@ -17,18 +17,18 @@ Marquette,Mar
 Quinnipiac,Qui
 # West
 Tennessee,Ten
-Stets/Merr,PI2
+Stets/Wag,PI2
 Dayton,Day
 Oklahoma,Okl
 BYU,BYU
 South Florida,SFl
 Illinois,Ill
 McNeese St,McN
-Gonzaga,Gon
+Utah St,USt
 Mississippi St,MiS
 Baylor,Bay
 Toledo,Tol
-Utah St,USt
+Saint Mary's,StM
 Seton Hall,SeH
 Arizona,Ari
 Montana,Mon
@@ -45,7 +45,7 @@ Clemson,Cle
 StJ/IndSt,PI3
 Kentucky,Ken
 Morehead St,MhS
-Saint Mary's,StM
+Gonzaga,Gon
 TCU,TCU
 North Carolina,NCU
 Colgate,Col
