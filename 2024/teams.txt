@@ -1,7 +1,7 @@
 # Midwest
 Purdue,Pur
 NorfSt/GramSt,PI1
-Texas,Tex
+Boise St,BoS
 Fla Atlantic,FlA
 Nevada,Nev
 Richmond,Rch
@@ -19,24 +19,24 @@ Quinnipiac,Qui
 Tennessee,Ten
 Stets/Wag,PI2
 Dayton,Day
-Oklahoma,Okl
+TCU,TCU
 BYU,BYU
 South Florida,SFl
 Illinois,Ill
 McNeese St,McN
-Utah St,USt
+Saint Mary's,StM
 Mississippi St,MiS
 Baylor,Bay
 Toledo,Tol
-Saint Mary's,StM
+Utah St,USt
 Seton Hall,SeH
 Arizona,Ari
 Montana,Mon
 # East
 UConn,UCn
 Longwood,Lon
-Boise St,BoS
 Nebraska,Neb
+Texas,Tex
 South Carolina,SCa
 Grand Canyon,GCy
 Kansas,Kan
@@ -46,7 +46,7 @@ StJ/IndSt,PI3
 Kentucky,Ken
 Morehead St,MhS
 Gonzaga,Gon
-TCU,TCU
+Oklahoma,Okl
 North Carolina,NCU
 Colgate,Col
 # South
