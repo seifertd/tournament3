@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en" >
+  <!-- This bracket is based nearly 100% on this codepen by Jeff Bridgforth: 
+    https://codepen.io/webcraftsman/pen/XWPYEZv
+    Minor changes:
+      * No fancy hardwood background image
+      * Embedded inline base64 logo
+      * Some class names changed (to protect the innocent)
+      * Got rid of the scrollbars
+      * CSS inlined
+      * Added an area to record the champion and tie break (for
+        use in some NCAA Pool Management software)
+      * Allowed clicking on teams to advance them to next round
+      * Added a button to save the entry as a file for my pool software:
+        https://github.com/seifertd/tournament3
+  -->
+<head>
+  <meta charset="UTF-8">
+  <title>NCAA Tournament Bracket Entry</title>
+  <link href="https://fonts.googleapis.com/css?family=Signika:400,600" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+	<style>
+body {
+  background-color: #FFE5B4;
+  font-family: "Signika", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+header {
+  margin-bottom: 50px;
+}
+header ol {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-gap: 0 6px;
+  width: 1220px;
+  margin: 0 auto;
+  overflow: auto;
+}
+@media (min-width: 1450px) {
+  header ol {
+    grid-template-columns: repeat(11, 1fr);
+    width: 1450px;
+  }
+  header ol li:nth-child(5) {
+    grid-column: span 3;
+  }
+}
+header li {
+  background-color: #04314c;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 0;
+}
+header li span {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.bracket {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(94, 8px);
+  grid-gap: 2px 6px;
+  grid-auto-flow: column;
+  margin: 20px auto;
+  width: 1220px;
+}
+@media (min-width: 1450px) {
+  .bracket {
+    grid-template-columns: repeat(11, 1fr);
+    width: 1450px;
+  }
+}
+
+.region {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(46, 8px);
+  grid-gap: 2px 6px;
+  grid-auto-flow: column;
+}
+
+.region-1 {
+  grid-column: 1/span 4;
+  grid-row: 1/span 47;
+}
+
+.final-four {
+  grid-column: 4/span 3;
+  grid-row: 45/span 6;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(6, 8px);
+  grid-gap: 2px 6px;
+  grid-auto-flow: column;
+}
+@media (min-width: 1450px) {
+  .final-four {
+    grid-column: 5/span 3;
+  }
+}
+
+.region-2 {
+  grid-column: 1/span 4;
+  grid-row: 49/span 47;
+}
+
+.region-3 {
+  grid-column: -5/span 4;
+  grid-row: 1/span 47;
+}
+
+.region-4 {
+  grid-column: -5/span 4;
+  grid-row: 49/span 47;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+ul.game li.team {
+  cursor: pointer;
+}
+
+.team, .champion {
+  background-color: white;
+  font-size: 11px;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 5px;
+}
+
+.team-top {
+  margin-bottom: 2px;
+}
+
+.winner {
+  background-color: #005eb8;
+  color: white;
+}
+
+.game {
+  grid-column: span 1;
+  grid-row: span 4;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+.game-1,
+.game-9 {
+  grid-column: span 1;
+  grid-row: span 4;
+}
+
+.game-2,
+.game-10 {
+  grid-row: 7/span 4;
+}
+
+.game-3,
+.game-11 {
+  grid-row: 13/span 4;
+}
+
+.game-4,
+.game-12 {
+  grid-row: 19/span 4;
+}
+
+.game-5,
+.game-13 {
+  grid-row: 25/span 4;
+}
+
+.game-6,
+.game-14 {
+  grid-row: 31/span 4;
+}
+
+.game-7,
+.game-15 {
+  grid-row: 37/span 4;
+}
+
+.game-8,
+.game-16 {
+  grid-row: 43/span 4;
+}
+
+.game-17,
+.game-25 {
+  grid-column: -2/span 1;
+  grid-row: 1/span 4;
+}
+
+.game-18,
+.game-26 {
+  grid-column: -2/span 1;
+  grid-row: 7/span 4;
+}
+
+.game-19,
+.game-27 {
+  grid-column: -2/span 1;
+  grid-row: 13/span 4;
+}
+
+.game-20,
+.game-28 {
+  grid-column: -2/span 1;
+  grid-row: 19/span 4;
+}
+
+.game-21,
+.game-29 {
+  grid-column: -2/span 1;
+  grid-row: 25/span 4;
+}
+
+.game-22,
+.game-30 {
+  grid-column: -2/span 1;
+  grid-row: 31/span 4;
+}
+
+.game-23,
+.game-31 {
+  grid-column: -2/span 1;
+  grid-row: 37/span 4;
+}
+
+.game-24,
+.game-32 {
+  grid-column: -2/span 1;
+  grid-row: 43/span 4;
+}
+
+.game-33,
+.game-37 {
+  grid-column: 2/span 1;
+  grid-row: 4/span 4;
+}
+
+.game-34,
+.game-38 {
+  grid-column: 2/span 1;
+  grid-row: 16/span 4;
+}
+
+.game-35,
+.game-39 {
+  grid-column: 2/span 1;
+  grid-row: 28/span 4;
+}
+
+.game-36,
+.game-40 {
+  grid-column: 2/span 1;
+  grid-row: 40/span 4;
+}
+
+.game-41,
+.game-45 {
+  grid-column: -3/span 1;
+  grid-row: 4/span 4;
+}
+
+.game-42,
+.game-46 {
+  grid-column: -3/span 1;
+  grid-row: 16/span 4;
+}
+
+.game-43,
+.game-47 {
+  grid-column: -3/span 1;
+  grid-row: 28/span 4;
+}
+
+.game-44,
+.game-48 {
+  grid-column: -3/span 1;
+  grid-row: 40/span 4;
+}
+
+.game-49,
+.game-51 {
+  grid-column: 3/span 1;
+  grid-row: 10/span 4;
+}
+
+.game-50,
+.game-52 {
+  grid-column: 3/span 1;
+  grid-row: 34/span 4;
+}
+
+.game-53,
+.game-55 {
+  grid-column: -4/span 1;
+  grid-row: 10/span 4;
+}
+
+.game-54,
+.game-56 {
+  grid-column: -4/span 1;
+  grid-row: 34/span 4;
+}
+
+.game-57,
+.game-58 {
+  grid-column: 4/span 1;
+  grid-row: 22/span 4;
+}
+
+.game-59,
+.game-60 {
+  grid-column: -5/span 1;
+  grid-row: 22/span 4;
+}
+
+.game-61 {
+  grid-column: 1/span 1;
+  grid-row: 2/span 4;
+}
+
+.game-62 {
+  grid-column: 3/span 1;
+  grid-row: 2/span 4;
+}
+
+.championship {
+  grid-column: 2/span 1;
+  grid-row: 1/span 4;
+  width: 150px;
+}
+.championship .team, .championship .champion, .championship .tie-break, .entry-name {
+  height: 28px;
+  line-height: 28px;
+}
+
+#tie-break, #entry-name {
+  width: 135px;
+}
+
+.logo {
+  grid-column: 4/span 3;
+  grid-row: 1;
+  margin: 0;
+  padding: 5px;
+  margin-left: 120px;
+  background: url(<%=svg_logo%>)
+    no-repeat
+    left center;
+    max-width: 350px;
+    height: 160px;
+}
+@media (min-width: 1450px) {
+  .logo {
+    grid-column: 5/span 3;
+    padding-top: 170px;
+    margin-left: 20px;
+    background-size: 100% !important;
+  }
+}
+  </style>
+</head>
+<body>
+<header>
+	<ol>
+		<li>Round 1</li>
+		<li>Round 2</li>
+		<li>Sweet 16</li>
+		<li>Elite 8</li>
+		<li>Final 4</li>
+		<li>Elite 8</li>
+		<li>Sweet 16</li>
+		<li>Round 2</li>
+		<li>Round 1</li>
+	</ol>
+</header>
+<div class="bracket">
+	<figure class="logo"></figure>
+	<div class="region region-1" data-name="<%=regions[0].name%>">
+	<!-- Region 1 Round 1-->
+		<% regions[0].games.each.with_index do |game, index| %>
+		<ul class="game game-<%=index+1%>">
+			<li class="team team-top" data-sn="<%=game.team1.short%>"><%=game.team1.seed%> <%=CGI.escapeHTML(game.team1.name)%></li>
+			<li class="team team-bottom" data-sn="<%=game.team2.short%>"><%=game.team2.seed%> <%=CGI.escapeHTML(game.team2.name)%></li>
+		</ul>
+		<% end %>
+	
+	<!-- Region 1 Round 2 -->
+		<ul class="game game-33">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+		<ul class="game game-34">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+		<ul class="game game-35">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+		<ul class="game game-36">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	
+	<!-- Region 1 Sweet 16 -->
+		<ul class="game game-49">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-50">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	<!-- End Region 1 Sweet 16 -->
+	
+	<!-- Region 1 Final -->
+		<ul class="game game-57">
+			<li class="team team-top" data-sn=""> </li>
+			<li class="team team-bottom" data-sn=""> </li>
+		</ul>
+		
+	</div>
+	<div class="region-2 region">
+	<!-- Region 2 Round 1 -->
+		<% regions[1].games.each.with_index do |game, index| %>
+		<ul class="game game-<%=index+9%>">
+			<li class="team team-top" data-sn="<%=game.team1.short%>"><%=game.team1.seed%> <%=CGI.escapeHTML(game.team1.name)%></li>
+			<li class="team team-bottom" data-sn="<%=game.team2.short%>"><%=game.team2.seed%> <%=CGI.escapeHTML(game.team2.name)%></li>
+		</ul>
+		<% end %>
+		<!-- End Region 2 Round 1 -->
+		
+		<!-- Region 2 Round 2 -->
+		<ul class="game game-37">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-38">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-39">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-40">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 2 Round 2 -->
+		
+		<!-- Region 2 Sweet 16 -->
+		<ul class="game game-51">
+			<li class="team team-top "></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-52">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 2 Sweet 16 -->
+		
+		<!-- Region 2 Final -->
+		<ul class="game game-58">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		
+	</div>
+	<div class="region-3 region">
+	
+		<!-- Region 3 Round 1 -->
+		<% regions[2].games.each.with_index do |game, index| %>
+		<ul class="game game-<%=index+17%>">
+			<li class="team team-top" data-sn="<%=game.team1.short%>"><%=game.team1.seed%> <%=CGI.escapeHTML(game.team1.name)%></li>
+			<li class="team team-bottom" data-sn="<%=game.team2.short%>"><%=game.team2.seed%> <%=CGI.escapeHTML(game.team2.name)%></li>
+		</ul>
+		<% end %>
+		<!-- End Region 3 Round 1 -->
+		
+		<!-- Region 3 Round 2 -->
+		<ul class="game game-41">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-42">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-43">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-44">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 3 Round 2 -->
+		<!-- Region 3 Sweet 16 -->
+		<ul class="game game-53">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-54">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- Region 3 Final -->
+		<ul class="game game-59">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""> </li>
+		</ul>
+	</div>
+	
+	<div class="region-4 region">
+		<!-- Region 4 Round 1 -->
+		<% regions[3].games.each.with_index do |game, index| %>
+		<ul class="game game-<%=index+25%>">
+			<li class="team team-top" data-sn="<%=game.team1.short%>"><%=game.team1.seed%> <%=CGI.escapeHTML(game.team1.name)%></li>
+			<li class="team team-bottom" data-sn="<%=game.team2.short%>"><%=game.team2.seed%> <%=CGI.escapeHTML(game.team2.name)%></li>
+		</ul>
+		<% end %>
+		<!-- End Region 4 Round 1 -->
+		
+		<!-- Region 4 Round 2 -->
+		<ul class="game game-45">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-46">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-47">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+
+		<ul class="game game-48">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 4 Round 2 -->
+		<!-- Region 4 Sweet 16 -->
+		<ul class="game game-55">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<ul class="game game-56">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- End Region 4 Sweet 16 -->
+		<!-- Region 4 Final -->
+		<ul class="game game-60">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+	</div>
+	<div class="final-four">
+		<!-- Final Four Game 1-->
+		<ul class="game game-61">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+		</ul>
+		<!-- Final Four Game 2-->
+		<ul class="game game-62">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom "></li>
+		</ul>
+
+		<ul class="game game-63 championship">
+			<li class="team team-top" data-sn=""></li>
+			<li class="team team-bottom" data-sn=""></li>
+      <li style="margin-top:40px"><span>CHAMPION:</span></li>
+			<li class="champion" style="padding: 5px; height: 18px; line-height: 18px;"></li>
+      <li class="tie-break" style="padding: 5px">
+        <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Tie Break: Total points scored in championship game"/>
+      </li>
+      <li class="entry-name" style="padding: 5px">
+        <input type="text" id="entry-name" name="entryname" size="20" placeholder="Entry name" title="Entry name"/>
+      </li>
+      <li style="padding: 5px">
+        <button id="generate-entry">Save Entry</button>
+      </li>
+      <li style="padding: 5px">
+        <button id="random-picks">Random Picks</button>
+      </li>
+      <li style="padding: 5px">
+	<label for="load-entry">Load Entry:</label>
+	<input type="file" id="load-entry" name="loadfile" size="20" title="Load Entry">
+      </li>
+		</ul>
+	</div>
+</div>
+  <script>
+    const nextGame = (elem) => {
+      let curGame = null
+      let nextGame = null;
+      elem.classList.forEach((cn) => {
+        if (m = cn.match(/game-(\d+)/)) {
+          let gn = parseInt(m[1], 10) - 1;
+          curGame = gn + 1;
+          let base = null;
+          if (gn < 32) {
+            base = 32;
+          } else if (gn < 48) {
+            base = 48;
+            gn -= 32;
+          } else if (gn < 56) {
+            base = 56;
+            gn -= 48;
+          } else if (gn < 60) {
+            base = 60;
+            gn -= 56;
+          } else if (gn < 62) {
+            base = 62;
+            gn -= 60;
+          } else {
+            base = 999;
+          }
+          if (base === 999) {
+            nextGame = '.champion';
+          } else {
+            const gadd = Math.round(gn/2 - 0.01);
+            const torb = gn % 2 ? 'bottom' : 'top';
+            //console.log("Match: ", m, " gn = ", gn, " gn/4 = ", gn/4, " gadd = ", gadd);
+            nextGame = `.game-${base + gadd + 1} .team-${torb}`;
+          }
+        }
+      });
+      return [curGame, nextGame];
+    };
+    const getGameNum = (ul) => {
+      let gameNo = null;
+      for (const clz of ul.classList) {
+        const md = clz.match(/game-(\d+)/);
+        if (md) {
+          gameNo = parseInt(md[1], 10);
+          break;
+        }
+      }
+      return gameNo;
+    };
+    const teams = document.querySelectorAll('ul.game li.team');
+    const pickTeam = (evt) => {
+      if (evt.target.classList.contains("winner")) {
+        return;
+      }
+      const teamName = evt.target.getAttribute("data-sn");
+      const [curGame, ngClass] = nextGame(evt.target.parentElement);
+      //console.log("Clicked ", evt.target.innerHTML, "classes: ", evt.target.classList, " curGame ", curGame, " new game class ", ngClass);
+      for (const li of evt.target.parentElement.children) {
+        li.classList.remove("winner");
+      }
+      evt.target.classList.add("winner");
+      const dest = document.querySelector(ngClass);
+      dest.setAttribute("data-sn", teamName);
+      dest.innerHTML = evt.target.innerHTML;
+      dest.classList.remove("winner");
+      // Find all games larger than dest if it is equal to the 
+      // other team in the curGame and blank it remove winner class
+      // and blank data-sn
+      let otherTeamClass = `ul.game-${curGame} li.`;
+      if (evt.target.classList.contains("team-bottom")) {
+        otherTeamClass = `${otherTeamClass}team-top`;
+      } else {
+        otherTeamClass = `${otherTeamClass}team-bottom`;
+      }
+      let otherTeamSn = document.querySelector(otherTeamClass).getAttribute("data-sn");
+      const allGameUls = document.querySelectorAll("ul.game");
+      allGameUls.forEach((ul) => {
+        let gameNo = getGameNum(ul);
+        if (gameNo && gameNo > curGame) {
+          for (const li of ul.children) {
+            if (li.getAttribute("data-sn") === otherTeamSn) {
+              li.classList.remove("winner");
+              li.innerHTML = "";
+              li.setAttribute("data-sn", "");
+            }
+          }
+        }
+      });
+    };
+    for (const team of teams) {
+      team.addEventListener('click', pickTeam, false);
+    }
+
+    const download = (filename, text) => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+
+      element.style.display = 'none';
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
+    }
+    document.getElementById("random-picks").onclick = (event) => {
+      if (confirm("This will scramble all the picks. Are you sure?")) {
+        let i = 1;
+        for (let i = 1; i < 64; i++) {
+          let selector = `ul.game-${i} li.team-`;
+          if (Math.floor(Math.random() * 2) == 0) {
+            selector = `${selector}top`;
+          } else {
+            selector = `${selector}bottom`;
+          }
+          document.querySelector(selector).click();
+        }
+      }
+    };
+    document.getElementById("load-entry").addEventListener('change', (event) => {
+      if (event.target.files[0]) {
+	const file = event.target.files[0];
+	const entryName = file.name.split(".")[0];
+	document.getElementById("entry-name").value = entryName;
+	const reader = new FileReader();
+	reader.readAsText(file, 'UTF-8');
+	reader.onload = (subEvent) => {
+	  const picks = subEvent.target.result.split("\n");
+	  if (picks.length < 70) {
+	    alert(`Entry ${file.name} was incomplete`);
+	    return;
+	  }
+	  document.getElementById("tie-break").value = picks.pop();
+	  let picksMade = 0;
+	  while (picks.length > 0) {
+	    while (picks[0].startsWith("#")) {
+	      picks.shift();
+	    }
+	    let pick = picks.shift();
+	    let uiEntries = document.querySelectorAll(`[data-sn="${pick}"]`);
+	    if (uiEntries.length == 0) {
+	      alert(`Could not find team with short name ${pick}`);
+	      return;
+	    }
+	    uiEntries[uiEntries.length-1].click();
+	    picksMade += 1;
+	  }
+	};
+	reader.onerror = (subEvent) => {
+	  alert("Got an error reading the file");
+	};
+      }
+    });
+    document.getElementById("generate-entry").onclick = (event) => {
+      const entryName = document.getElementById("entry-name");
+      if (!entryName.value || entryName.value === "") {
+        entryName.style.border = 'thick solid red';
+        alert("You haven't set the Entry name.");
+        return;
+      }
+      if (!entryName.value.match(/^[^\\\/'\"]+$/)) {
+        entryName.style.border = 'thick solid red';
+        alert("Entry names can't contain \\, /, ' or\" characters.");
+        return;
+      }
+      entryName.style.border = 'none';
+      const tieBreak = document.getElementById("tie-break");
+      if (!tieBreak.value || tieBreak.value === "") {
+        tieBreak.style.border = 'thick solid red';
+        alert("You haven't set the tie break value.");
+        return;
+      }
+      tieBreak.style.border = 'none';
+      const winnersLis = document.querySelectorAll("li.winner");
+      if (winnersLis.length < 63) {
+        alert("You haven't completed making all picks.");
+        return;
+      }
+      let entryData = [];
+      for (const li of winnersLis) {
+        const gameNo = getGameNum(li.parentElement);
+        const teamName = li.getAttribute("data-sn");
+        entryData.push([gameNo, teamName]);
+      }
+
+      entryData.sort((a, b) => { return a[0] - b[0]; })
+      entryData = entryData.map((a) => a[1]);
+
+      entryData.push(tieBreak.value);
+      entryData.splice(0, 0, "# Round 1:");
+      entryData.splice(33, 0, "# Round 2:");
+      entryData.splice(50, 0, "# Round 3:");
+      entryData.splice(59, 0, "# Round 4:");
+      entryData.splice(64, 0, "# Final Four:");
+      entryData.splice(67, 0, "# Championship:");
+
+      download(`${entryName.value}.txt`, entryData.join("\n"));
+      alert(`File ${entryName.value}.txt was saved to your downloads folder.`);
+    };
+  </script>
+</body>
+</html>

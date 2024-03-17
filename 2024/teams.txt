@@ -1,0 +1,68 @@
+# East
+UConn,UCn
+Stetson,Ste
+Fla Atlantic,FAU
+Northwestern,Nwn
+San Diego St,SDS
+UAB,UAB
+Auburn,Aub
+Yale,Yal
+BYU,BYU
+Duquesne,Duq
+Illinois,Ill
+Morehead St,MhS
+Washington St,WSt
+Drake,Drk
+Iowa St,IoS
+South Dakota St,SDk
+# West
+North Carolina,NCU
+How/Wag,PI1
+Mississippi St,MiS
+Michigan St, MSU
+Saint Mary's,StM
+Grand Canyon,GCy
+Alabama,Ala
+Charleston,Cha
+Clemson,Cle
+New Mexico,NMx
+Baylor,Bay
+Colgate,Col
+Dayton,Day
+Nevada,Nev
+Arizona,Ari
+Long Beach St,LBS
+# South
+Houston,Hou
+Longwood,LWd
+Nebraska,Neb
+Texas A&M,A&M
+Wisconsin,Wis
+James Madison,JMa
+Duke,Duk
+Vermont,Ver
+Texas Tech,TTU
+NC State,NCS
+Kentucky,Ken
+Oakland,Oak
+Florida,Fla
+BSU/Colo,PI2
+Marquette,Mar
+W Kentucky,WKt
+# Midwest
+Purdue,Pur
+MontSt/GramSt,PI3
+Utah St,USt
+TCU,TCU
+Gonzaga,Gon
+McNeese St,McN
+Kansas,Kan
+Samford,Sam
+South Carolina,SCa
+Oregon,Ore
+Creighton,Cre
+Akron,Akr
+Texas,Tex
+UVA/ColoSt,PI4
+Tennessee,Ten
+St Peter's,StP
