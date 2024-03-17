@@ -1,68 +1,68 @@
-# Midwest
-Purdue,Pur
-NorfSt/GramSt,PI1
-Boise St,BoS
-Fla Atlantic,FlA
-Nevada,Nev
-Richmond,Rch
-Auburn,Aub
-Charleston,Cha
-Washington St,WSt
-James Madison,JMa
-Iowa St,IoS
-Oakland,Oak
-Florida,Fla
-Michigan St,MSU
-Marquette,Mar
-Quinnipiac,Qui
-# West
-Tennessee,Ten
-Stets/Wag,PI2
-Dayton,Day
-TCU,TCU
-BYU,BYU
-South Florida,SFl
-Illinois,Ill
-McNeese St,McN
-Saint Mary's,StM
-Mississippi St,MiS
-Baylor,Bay
-Toledo,Tol
-Utah St,USt
-Seton Hall,SeH
-Arizona,Ari
-Montana,Mon
 # East
 UConn,UCn
-Longwood,Lon
-Nebraska,Neb
-Texas,Tex
-South Carolina,SCa
-Grand Canyon,GCy
-Kansas,Kan
-Samford,Sam
-Clemson,Cle
-StJ/IndSt,PI3
-Kentucky,Ken
+Stetson,Ste
+Fla Atlantic,FAU
+Northwestern,Nwn
+San Diego St,SDS
+UAB,UAB
+Auburn,Aub
+Yale,Yal
+BYU,BYU
+Duquesne,Duq
+Illinois,Ill
 Morehead St,MhS
-Gonzaga,Gon
-Oklahoma,Okl
+Washington St,WSt
+Drake,Drk
+Iowa St,IoS
+South Dakota St,SDk
+# West
 North Carolina,NCU
+How/Wag,PI1
+Mississippi St,MiS
+Michigan St, MSU
+Saint Mary's,StM
+Grand Canyon,GCy
+Alabama,Ala
+Charleston,Cha
+Clemson,Cle
+New Mexico,NMx
+Baylor,Bay
 Colgate,Col
+Dayton,Day
+Nevada,Nev
+Arizona,Ari
+Long Beach St,LBS
 # South
 Houston,Hou
-South Dakota St,SDk
-Northwestern,Nwn
-Colorado St,CSt
-San Diego St,SDS
-Princeton,Pri
-Alabama,Ala
-UC Irvine,UCI
+Longwood,LWd
+Nebraska,Neb
+Texas A&M,A&M
 Wisconsin,Wis
-Col/Virg,PI4
+James Madison,JMa
 Duke,Duk
 Vermont,Ver
 Texas Tech,TTU
-Drake,Drk
+NC State,NCS
+Kentucky,Ken
+Oakland,Oak
+Florida,Fla
+BSU/Colo,PI2
+Marquette,Mar
+W Kentucky,WKt
+# Midwest
+Purdue,Pur
+MontSt/GramSt,PI3
+Utah St,USt
+TCU,TCU
+Gonzaga,Gon
+McNeese St,McN
+Kansas,Kan
+Samford,Sam
+South Carolina,SCa
+Oregon,Ore
 Creighton,Cre
-Sam Houston,SHo
+Akron,Akr
+Texas,Tex
+UVA/ColoSt,PI4
+Tennessee,Ten
+St Peter's,StP
