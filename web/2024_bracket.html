@@ -894,6 +894,9 @@ ul.game li.team {
 	    alert(`Entry ${file.name} was incomplete`);
 	    return;
 	  }
+	  while (picks[picks.length - 1] == "") {
+	    picks.pop();
+	  }
 	  document.getElementById("tie-break").value = picks.pop();
 	  let picksMade = 0;
 	  while (picks.length > 0) {
