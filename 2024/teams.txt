@@ -19,7 +19,7 @@ South Dakota St,SDk
 North Carolina,NCU
 How/Wag,PI1
 Mississippi St,MiS
-Michigan St, MSU
+Michigan St,MSU
 Saint Mary's,StM
 Grand Canyon,GCy
 Alabama,Ala
