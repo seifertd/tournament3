@@ -32,7 +32,12 @@ Running a Pool
 --------------
 You can use this software to run your office or friend group NCAA pool.
 
-1. Collecting entries.
+1. Create a directory on your computer to hold the pool files.
+1. Create the `config.txt` file and set your pool's name, scoring method
+   and round multipliers.
+1. Create the `teams.txt` file in the directory. See the `./pool -h` for a
+   link to a sample you can edit.
+1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
       or send out the included bracket HTML entry collector page via email.
    1. The HTML entry collector needs to be edited with the current year's
@@ -40,13 +45,14 @@ You can use this software to run your office or friend group NCAA pool.
       you will have to enter placeholders at the right seeds and region.
       You will then have to hand edit any entries produced to have the right
       team short name in the right spots.
-   1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/bracket.html)
-1. Create a directory on your computer to hold the pool files.
-1. Create the `config.txt` file and set your pool's name, scoring method
-   and round multipliers.
-1. After the playin games are complete, you can create the `teams.txt` file
-   in the directory. See the `./pool -h` for a link to a sample you can
-   edit.
+      1. New for 2024: there is a ruby script to generate the web entry collector
+         from the teams file. You need a working ruby install and can run it as
+         follows: `ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.svg`
+         * 1st argument: the location of the generator script in this repo
+         * 2nd argument: the location of the teams file
+         * 3rd argument: location where to save the bracket
+         * 4th argument: the location of a logo svg file in urldata format
+   1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/2024_bracket.html)
 1. Create the `entries` subfolder and copy/create/save any entry files you
    got from the pool entrants. Again, you may need to hand edit them to
    swap out First Four placeholder short names for actual ones.
@@ -56,7 +62,8 @@ You can use this software to run your office or friend group NCAA pool.
    `results.txt` file
 1. Run the scores report: `./pool -d mypool scores` until the first round
    is complete.
-1. Run your first possibilities report: `./pool -d mypool poss` and pass
+1. Run your first possibilities report as soon as your machine
+   can handle it: `./pool -d mypool poss` and pass
    around the results via email, slack, discord or whatever.
 
 Scorers
@@ -85,7 +92,7 @@ Possibilities Report
 ---------------------
 
 M1 mac can analyze 2.147B possible outcomes against 50 entries
-in 37 minutes.
+in 37 minutes once there are 32 teams remaining.
 
 ```
 Supercalifragilistic Pool: Possibilities Report
