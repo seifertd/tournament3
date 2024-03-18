@@ -899,14 +899,14 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
   switch (fmt) {
   case PoolFormatText:
     {
-      printf("%10s %4s %4s %5s %5s %6s %6s %6s\n", "",
+      printf("%20s %4s %4s %5s %5s %6s %6s %6s\n", "",
           "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
-      printf("%10s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "Name  ",
+      printf("%20s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "Name  ",
           "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
       for (size_t i = 0; i < poolBracketsCount; i++) {
         PoolStats *stat = &stats[i];
         float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
-        printf("%10.10s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
+        printf("%20.20s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
             stat->minRank, stat->maxRank, stat->bracket->score,
             stat->maxScore, winChance);
         pool_print_humanized(stdout, stat->timesWon, 5);
@@ -1031,9 +1031,9 @@ POOLDEF void pool_score_report(void) {
       printf("UNK\n");
     }
   }
-  printf("                 Curr  Max  Champ/  Tie            Round Scores\n");
-  printf("Rank    Name    Score Score  Live? Break Diff  1   2   3   4   5   6\n");
-  printf("---- ---------- ----- ----- ------ ----- ---- --- --- --- --- --- ---\n");
+  printf("                           Curr  Max  Champ/  Tie            Round Scores\n");
+  printf("Rank          Name        Score Score  Live? Break Diff  1   2   3   4   5   6\n");
+  printf("---- -------------------- ----- ----- ------ ----- ---- --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
     if (i > 0) {
       if (poolBrackets[i].score != lastScore || poolTournamentBracket.tieBreak > 0) {
@@ -1043,7 +1043,7 @@ POOLDEF void pool_score_report(void) {
     } else {
       lastScore = poolBrackets[i].score;
     }
-    printf("%4d %10.10s %5d %5d  %3s %c %5d ",
+    printf("%4d %20.20s %5d %5d  %3s %c %5d ",
       rank,
       poolBrackets[i].name,
       poolBrackets[i].score,
