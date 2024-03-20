@@ -17,7 +17,7 @@ Iowa St,IoS
 South Dakota St,SDk
 # West
 North Carolina,NCU
-How/Wag,PI1
+Wagner,PI1
 Mississippi St,MiS
 Michigan St,MSU
 Saint Mary's,StM
@@ -46,7 +46,7 @@ NC State,NCS
 Kentucky,Ken
 Oakland,Oak
 Florida,Fla
-BSU/Colo,PI2
+Colorado St,PI2
 Marquette,Mar
 W Kentucky,WKt
 # Midwest
