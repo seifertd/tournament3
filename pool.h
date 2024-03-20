@@ -548,6 +548,9 @@ POOLDEF int pool_score_cmpfunc (const void * a, const void * b) {
       diff = bracket_a->tieBreakDiff - bracket_b->tieBreakDiff;
     }
   }
+  if (diff == 0) {
+    diff = bracket_b->maxScore - bracket_a->maxScore;
+  }
   return diff;
 }
 
@@ -569,16 +572,18 @@ POOLDEF int pool_stats_possible_score_cmpfunc (const void * a, const void * b) {
 POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
   PoolStats *aStats = (PoolStats *) a;
   PoolStats *bStats = (PoolStats *) b;
-  int cmp = ( bStats->timesWon - aStats->timesWon );
+  int cmp = ( aStats->minRank - bStats->minRank );
+  if (cmp == 0) {
+    cmp = ( bStats->timesWon - aStats->timesWon );
+  }
   if (cmp == 0) {
     cmp = bStats->timesTied - aStats->timesTied;
-    if (cmp == 0) {
-      cmp = bStats->maxScore - aStats->maxScore;
-    }
+  }
+  if (cmp == 0) {
+    cmp = bStats->maxScore - aStats->maxScore;
   }
   return cmp;
 }
-
 
 POOLDEF void pool_team_report(void) {
   printf("%s: Team Report\n", poolConfiguration.poolName);
