@@ -1,0 +1,70 @@
+# Round 1:
+UCn
+Nwn
+SDS
+Yal
+Duq
+MhS
+Drk
+SDk
+Wag
+MiS
+StM
+Ala
+Cle
+Bay
+Day
+Ari
+Hou
+A&M
+JMa
+Ver
+NCS
+Ken
+Fla
+Mar
+GrS
+TCU
+McN
+Sam
+SCa
+Akr
+CSt
+StP
+# Round 2:
+Nwn
+Yal
+MhS
+SDk
+MiS
+StM
+Cle
+Ari
+A&M
+Ver
+Ken
+Fla
+TCU
+McN
+Akr
+StP
+# Round 3:
+Nwn
+MhS
+StM
+Cle
+Ver
+Fla
+TCU
+Akr
+# Round 4:
+MhS
+Cle
+Ver
+TCU
+# Final Four:
+Cle
+Ver
+# Championship:
+Ver
+194

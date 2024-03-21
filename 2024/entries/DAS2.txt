@@ -1,0 +1,70 @@
+# Round 1:
+UCn
+Nwn
+SDS
+Aub
+Duq
+Ill
+Drk
+IoS
+UNC
+MSU
+GCy
+Ala
+Cle
+Bay
+Day
+Ari
+Hou
+Neb
+Wis
+Duk
+TTU
+Ken
+Cdo
+Mar
+Pur
+TCU
+Gon
+Sam
+SCa
+Cre
+Tex
+Ten
+# Round 2:
+UCn
+SDS
+Duq
+IoS
+UNC
+GCy
+Bay
+Day
+Hou
+Duk
+Ken
+Mar
+Pur
+Gon
+Cre
+Ten
+# Round 3:
+SDS
+IoS
+UNC
+Bay
+Hou
+Mar
+Gon
+Cre
+# Round 4:
+IoS
+UNC
+Hou
+Cre
+# Final Four:
+IoS
+Hou
+# Championship:
+Hou
+145

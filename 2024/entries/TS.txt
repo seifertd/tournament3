@@ -1,0 +1,70 @@
+# Round 1:
+UCn
+Nwn
+SDS
+Yal
+Duq
+Ill
+Drk
+SDk
+UNC
+MSU
+GCy
+Cha
+Cle
+Bay
+Day
+LBS
+LWd
+A&M
+JMa
+Duk
+TTU
+Ken
+Fla
+WKt
+Pur
+TCU
+Gon
+Sam
+SCa
+Akr
+Tex
+StP
+# Round 2:
+Nwn
+Yal
+Duq
+Drk
+MSU
+Cha
+Bay
+Day
+LWd
+JMa
+TTU
+Fla
+TCU
+Sam
+SCa
+Tex
+# Round 3:
+Nwn
+Drk
+MSU
+Bay
+LWd
+TTU
+TCU
+SCa
+# Round 4:
+Nwn
+Bay
+TTU
+TCU
+# Final Four:
+Bay
+TTU
+# Championship:
+Bay
+203

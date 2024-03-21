@@ -1,0 +1,70 @@
+# Round 1:
+UCn
+Nwn
+UAB
+Yal
+BYU
+Ill
+Drk
+IoS
+Wag
+MSU
+GCy
+Cha
+NMx
+Col
+Nev
+Ari
+LWd
+Neb
+Wis
+Duk
+NCS
+Ken
+Cdo
+WKt
+Pur
+USt
+Gon
+Kan
+SCa
+Akr
+Tex
+Ten
+# Round 2:
+UCn
+Yal
+BYU
+Drk
+MSU
+Cha
+NMx
+Ari
+Neb
+Duk
+NCS
+WKt
+Pur
+Gon
+SCa
+Ten
+# Round 3:
+UCn
+BYU
+MSU
+Ari
+Neb
+WKt
+Pur
+Ten
+# Round 4:
+UCn
+Ari
+WKt
+Ten
+# Final Four:
+UCn
+WKt
+# Championship:
+UCn
+155

@@ -1,2 +1,2 @@
-name=2024 NCAA Basketball Championship
+name=2024 NCAA BB Tourny: Americorp Challenge
 scorerType=Upset

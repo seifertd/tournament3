@@ -1,0 +1,70 @@
+# Round 1:
+UCn
+Nwn
+SDS
+Aub
+Duq
+Ill
+WSt
+IoS
+UNC
+MSU
+StM
+Cha
+Cle
+Col
+Nev
+Ari
+Hou
+A&M
+JMa
+Duk
+TTU
+Oak
+Cdo
+Mar
+Pur
+USt
+Gon
+Kan
+SCa
+Akr
+Tex
+Ten
+# Round 2:
+UCn
+Aub
+Ill
+WSt
+MSU
+Cha
+Cle
+Ari
+Hou
+Duk
+TTU
+Mar
+USt
+Kan
+SCa
+Tex
+# Round 3:
+UCn
+WSt
+MSU
+Ari
+Duk
+Mar
+Kan
+Tex
+# Round 4:
+UCn
+Ari
+Duk
+Tex
+# Final Four:
+Ari
+Tex
+# Championship:
+Tex
+143

@@ -1,0 +1,70 @@
+# Round 1:
+UCn
+FAU
+SDS
+Aub
+BYU
+Ill
+Drk
+IoS
+UNC
+MSU
+StM
+Ala
+NMx
+Bay
+Day
+Ari
+Hou
+A&M
+JMa
+Duk
+TTU
+Ken
+Fla
+Mar
+Pur
+TCU
+McN
+Kan
+Ore
+Cre
+CSt
+Ten
+# Round 2:
+UCn
+Aub
+BYU
+IoS
+UNC
+StM
+Bay
+Ari
+Hou
+JMa
+Ken
+Mar
+Pur
+Kan
+Cre
+Ten
+# Round 3:
+Aub
+IoS
+UNC
+Ari
+Hou
+Mar
+Pur
+Cre
+# Round 4:
+Aub
+Ari
+Hou
+Pur
+# Final Four:
+Aub
+Pur
+# Championship:
+Pur
+145

@@ -16,8 +16,8 @@ Drake,Drk
 Iowa St,IoS
 South Dakota St,SDk
 # West
-North Carolina,NCU
-Wagner,PI1
+North Carolina,UNC
+Wagner,Wag
 Mississippi St,MiS
 Michigan St,MSU
 Saint Mary's,StM
@@ -46,12 +46,12 @@ NC State,NCS
 Kentucky,Ken
 Oakland,Oak
 Florida,Fla
-Colorado,PI2
+Colorado,Cdo
 Marquette,Mar
 W Kentucky,WKt
 # Midwest
 Purdue,Pur
-Grambling St,PI3
+Grambling St,GrS
 Utah St,USt
 TCU,TCU
 Gonzaga,Gon
@@ -63,6 +63,6 @@ Oregon,Ore
 Creighton,Cre
 Akron,Akr
 Texas,Tex
-Colorado St,PI4
+Colorado St,CSt
 Tennessee,Ten
 St Peter's,StP
