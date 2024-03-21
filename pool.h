@@ -124,6 +124,7 @@ typedef struct {
   uint32_t score;
   uint32_t maxScore;
   uint32_t roundScores[POOL_ROUNDS];
+  uint8_t wins;
 } PoolBracket;
 #define POOL_BRACKET_CAPACITY 1024
 static uint32_t poolBracketsCount = 0;
@@ -134,7 +135,8 @@ static PoolBracket poolTournamentBracket = {
   .name = "Tourney",
   .score = 0,
   .maxScore = 0,
-  .roundScores = {0}
+  .roundScores = {0},
+  .wins = 0
 };
 
 typedef struct {
@@ -176,6 +178,7 @@ POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
 POOLDEF void pool_print_entry(PoolBracket *bracket);
 POOLDEF void pool_read_config_file(const char *filePath);
 POOLDEF void pool_read_team_file(const char *filePath);
+POOLDEF uint8_t pool_games_played(void);
 POOLDEF uint8_t pool_team_num_for_short_name(const char *shortName);
 POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *entryName, size_t entryNameSize,
     PoolBracket *bracket, bool recordEliminations);
@@ -391,6 +394,7 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
   bracket->score = 0;
   bracket->maxScore = 0;
   bracket->roundScores[0] = 0;
+  bracket->wins = 0;
   uint8_t round = 0;
   for (uint8_t g = 0; g < POOL_NUM_GAMES; g++) {
     if (g >= poolGamesInRound[round]) {
@@ -405,6 +409,7 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
         bracket->score += gameScore;
         bracket->maxScore += gameScore;
         bracket->roundScores[round] += gameScore;
+        bracket->wins += 1;
       }
     } else {
       if (!poolTeams[bracketWinner - 1].eliminated) {
@@ -471,7 +476,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     uint8_t team1, team2 = 0;
     pool_teams_of_game(g, 0, bracket, &team1, &team2);
     if (g > 0) { printf(" "); }
-    printf("%3s", POOL_TEAM_SHORT_NAME(team1));
+    printf(STRIKE(team1, 0, "%3s"), POOL_TEAM_SHORT_NAME(team1));
   }
   printf("\n");
   printf("   ");
@@ -479,7 +484,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     uint8_t team1, team2 = 0;
     pool_teams_of_game(g, 0, bracket, &team1, &team2);
     if (g > 0) { printf(" "); }
-    printf("%3s", POOL_TEAM_SHORT_NAME(team2));
+    printf(STRIKE(team2, 0, "%3s"), POOL_TEAM_SHORT_NAME(team2));
   }
   printf("\n");
   printf("1: ");
@@ -584,6 +589,7 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
   }
   return cmp;
 }
+
 
 POOLDEF void pool_team_report(void) {
   printf("%s: Team Report\n", poolConfiguration.poolName);
@@ -1036,9 +1042,9 @@ POOLDEF void pool_score_report(void) {
       printf("UNK\n");
     }
   }
-  printf("                           Curr  Max  Champ/  Tie            Round Scores\n");
-  printf("Rank          Name        Score Score  Live? Break Diff  1   2   3   4   5   6\n");
-  printf("---- -------------------- ----- ----- ------ ----- ---- --- --- --- --- --- ---\n");
+  printf("                           Curr  Max   Win   Champ/  Tie            Round Scores\n");
+  printf("Rank          Name        Score Score  Pct    Live? Break Diff  1   2   3   4   5   6\n");
+  printf("---- -------------------- ----- ----- ------ ------ ----- ---- --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
     if (i > 0) {
       if (poolBrackets[i].score != lastScore || poolTournamentBracket.tieBreak > 0) {
@@ -1048,11 +1054,12 @@ POOLDEF void pool_score_report(void) {
     } else {
       lastScore = poolBrackets[i].score;
     }
-    printf("%4d %20.20s %5d %5d  %3s %c %5d ",
+    printf("%4d %20.20s %5d %5d %6.2f  %3s %c %5d ",
       rank,
       poolBrackets[i].name,
       poolBrackets[i].score,
       poolBrackets[i].maxScore,
+      poolBrackets[i].wins * 100.0 / pool_games_played(), 
       POOL_TEAM_SHORT_NAME(poolBrackets[i].winners[62]),
       poolTeams[poolBrackets[i].winners[62] - 1].eliminated ? 'N' : 'Y',
       poolBrackets[i].tieBreak
@@ -1150,6 +1157,7 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
         }
         teamRounds[teamNum-1] = teamRounds[teamNum-1] + 1;
       }
+      bracket->wins += 1;
       line = fgets(buffer, 1023, f);
       resultsCount++;
     }
@@ -1257,6 +1265,10 @@ POOLDEF void pool_read_config_file(const char *filePath) {
     line = fgets(buffer, 1023, f);
   }
   poolConfiguration.poolScorer = pool_get_scorer_function(poolConfiguration.scorerType);
+}
+
+POOLDEF uint8_t pool_games_played(void) {
+  return poolTournamentBracket.wins;
 }
 
 POOLDEF void pool_read_team_file(const char *filePath) {
