@@ -205,6 +205,10 @@ typedef struct {
   char poolName[POOL_NAME_LIMIT];
   PoolScorerFunction poolScorer;
   char dirPath[1024];
+  char pi1[POOL_TEAM_SHORT_NAME_LIMIT];
+  char pi2[POOL_TEAM_SHORT_NAME_LIMIT];
+  char pi3[POOL_TEAM_SHORT_NAME_LIMIT];
+  char pi4[POOL_TEAM_SHORT_NAME_LIMIT];
 } PoolConfiguration;
 static PoolConfiguration poolConfiguration = {0};
 
@@ -1137,6 +1141,19 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
       fprintf(stderr, "Too many lines in entry file %s: %d\n", filePath, resultsCount);
       exit(1);
     } else {
+      // Swap out play ins
+      if (strncmp(buffer, "PI1", POOL_TEAM_SHORT_NAME_LIMIT) == 0 && strlen(poolConfiguration.pi1) > 0) {
+        strcpy(buffer, poolConfiguration.pi1);
+      }
+      if (strncmp(buffer, "PI2", POOL_TEAM_SHORT_NAME_LIMIT) == 0 && strlen(poolConfiguration.pi2) > 0) {
+        strcpy(buffer, poolConfiguration.pi2);
+      }
+      if (strncmp(buffer, "PI3", POOL_TEAM_SHORT_NAME_LIMIT) == 0 && strlen(poolConfiguration.pi3) > 0) {
+        strcpy(buffer, poolConfiguration.pi3);
+      }
+      if (strncmp(buffer, "PI4", POOL_TEAM_SHORT_NAME_LIMIT) == 0 && strlen(poolConfiguration.pi4) > 0) {
+        strcpy(buffer, poolConfiguration.pi4);
+      }
       uint8_t teamNum = pool_team_num_for_short_name(buffer);
       if (teamNum == 0) {
         fprintf(stderr, "Could not determine team number of %s\n", buffer);
@@ -1262,6 +1279,18 @@ POOLDEF void pool_read_config_file(const char *filePath) {
         exit(1);
       }
     }
+    if (strncmp(line, "PI1=", 4) == 0) {
+      strncpy(poolConfiguration.pi1, line + 4, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strncmp(line, "PI2=", 4) == 0) {
+      strncpy(poolConfiguration.pi2, line + 4, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strncmp(line, "PI3=", 4) == 0) {
+      strncpy(poolConfiguration.pi3, line + 4, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strncmp(line, "PI4=", 4) == 0) {
+      strncpy(poolConfiguration.pi4, line + 4, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
     line = fgets(buffer, 1023, f);
   }
   poolConfiguration.poolScorer = pool_get_scorer_function(poolConfiguration.scorerType);
@@ -1305,6 +1334,19 @@ POOLDEF void pool_read_team_file(const char *filePath) {
       fprintf(stderr, "Could not read name and short name from line %s\n", buffer);
       exit(1);
     }
+    // Swap in PI[1234] accordingly
+    if (strcmp(team->shortName, "PI1") == 0 && strlen(poolConfiguration.pi1) > 0) {
+      strncpy(team->shortName, poolConfiguration.pi1, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strcmp(team->shortName, "PI2") == 0 && strlen(poolConfiguration.pi2) > 0) {
+      strncpy(team->shortName, poolConfiguration.pi2, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strcmp(team->shortName, "PI3") == 0 && strlen(poolConfiguration.pi3) > 0) {
+      strncpy(team->shortName, poolConfiguration.pi3, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strcmp(team->shortName, "PI4") == 0 && strlen(poolConfiguration.pi4) > 0) {
+      strncpy(team->shortName, poolConfiguration.pi4, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
     // Check if we already read this
     for (uint8_t t = 0; t < i; t++) {
       if (strcmp(poolTeams[i].name, poolTeams[t].name) == 0) {
@@ -1312,7 +1354,7 @@ POOLDEF void pool_read_team_file(const char *filePath) {
         exit(1);
       }
       if (strcmp(poolTeams[i].shortName, poolTeams[t].shortName) == 0) {
-        fprintf(stderr, "Duplicate team shortName %s for team %d and %d\n", poolTeams[i].shortName, i+1, t+1);
+        fprintf(stderr, "Duplicate team shortName |%s| for team %d and %d\n", poolTeams[i].shortName, i+1, t+1);
         exit(1);
       }
     }
