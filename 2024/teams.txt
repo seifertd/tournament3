@@ -46,12 +46,12 @@ NC State,NCS
 Kentucky,Ken
 Oakland,Oak
 Florida,Fla
-Colorado St,PI2
+Colorado,PI2
 Marquette,Mar
 W Kentucky,WKt
 # Midwest
 Purdue,Pur
-MontSt/GramSt,PI3
+Grambling St,PI3
 Utah St,USt
 TCU,TCU
 Gonzaga,Gon
@@ -63,6 +63,6 @@ Oregon,Ore
 Creighton,Cre
 Akron,Akr
 Texas,Tex
-UVA/ColoSt,PI4
+Colorado St,PI4
 Tennessee,Ten
 St Peter's,StP
