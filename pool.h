@@ -194,7 +194,7 @@ POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType);
 POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket);
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength);
 
-#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m\033[31m" f "\033[0m" : (w != 0 ? "\033[32m" f "\033[0m" : f) )
+#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m\033[31m" f "\033[0m" : (w != 0 && pw != 0 ? "\033[32m" f "\033[0m" : f) )
 #define POOL_TEAM_SHORT_NAME(w) ( w == 0 ? "Unk" : poolTeams[w-1].shortName )
 #define POOL_TEAM_NAME(w) ( w == 0 ? "Unknown" : poolTeams[w-1].name )
 
@@ -480,7 +480,8 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     uint8_t team1, team2 = 0;
     pool_teams_of_game(g, 0, bracket, &team1, &team2);
     if (g > 0) { printf(" "); }
-    printf(STRIKE(team1, 0, "%3s"), POOL_TEAM_SHORT_NAME(team1));
+    uint8_t pw = poolTournamentBracket.winners[g];
+    printf(STRIKE(team1, pw, "%3s"), POOL_TEAM_SHORT_NAME(team1));
   }
   printf("\n");
   printf("   ");
@@ -488,7 +489,8 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     uint8_t team1, team2 = 0;
     pool_teams_of_game(g, 0, bracket, &team1, &team2);
     if (g > 0) { printf(" "); }
-    printf(STRIKE(team2, 0, "%3s"), POOL_TEAM_SHORT_NAME(team2));
+    uint8_t pw = poolTournamentBracket.winners[g];
+    printf(STRIKE(team2, pw, "%3s"), POOL_TEAM_SHORT_NAME(team2));
   }
   printf("\n");
   printf("1: ");
