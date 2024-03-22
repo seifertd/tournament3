@@ -1082,6 +1082,12 @@ POOLDEF void pool_score_report(void) {
       poolBrackets[i].roundScores[5]
     );
   }
+  int gamesLeftCount = 63 - pool_games_played();
+  uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
+  printf("There are %d teams and %d games remaining, ",
+    gamesLeftCount + 1, gamesLeftCount);
+  pool_print_humanized(stdout, possibleOutcomes, 6);
+  printf(" possible outcomes\n");
 }
 
 POOLDEF int pool_name_cmpfunc (const void * a, const void * b) {

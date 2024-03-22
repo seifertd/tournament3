@@ -13,4 +13,7 @@ Oak
 Gon
 IoS
 Ten
+WSt
+NCS
+Kan
 # Round 1 Day 2
