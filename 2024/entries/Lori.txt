@@ -7,7 +7,7 @@ BYU
 Ill
 Drk
 IoS
-Wag
+PI1
 MSU
 GCy
 Cha
@@ -21,7 +21,7 @@ Wis
 Duk
 NCS
 Ken
-Cdo
+PI2
 WKt
 Pur
 USt

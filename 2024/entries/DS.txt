@@ -7,7 +7,7 @@ Duq
 MhS
 Drk
 SDk
-Wag
+PI1
 MiS
 StM
 Ala
@@ -23,13 +23,13 @@ NCS
 Ken
 Fla
 Mar
-GrS
+PI3
 TCU
 McN
 Sam
 SCa
 Akr
-CSt
+PI4
 StP
 # Round 2:
 Nwn
