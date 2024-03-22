@@ -21,7 +21,7 @@ Wis
 Duk
 TTU
 Oak
-Cdo
+PI2
 Mar
 Pur
 TCU
@@ -29,7 +29,7 @@ Gon
 Kan
 Ore
 Cre
-CSt
+PI4
 Ten
 # Round 2:
 UCn
@@ -47,7 +47,7 @@ Mar
 Pur
 Gon
 Ore
-CSt
+PI4
 # Round 3:
 Aub
 Drk
