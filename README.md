@@ -37,14 +37,13 @@ You can use this software to run your office or friend group NCAA pool.
    and round multipliers.
 1. Create the `teams.txt` file in the directory. See the `./pool -h` for a
    link to a sample you can edit.
+   1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
+      short name. The long name is irrelvant
 1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
       or send out the included bracket HTML entry collector page via email.
    1. The HTML entry collector needs to be edited with the current year's
-      teams. If you hand this out before the First Four games are finished
-      you will have to enter placeholders at the right seeds and region.
-      You will then have to hand edit any entries produced to have the right
-      team short name in the right spots.
+      teams.
       1. New for 2024: there is a ruby script to generate the web entry collector
          from the teams file. You need a working ruby install and can run it as
          follows: `ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.svg`
@@ -54,12 +53,26 @@ You can use this software to run your office or friend group NCAA pool.
          * 4th argument: the location of a logo svg file in urldata format
    1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/2024_bracket.html)
 1. Create the `entries` subfolder and copy/create/save any entry files you
-   got from the pool entrants. Again, you may need to hand edit them to
-   swap out First Four placeholder short names for actual ones.
+   got from the pool entrants. 
 1. Generate an entries report and send it out to everyone for confirmation:
    `./pool -d mypool entries`
+1. Handle the play in games.
+   1. As the play in games are played, add to
+      the pool `config.txt` file lines that map the place holder short
+      team names (`PI[1234]`) with a new short name matching the winner.
+      You will end up with lines like:
+      ```
+      PI1=Wag
+      PI2=Cdo
+      PI3=GrS
+      PI4=CSt
+      ```
+   1. Make sure to change the long name of the play in teams in the
+      `teams.txt` file, but don't modify the `PI[1234]` short names.
 1. As games are played in the tournament, record the winners in the 
-   `results.txt` file
+   `results.txt` file, one team short name per line. For play in games,
+   you can use either the original `PI[1234]` short names or the mapped
+   short names of the play in from the step above.
 1. Run the scores report: `./pool -d mypool scores` until the first round
    is complete.
 1. Run your first possibilities report as soon as your machine
