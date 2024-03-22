@@ -475,7 +475,7 @@ POOLDEF void pool_initialize(const char *dirPath) {
 
 POOLDEF void pool_print_entry(PoolBracket *bracket) {
   printf("%s\n", bracket->name);
-  printf("   ");
+  printf("          ");
   for (size_t g = 0; g < 32; g++) {
     uint8_t team1, team2 = 0;
     pool_teams_of_game(g, 0, bracket, &team1, &team2);
@@ -484,7 +484,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     printf(STRIKE(team1, pw, "%3s"), POOL_TEAM_SHORT_NAME(team1));
   }
   printf("\n");
-  printf("   ");
+  printf("          ");
   for (size_t g = 0; g < 32; g++) {
     uint8_t team1, team2 = 0;
     pool_teams_of_game(g, 0, bracket, &team1, &team2);
@@ -493,7 +493,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     printf(STRIKE(team2, pw, "%3s"), POOL_TEAM_SHORT_NAME(team2));
   }
   printf("\n");
-  printf("1: ");
+  printf(" Round 1: ");
   for (size_t g = 0; g < 32; g++) {
     uint8_t w = bracket->winners[g];
     uint8_t pw = poolTournamentBracket.winners[g];
@@ -501,7 +501,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     printf(STRIKE(w, pw, "%3s"), POOL_TEAM_SHORT_NAME(w));
   }
   printf("\n");
-  printf("2: ");
+  printf("Sweet 16: ");
   for (size_t g = 0; g < 16; g++) {
     uint8_t w = bracket->winners[g + 32];
     uint8_t pw = poolTournamentBracket.winners[g + 32];
@@ -511,7 +511,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     printf("  ");
   }
   printf("\n");
-  printf("3: ");
+  printf(" Elite 8: ");
   for (size_t g = 0; g < 8; g++) {
     uint8_t w = bracket->winners[g + 48];
     uint8_t pw = poolTournamentBracket.winners[g + 48];
@@ -521,7 +521,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     printf("      ");
   }
   printf("\n");
-  printf("4: ");
+  printf(" Final 4: ");
   for (size_t g = 0; g < 4; g++) {
     uint8_t w = bracket->winners[g + 56];
     uint8_t pw = poolTournamentBracket.winners[g + 56];
@@ -531,7 +531,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
     printf("              ");
   }
   printf("\n");
-  printf("5: ");
+  printf(" Final 2: ");
   for (size_t g = 0; g < 2; g++) {
     uint8_t w = bracket->winners[g + 60];
     uint8_t pw = poolTournamentBracket.winners[g + 60];
@@ -542,7 +542,7 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
   }
   printf("\n");
   uint8_t w = bracket->winners[62];
-  printf("6: Champion: %s%s%s Tie Breaker: %d\n",
+  printf("Champion: %s%s%s Tie Breaker: %d\n",
     ( poolTeams[w-1].eliminated ? "\033[9m" : "" ),
     POOL_TEAM_NAME(w),
     ( poolTeams[w-1].eliminated ? "\033[0m" : "" ),
