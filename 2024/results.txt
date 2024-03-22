@@ -8,3 +8,9 @@ UNC
 Ill
 Ore
 Day
+Tex
+Oak
+Gon
+IoS
+Ten
+# Round 1 Day 2

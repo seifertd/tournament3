@@ -50,6 +50,10 @@ void help(void) {
   fprintf(stderr, "              1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15\n");
   fprintf(stderr, "          region 1 first, region 2 second, etc\n");
   fprintf(stderr, "          final four: region 1 vs region 2, region 3 vs. region 4\n");
+  fprintf(stderr, "          Play in games: The four play in games should use short names\n");
+  fprintf(stderr, "            PI1, PI2, PI3, PI4.  As each play in game concludes, modify\n");
+  fprintf(stderr, "            the config.txt to map the PI{n} names to actual winner short\n");
+  fprintf(stderr, "            names. The long name of the winner can be set in teams.txt\n");
   fprintf(stderr, "     results.txt: file containing short names of winners of each match\n");
   fprintf(stderr, "          winners can be reported in any order, EXCEPT:\n");
   fprintf(stderr, "          all current round winners must be reported before next round winners may be reported\n");
@@ -68,8 +72,8 @@ void help(void) {
   fprintf(stderr, "           the difference between the winner's seed and loser's seed is added if > 0\n");
   fprintf(stderr, "\nExample Configuration File:\n");
   fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundScores=1,2,4,8,11,15\n");
-  fprintf(stderr, "\nSample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2023/teams.txt\n");
-  fprintf(stderr, "\nSample results.txt file: https://github.com/seifertd/tournament3/blob/main/2023/results.txt\n");
+  fprintf(stderr, "\nSample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2024/teams.txt\n");
+  fprintf(stderr, "\nSample results.txt file: https://github.com/seifertd/tournament3/blob/main/2024/results.txt\n");
 }
 
 int main(int argc, char *argv[]) {
