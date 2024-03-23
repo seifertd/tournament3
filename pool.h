@@ -279,7 +279,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
     prog->nextPercent += 1;
   } else if (prog->complete < prog->total) {
     double perc = (double) prog->complete / (double) prog->total * 100.0;
-    if ( perc > prog->nextPercent || prog->complete == 10000000) {
+    if ( perc > prog->nextPercent || prog->complete % 10000000 == 0) {
       clock_t curr = clock();
       double elapsed_t = (double)(curr - prog->start)/CLOCKS_PER_SEC;
       double bps = elapsed_t > 0 ? prog->complete / elapsed_t : 9999999.99;
@@ -612,14 +612,28 @@ POOLDEF void pool_team_report(void) {
   }
 }
 
+int power_of_two(int num) {
+  int ans = 0;
+  if (num == 0)
+    return 0;
+  while (num != 1) {
+    if (num % 2 != 0)
+      return 0;
+    ans++;
+    num = num / 2;
+  }
+  return ans;
+}
+
 POOLDEF void pool_advance_bracket_for_batch(PoolBracket *possibleBracket,
              uint8_t gamesLeft[], int *gamesLeftCount, int batch, int numBatches) {
   if (numBatches <= 1) {
     return;
   }
-  if (numBatches > *gamesLeftCount) {
-    fprintf(stderr, "[ERROR] There are more batches %d than games left %d\n",
-            numBatches, *gamesLeftCount);
+  int log2Batches = power_of_two(numBatches);
+  if (log2Batches > *gamesLeftCount) {
+    fprintf(stderr, "[ERROR] There are more batches log2(%d) = %d needed for the games left %d\n",
+            numBatches, log2Batches, *gamesLeftCount);
     exit(1);
   }
   int gamesToDecide = LOG2(numBatches);
