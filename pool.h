@@ -542,12 +542,11 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
   }
   printf("\n");
   uint8_t w = bracket->winners[62];
-  printf("Champion: %s%s%s Tie Breaker: %d\n",
-    ( poolTeams[w-1].eliminated ? "\033[9m" : "" ),
-    POOL_TEAM_NAME(w),
-    ( poolTeams[w-1].eliminated ? "\033[0m" : "" ),
-    bracket->tieBreak);
-  printf("\n\n");
+  uint8_t pw = poolTournamentBracket.winners[62];
+  printf("Champion: ");
+  printf(STRIKE(w, pw, "%s"), POOL_TEAM_NAME(w));
+  printf(" Tie Breaker: %d\n", bracket->tieBreak);
+  printf("\n");
 }
 
 POOLDEF int pool_score_cmpfunc (const void * a, const void * b) {
