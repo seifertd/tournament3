@@ -51,3 +51,19 @@ Ala
 UCn
 Hou
 SDS
+# Round 3 Day 1
+UCn
+Cle
+Ala
+Ill
+# Round 3 Day 2
+NCS
+Pur
+Duk
+Ten
+# Round 4 Day 1
+UCn
+Ala
+# Round 4 Day 2
+Pur
+NCS
