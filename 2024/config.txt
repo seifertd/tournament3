@@ -4,3 +4,4 @@ PI1=Wag
 PI2=Cdo
 PI3=GrS
 PI4=CSt
+payouts=60,30,10,-1

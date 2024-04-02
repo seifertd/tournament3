@@ -34,7 +34,8 @@ void usage(char *progName) {
   fprintf(stderr, "     results: show tournament bracket\n");
   fprintf(stderr, "     entries: show tournament entry brackets\n");
   fprintf(stderr, "     scores: show current scores\n");
-  fprintf(stderr, "     poss: show possiblities stats scores.\n");
+  fprintf(stderr, "     poss: show possibilities stats\n");
+  fprintf(stderr, "     ffour: show final four possibilities\n");
 }
 
 void help(void) {
@@ -145,6 +146,8 @@ int main(int argc, char *argv[]) {
     pool_score_report();
   } else if (strcmp(command, "poss") == 0) {
     pool_possibilities_report(format, progress, batch, numBatches, restore);
+  } else if (strcmp(command, "ffour") == 0) {
+    pool_final_four_report();
   } else if (strcmp(command, "entries") == 0) {
     pool_entries_report();
   } else if (strcmp(command, "results") == 0) {
