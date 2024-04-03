@@ -4,3 +4,5 @@ PI1=Wag
 PI2=Cdo
 PI3=GrS
 PI4=CSt
+payouts=80,20,-1
+fee=5

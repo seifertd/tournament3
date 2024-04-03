@@ -35,6 +35,14 @@ You can use this software to run your office or friend group NCAA pool.
 1. Create a directory on your computer to hold the pool files.
 1. Create the `config.txt` file and set your pool's name, scoring method
    and round multipliers.
+   1. If you are running this pool for profit, also fill in the `fee`
+      and `payouts` lines.
+   1. The `fee` is the number of currency units you collect per entry.
+   1. The `payouts` line is a comma separated list of no more than
+      4 integers which specify the payouts by rank.
+      1. postive numbers specify a percentage of the total fees collected
+      1. -1 specifies that rank gets the entry fee back.
+      1. The sum of the percentages has to equal exactly 100
 1. Create the `teams.txt` file in the directory. See the `./pool -h` for a
    link to a sample you can edit.
    1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
