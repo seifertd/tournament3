@@ -134,6 +134,7 @@ static PoolBracket poolBrackets[POOL_BRACKET_CAPACITY] = {0};
 static PoolBracket poolTournamentBracket = {
   .winners = {0},
   .tieBreak = 0,
+  .tieBreakDiff = 0,
   .name = "Tourney",
   .score = 0,
   .maxScore = 0,
@@ -156,6 +157,11 @@ typedef struct {
   PoolStats *stats;
   uint32_t possibleScore;
 } PoolScoreStats;
+
+typedef struct {
+  PoolBracket *bracket;
+  uint32_t possibleScore;
+} PoolBracketScore;
 
 #define POOL_CONFIG_FILE_NAME "config.txt"
 #define POOL_TEAMS_FILE_NAME "teams.txt"
@@ -205,6 +211,7 @@ typedef struct {
   uint32_t roundScores[POOL_ROUNDS];
   PoolScorerType scorerType;
   int payouts[POOL_MAX_PAYOUTS];
+  uint8_t fee;
   char poolName[POOL_NAME_LIMIT];
   PoolScorerFunction poolScorer;
   char dirPath[1024];
@@ -665,10 +672,16 @@ POOLDEF void pool_possibilities_dfs(
     uint8_t gamesLeft[], int gamesLeftCount, uint8_t game,
     PoolBracket *possibleBracket,
     PoolStats stats[], uint32_t numBrackets,
-    PoolProgress *prog) {
+    PoolProgress *prog,
+    PoolBracket possibleBrackets[],
+    uint8_t *possibleBracketCount) {
   if (game >= gamesLeftCount) {
     pool_inc_progress(prog);
     PoolScoreStats copyStats[numBrackets];
+    if (possibleBrackets && possibleBracketCount) {
+      memcpy(&possibleBrackets[*possibleBracketCount], possibleBracket, sizeof(PoolBracket));
+      *possibleBracketCount += 1;
+    }
     for (uint32_t i = 0; i < numBrackets; i++) {
       copyStats[i].stats = &stats[i];
       copyStats[i].possibleScore = stats[i].possibleScore;
@@ -738,7 +751,9 @@ POOLDEF void pool_possibilities_dfs(
       gamesLeft, gamesLeftCount, game + 1,
       possibleBracket,
       stats, poolBracketsCount,
-      prog);
+      prog,
+      possibleBrackets,
+      possibleBracketCount);
 
     for (size_t i = 0; i < numBrackets; i++) {
       stats[i].possibleScore -= bracketGameScores[i];
@@ -858,7 +873,8 @@ POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCo
 }
 
 bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
-                         int batch, int numBatches, bool restore, uint64_t *possibleOutcomes) {
+                         int batch, int numBatches, bool restore, uint64_t *possibleOutcomes,
+                         PoolBracket possibleBrackets[], uint8_t *possibleBracketCount) {
   if (poolBracketsCount == 0) {
     fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return false;
@@ -868,6 +884,7 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
   PoolBracket possibleBracket = {
     .winners = {0},
     .tieBreak = poolTournamentBracket.tieBreak,
+    .tieBreakDiff = 0,
     .name = "possible",
     .maxScore = 0,
     .roundScores = {0}
@@ -919,7 +936,9 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
       gamesLeft, gamesLeftCount, 0,
       &possibleBracket,
       stats, poolBracketsCount,
-      progress ? &prog : NULL);
+      progress ? &prog : NULL,
+      possibleBrackets,
+      possibleBracketCount);
   } else {
     pool_restore_stats_from_files(stats, poolBracketsCount);
   }
@@ -932,11 +951,86 @@ POOLDEF void pool_final_four_report(void) {
     fprintf(stderr, "Final Four report should only be run when 4 or fewer teams remain\n");
     return;
   }
+  if (poolConfiguration.fee == 0) {
+    fprintf(stderr, "Final Four report is not applicable if no pool fee is configured.\n");
+    return;
+  }
+  uint8_t numPayouts = 0;
+  for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
+    if (poolConfiguration.payouts[i] != 0) {
+       numPayouts++;
+    }
+  }
+  if (numPayouts == 0) {
+    fprintf(stderr, "Final Four report is not applicable if no pool payouts are configured.\n");
+    return;
+  }
+  
   // Reserve space for stats
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
-
+  PoolBracket possibleBrackets[8] = {0};
   uint64_t possibleOutcomes = 0L;
-  if (setup_possibilities(stats, PoolFormatInvalid, false, 0, 1, false, &possibleOutcomes)) {
+  uint8_t possibleBracketCount = 0;
+
+  if (setup_possibilities(stats, PoolFormatInvalid, false, 0, 1, false, &possibleOutcomes, possibleBrackets, &possibleBracketCount)) {
+    printf("%s: Final Four Report\n", poolConfiguration.poolName);
+
+    float totalPayout = poolBracketsCount * poolConfiguration.fee;
+    printf("Fees collected: $%d\n", (int) totalPayout);
+
+    for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
+      if (poolConfiguration.payouts[i] == -1) {
+        totalPayout -= poolConfiguration.fee;
+      }
+    }
+    for (uint8_t i = 0; i < possibleBracketCount; i++) {
+      PoolBracket b = possibleBrackets[i];
+      PoolTeam ff1 = poolTeams[b.winners[60]-1];
+      PoolTeam ff2 = poolTeams[b.winners[61]-1];
+      PoolTeam champ = poolTeams[b.winners[62]-1];
+      printf("Possibility %d: (%d) %s vs (%d) %s Champ: (%d) %s\n", i+1, ff1.seed, ff1.name,
+             ff2.seed, ff2.name, champ.seed, champ.name);
+
+      // Calculate score of all brackets based on this possible outcome and then sort them
+      for (uint32_t i = 0; i < poolBracketsCount; i++) {
+        pool_bracket_score(&poolBrackets[i], &b);
+      }
+      qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
+      uint8_t ranks[poolBracketsCount];
+      float payouts[poolBracketsCount];
+      uint8_t numRanks = 0;
+      while (numRanks < POOL_MAX_PAYOUTS && numRanks < poolBracketsCount) {
+        if (poolConfiguration.payouts[numRanks] == 0) {
+          continue;
+        }
+        PoolBracket entry = poolBrackets[numRanks];
+        float payout = poolConfiguration.payouts[numRanks] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[numRanks] / 100.0;
+        // Look ahead for ties
+        uint8_t numTies = 1;
+        float tiedPayoutPool = payout;
+        for (uint8_t j = numRanks+1; j < poolBracketsCount; j++) {
+          if (poolBrackets[j].score == entry.score) {
+            if (poolBrackets[j].tieBreakDiff == entry.tieBreakDiff) {
+              numTies++;
+              if (j < POOL_MAX_PAYOUTS) {
+                tiedPayoutPool += poolConfiguration.payouts[j] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[j] / 100.0;
+              }
+            }
+          }
+        }
+        for (uint8_t j = 0; j < numTies; j++) {
+          ranks[numRanks+j] = numRanks + 1;
+          payouts[numRanks+j] = tiedPayoutPool / numTies;
+        }
+        numRanks += numTies;
+      }
+      printf("Rank Score Payout  Name\n");
+      for (uint8_t i = 0; i < numRanks; i++) {
+        PoolBracket entry = poolBrackets[i];
+        printf("%4d %5d $%6.2f %s\n", ranks[i], entry.score, payouts[i], entry.name);
+      }
+      printf("\n");
+    }
   }
 }
 
@@ -950,7 +1044,7 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
 
   uint64_t possibleOutcomes = 0L;
 
-  if (setup_possibilities(stats, fmt, progress, batch, numBatches, restore, &possibleOutcomes)) {
+  if (setup_possibilities(stats, fmt, progress, batch, numBatches, restore, &possibleOutcomes, NULL, NULL)) {
     qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
 
     switch (fmt) {
@@ -1337,6 +1431,15 @@ POOLDEF void pool_read_config_file(const char *filePath) {
     }
     if (strncmp(line, "PI4=", 4) == 0) {
       strncpy(poolConfiguration.pi4, line + 4, POOL_TEAM_SHORT_NAME_LIMIT);
+    }
+    if (strncmp(line, "fee=", 4) == 0) {
+      int fee = atoi(line + 4);
+      if (fee <= 0) {
+        fprintf(stderr, "config.txt fee '%s' must be a positive integer\n", line+4);
+        exit(1);
+      }
+      //fprintf(stderr, "config.txt fee = %d '%s'\n", fee, line+4);
+      poolConfiguration.fee = (uint8_t) fee;
     }
     if (strncmp(line, "payouts=", 8) == 0) {
       uint32_t offset = 0;
