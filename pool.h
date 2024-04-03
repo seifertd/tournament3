@@ -1001,7 +1001,7 @@ POOLDEF void pool_final_four_report(void) {
       uint8_t numRanks = 0;
       while (numRanks < POOL_MAX_PAYOUTS && numRanks < poolBracketsCount) {
         if (poolConfiguration.payouts[numRanks] == 0) {
-          continue;
+          break;
         }
         PoolBracket entry = poolBrackets[numRanks];
         float payout = poolConfiguration.payouts[numRanks] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[numRanks] / 100.0;

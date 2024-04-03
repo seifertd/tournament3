@@ -44,6 +44,8 @@ void help(void) {
   fprintf(stderr, "          name: The name of the pool, default: 'NCAA Tournament'\n");
   fprintf(stderr, "          scorerType: One of Basic, Upset, SeedDiff or JoshP (see Scorers below)\n");
   fprintf(stderr, "          roundScores: 6 numeric round scores for the Scorer (See below)\n");
+  fprintf(stderr, "          fee: optional, the amount collected per entry (if running a for profit pool)\n");
+  fprintf(stderr, "          payouts: optional, payouts by final rank. Percentages or -1 to indicate that rank gets the entry fee back.\n");
   fprintf(stderr, "     teams.txt: file containing the teams in the tournament in matchup order\n");
   fprintf(stderr, "          1 team per line in the form 'Name,shortName'\n");
   fprintf(stderr, "              name can be at most 32 chars, short name 3 chars\n");
@@ -72,7 +74,7 @@ void help(void) {
   fprintf(stderr, " SeedDiff: each correct pick is worth the roundScore. If the loser is also picked correctly,\n");
   fprintf(stderr, "           the difference between the winner's seed and loser's seed is added if > 0\n");
   fprintf(stderr, "\nExample Configuration File:\n");
-  fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundScores=1,2,4,8,11,15\n");
+  fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundScores=1,2,4,8,11,15\nfee=5\npayouts=80,20,-1");
   fprintf(stderr, "\nSample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2024/teams.txt\n");
   fprintf(stderr, "\nSample results.txt file: https://github.com/seifertd/tournament3/blob/main/2024/results.txt\n");
 }
