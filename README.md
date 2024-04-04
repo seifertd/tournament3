@@ -94,7 +94,7 @@ Each scorer uses as input the bracket being scored, the round number
 and the game number. In addition to the scorer, the pool configuration
 specifies 6 round multipliers that the scorer can use. The default
 multipliers are 1, 2, 4, 8, 16, 32
-There are 3 supported scorers:
+These are the supported scorers:
 
 1. Basic: each correct pick is worth a constant amount - the
    round multiplier configured for that round.
@@ -105,6 +105,15 @@ There are 3 supported scorers:
    winning team and the losing team. The bonus points only 
    apply if the loser was picked correctly and the winner's
    seed is greater than the loser's seed.
+1. RelaxedSeedDiff: each correct pick is worth the round multiplier
+   for the game's round plus the difference in seeds of the 
+   winning team and the losing team. The bonus points only 
+   apply if winner's seed is greater than the loser's seed.
+   This differs from SeedDiff in that the loser in the game
+   need not have been picked correctly.
+1. JoshP: each correct pick is worth the round multiplier
+   for the game's round multiplied by the seed number of the
+   winning team.
 
 The choice of scorer can affect the performance of the pool
 possibilities report.
