@@ -951,20 +951,20 @@ POOLDEF void pool_final_four_report(void) {
     fprintf(stderr, "Final Four report should only be run when 4 or fewer teams remain\n");
     return;
   }
-  if (poolConfiguration.fee == 0) {
-    fprintf(stderr, "Final Four report is not applicable if no pool fee is configured.\n");
-    return;
-  }
+  //if (poolConfiguration.fee == 0) {
+    //  fprintf(stderr, "Final Four report is not applicable if no pool fee is configured.\n");
+    //return;
+    //}
   uint8_t numPayouts = 0;
   for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
     if (poolConfiguration.payouts[i] != 0) {
        numPayouts++;
     }
   }
-  if (numPayouts == 0) {
-    fprintf(stderr, "Final Four report is not applicable if no pool payouts are configured.\n");
-    return;
-  }
+  //if (numPayouts == 0) {
+    //  fprintf(stderr, "Final Four report is not applicable if no pool payouts are configured.\n");
+    // return;
+    // }
   
   // Reserve space for stats
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
@@ -977,6 +977,16 @@ POOLDEF void pool_final_four_report(void) {
 
     float totalPayout = poolBracketsCount * poolConfiguration.fee;
     printf("Fees collected: $%d\n", (int) totalPayout);
+    PoolTeam r1 = poolTeams[poolTournamentBracket.winners[56] - 1];
+    PoolTeam r2 = poolTeams[poolTournamentBracket.winners[57] - 1];
+    PoolTeam r3 = poolTeams[poolTournamentBracket.winners[58] - 1];
+    PoolTeam r4 = poolTeams[poolTournamentBracket.winners[59] - 1];
+    printf("(%d) %s vs. (%d) %s AND (%d) %s vs. (%d) %s\n",
+           r1.seed, r1.name,
+           r2.seed, r2.name,
+           r3.seed, r3.name,
+           r4.seed, r4.name
+           );
 
     for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
       if (poolConfiguration.payouts[i] == -1) {
@@ -1000,9 +1010,6 @@ POOLDEF void pool_final_four_report(void) {
       float payouts[poolBracketsCount];
       uint8_t numRanks = 0;
       while (numRanks < POOL_MAX_PAYOUTS && numRanks < poolBracketsCount) {
-        if (poolConfiguration.payouts[numRanks] == 0) {
-          break;
-        }
         PoolBracket entry = poolBrackets[numRanks];
         float payout = poolConfiguration.payouts[numRanks] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[numRanks] / 100.0;
         // Look ahead for ties
