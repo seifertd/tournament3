@@ -40,13 +40,13 @@ You can use this software to run your office or friend group NCAA pool.
    1. The `fee` is the number of currency units you collect per entry.
    1. The `payouts` line is a comma separated list of no more than
       4 integers which specify the payouts by rank.
-      1. postive numbers specify a percentage of the total fees collected
+      1. positive numbers specify a percentage of the total fees collected
       1. -1 specifies that rank gets the entry fee back.
       1. The sum of the percentages has to equal exactly 100
 1. Create the `teams.txt` file in the directory. See the `./pool -h` for a
    link to a sample you can edit.
    1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
-      short name. The long name is irrelvant
+      short name. The long name is irrelevant
 1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
       or send out the included bracket HTML entry collector page via email.
