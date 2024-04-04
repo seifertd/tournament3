@@ -370,8 +370,7 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
   return poolConfiguration.roundScores[round] + bonus;
 }
 POOLDEF uint32_t pool_relaxed_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
-  UNUSED(results);
-  uint8_t loser = pool_loser_of_game(game, bracket);
+  uint8_t loser = pool_loser_of_game(game, results);
   PoolTeam *losingTeam = &poolTeams[loser-1];
   uint8_t winner = bracket->winners[game];
   PoolTeam *winningTeam = &poolTeams[winner-1];
@@ -1435,7 +1434,7 @@ POOLDEF void pool_read_config_file(const char *filePath) {
         poolConfiguration.scorerType = PoolScorerJoshP;
       } else if (strncmp(line+11, "SeedDiff", 8) == 0) {
         poolConfiguration.scorerType = PoolScorerSeedDiff;
-      } else if (strncmp(line+11, "RelaxedSeedDiff", 8) == 0) {
+      } else if (strncmp(line+11, "RelaxedSeedDiff", 15) == 0) {
         poolConfiguration.scorerType = PoolScorerRelaxedSeedDiff;
       } else {
         fprintf(stderr, "config.txt scorerType %s is not known\n", line+11);
