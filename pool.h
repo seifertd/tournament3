@@ -496,7 +496,11 @@ POOLDEF void pool_initialize(const char *dirPath) {
 
 
 POOLDEF void pool_print_entry(PoolBracket *bracket) {
-  printf("%s\n", bracket->name);
+  if (poolTournamentBracket.tieBreak > 0) {
+    printf("%s Score: %d Tie Break Diff: %d\n", bracket->name, bracket->score, bracket->tieBreakDiff);
+  } else {
+    printf("%s Score: %d\n", bracket->name, bracket->score);
+  }
   printf("          ");
   for (size_t g = 0; g < 32; g++) {
     uint8_t team1, team2 = 0;
@@ -567,7 +571,12 @@ POOLDEF void pool_print_entry(PoolBracket *bracket) {
   uint8_t pw = poolTournamentBracket.winners[62];
   printf("Champion: ");
   printf(STRIKE(w, pw, "%s"), POOL_TEAM_NAME(w));
-  printf(" Tie Breaker: %d\n", bracket->tieBreak);
+  printf(" Tie Breaker: %d", bracket->tieBreak);
+  if (poolTournamentBracket.tieBreak > 0) {
+    printf(" Diff: %d\n", bracket->tieBreakDiff);
+  } else {
+    printf("\n");
+  }
   printf("\n");
 }
 
@@ -1255,7 +1264,15 @@ POOLDEF int pool_name_cmpfunc (const void * a, const void * b) {
 POOLDEF void pool_entries_report(void) {
   printf("%s: Entries Report\n", poolConfiguration.poolName);
   pool_print_entry(&poolTournamentBracket);
-  qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_name_cmpfunc);
+  for (size_t i = 0; i < poolBracketsCount; i++) {
+    pool_bracket_score(&poolBrackets[i], &poolTournamentBracket);
+  }
+  if (pool_games_played() == 63) {
+    // Sort by score when pool is done
+    qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
+  } else {
+    qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_name_cmpfunc);
+  }
   for (size_t i = 0; i < poolBracketsCount; i++) {
     pool_print_entry(&poolBrackets[i]);
   }
