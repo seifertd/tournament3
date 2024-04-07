@@ -615,13 +615,21 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
   PoolStats *bStats = (PoolStats *) b;
   int cmp = ( aStats->minRank - bStats->minRank );
   if (cmp == 0) {
-    cmp = ( bStats->timesWon - aStats->timesWon );
+    if (bStats->timesWon > aStats->timesWon) {
+      cmp = 1;
+    } else if (bStats->timesWon < aStats->timesWon) {
+      cmp = -1;
+    }
   }
   if (cmp == 0) {
-    cmp = bStats->timesTied - aStats->timesTied;
+    if (bStats->timesTied > aStats->timesTied) {
+      cmp = 1;
+    } else if (bStats->timesTied < aStats->timesTied) {
+      cmp = -1;
+    }
   }
   if (cmp == 0) {
-    cmp = aStats->maxRank - bStats->maxRank;
+    cmp = aStats->maxScore - bStats->maxScore;
   }
   return cmp;
 }
@@ -967,6 +975,13 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
 }
 
 POOLDEF void pool_final_four_report(void) {
+  // If num possibilities is > 8, bail
+  int gamesLeftCount = 63 - pool_games_played();
+  if (gamesLeftCount > 3) {
+    fprintf(stderr, "Can only run final four report when 3 or fewer games remain.\n");
+    exit(1);
+  }
+
   uint8_t numPayouts = 0;
   for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
     if (poolConfiguration.payouts[i] != 0) {
@@ -1093,7 +1108,7 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
             "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
         for (size_t i = 0; i < poolBracketsCount; i++) {
           PoolStats *stat = &stats[i];
-          float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
+          float winChance = (double) stat->timesWon / (double) possibleOutcomes * 100.0;
           printf("%20.20s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
               stat->minRank, stat->maxRank, stat->bracket->score,
               stat->maxScore, winChance);
