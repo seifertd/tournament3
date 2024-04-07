@@ -922,10 +922,10 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
     }
   }
 
-  if (gamesLeftCount == 0) {
-    fprintf(stderr, ">>>> There are no games left in this pool. <<<<\n");
-    return false;
-  }
+  //if (gamesLeftCount == 0) {
+  //  fprintf(stderr, ">>>> There are no games left in this pool. <<<<\n");
+  //  return false;
+  //}
 
   // If we are running a batch advance possible bracket accordingly
   pool_advance_bracket_for_batch(&possibleBracket, gamesLeft, &gamesLeftCount, batch, numBatches);
@@ -967,25 +967,12 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
 }
 
 POOLDEF void pool_final_four_report(void) {
-  int gamesLeftCount = 63 - pool_games_played();
-  if (gamesLeftCount > 3) {
-    fprintf(stderr, "Final Four report should only be run when 4 or fewer teams remain\n");
-    return;
-  }
-  //if (poolConfiguration.fee == 0) {
-    //  fprintf(stderr, "Final Four report is not applicable if no pool fee is configured.\n");
-    //return;
-    //}
   uint8_t numPayouts = 0;
   for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
     if (poolConfiguration.payouts[i] != 0) {
        numPayouts++;
     }
   }
-  //if (numPayouts == 0) {
-    //  fprintf(stderr, "Final Four report is not applicable if no pool payouts are configured.\n");
-    // return;
-    // }
   
   // Reserve space for stats
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
@@ -994,20 +981,28 @@ POOLDEF void pool_final_four_report(void) {
   uint8_t possibleBracketCount = 0;
 
   if (setup_possibilities(stats, PoolFormatInvalid, false, 0, 1, false, &possibleOutcomes, possibleBrackets, &possibleBracketCount)) {
-    printf("%s: Final Four Report\n", poolConfiguration.poolName);
+    if (possibleOutcomes > 2) {
+      printf("%s: Final Four Report\n", poolConfiguration.poolName);
+    } else if (possibleOutcomes == 2) {
+      printf("%s: Championship Report\n", poolConfiguration.poolName);
+    } else {
+      printf("%s: Final Results\n", poolConfiguration.poolName);
+    }
 
     float totalPayout = poolBracketsCount * poolConfiguration.fee;
     printf("Fees collected: $%d\n", (int) totalPayout);
-    PoolTeam r1 = poolTeams[poolTournamentBracket.winners[56] - 1];
-    PoolTeam r2 = poolTeams[poolTournamentBracket.winners[57] - 1];
-    PoolTeam r3 = poolTeams[poolTournamentBracket.winners[58] - 1];
-    PoolTeam r4 = poolTeams[poolTournamentBracket.winners[59] - 1];
-    printf("(%d) %s vs. (%d) %s AND (%d) %s vs. (%d) %s\n",
+    if (possibleOutcomes > 2) {
+      PoolTeam r1 = poolTeams[poolTournamentBracket.winners[56] - 1];
+      PoolTeam r2 = poolTeams[poolTournamentBracket.winners[57] - 1];
+      PoolTeam r3 = poolTeams[poolTournamentBracket.winners[58] - 1];
+      PoolTeam r4 = poolTeams[poolTournamentBracket.winners[59] - 1];
+      printf("(%d) %s vs. (%d) %s AND (%d) %s vs. (%d) %s\n",
            r1.seed, r1.name,
            r2.seed, r2.name,
            r3.seed, r3.name,
            r4.seed, r4.name
            );
+    }
 
     for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
       if (poolConfiguration.payouts[i] == -1) {
@@ -1019,8 +1014,16 @@ POOLDEF void pool_final_four_report(void) {
       PoolTeam ff1 = poolTeams[b.winners[60]-1];
       PoolTeam ff2 = poolTeams[b.winners[61]-1];
       PoolTeam champ = poolTeams[b.winners[62]-1];
-      printf("Possibility %d: (%d) %s vs (%d) %s Champ: (%d) %s\n", i+1, ff1.seed, ff1.name,
+      if (possibleBracketCount > 1) {
+        printf("Possibility %d: ", i+1);
+      } else {
+        printf("Final: ");
+      }
+      printf("(%d) %s vs (%d) %s Champ: (%d) %s\n", ff1.seed, ff1.name,
              ff2.seed, ff2.name, champ.seed, champ.name);
+      if (poolTournamentBracket.tieBreak > 0) {
+        printf("Total Points Scored in Final: %d\n", poolTournamentBracket.tieBreak);
+      }
 
       // Calculate score of all brackets based on this possible outcome and then sort them
       for (uint32_t i = 0; i < poolBracketsCount; i++) {
@@ -1052,10 +1055,17 @@ POOLDEF void pool_final_four_report(void) {
         }
         numRanks += numTies;
       }
-      printf("Rank Score Payout  Name\n");
+      printf("           Tie Break\n");
+      printf("Rank Score Pts  Diff Payout  Name\n");
       for (uint8_t i = 0; i < numRanks; i++) {
         PoolBracket entry = poolBrackets[i];
-        printf("%4d %5d $%6.2f %s\n", ranks[i], entry.score, payouts[i], entry.name);
+        char tieBreakDiff[10] = {0};
+        if (entry.tieBreakDiff > 0) {
+          sprintf(tieBreakDiff, "%3d", entry.tieBreakDiff);
+        } else {
+          sprintf(tieBreakDiff, "%s ", "?");
+        }
+        printf("%4d %5d %3d %4s  $%6.2f %s\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
       }
       printf("\n");
     }
@@ -1209,9 +1219,9 @@ POOLDEF void pool_score_report(void) {
       printf("UNK\n");
     }
   }
-  printf("                           Curr  Max   Win   Champ/  Tie            Round Scores\n");
-  printf("Rank          Name        Score Score  Pct    Live? Break Diff  1   2   3   4   5   6\n");
-  printf("---- -------------------- ----- ----- ------ ------ ----- ---- --- --- --- --- --- ---\n");
+  printf("                           Curr  Max  Correct Champ/  Tie            Round Scores\n");
+  printf("Rank          Name        Score Score  Picks   Live? Break Diff  1   2   3   4   5   6\n");
+  printf("---- -------------------- ----- ----- ------- ------ ----- ---- --- --- --- --- --- ---\n");
   for (size_t i = 0; i < poolBracketsCount; i++) {
     if (i > 0) {
       if (poolBrackets[i].score != lastScore || poolTournamentBracket.tieBreak > 0) {
@@ -1221,7 +1231,7 @@ POOLDEF void pool_score_report(void) {
     } else {
       lastScore = poolBrackets[i].score;
     }
-    printf("%4d %20.20s %5d %5d %6.2f  %3s %c %5d ",
+    printf("%4d %20.20s %5d %5d %6.2f%%  %3s %c %5d ",
       rank,
       poolBrackets[i].name,
       poolBrackets[i].score,
@@ -1246,11 +1256,13 @@ POOLDEF void pool_score_report(void) {
     );
   }
   int gamesLeftCount = 63 - pool_games_played();
-  uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
-  printf("There are %d teams and %d games remaining, ",
-    gamesLeftCount + 1, gamesLeftCount);
-  pool_print_humanized(stdout, possibleOutcomes, 6);
-  printf(" possible outcomes\n");
+  if (gamesLeftCount > 0) {
+    uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
+    printf("There are %d teams and %d games remaining, ",
+      gamesLeftCount + 1, gamesLeftCount);
+    pool_print_humanized(stdout, possibleOutcomes, 6);
+    printf(" possible outcomes\n");
+  }
 }
 
 POOLDEF int pool_name_cmpfunc (const void * a, const void * b) {

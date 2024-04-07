@@ -1,5 +1,5 @@
 name=2024 NCAA BB Tourny: Americorp Challenge
-scorerType=Upset
+scorerType=RelaxedSeedDiff
 PI1=Wag
 PI2=Cdo
 PI3=GrS
