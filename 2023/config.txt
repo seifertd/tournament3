@@ -1,2 +1,4 @@
 name=2023 NCAA Basketball Championship
 scorerType=Upset
+fee=5
+payouts=80,20
