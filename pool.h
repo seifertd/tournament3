@@ -629,7 +629,7 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
     }
   }
   if (cmp == 0) {
-    cmp = aStats->maxScore - bStats->maxScore;
+    cmp = bStats->maxScore - aStats->maxScore;
   }
   return cmp;
 }

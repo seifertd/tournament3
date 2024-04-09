@@ -29,12 +29,12 @@ cla
 mas
 slu
 rap
-ten
-Wis
+#ten
+#Wis
 # Round 2
-foe
-can
-wid
-mor
-pos
-fan
+#foe
+#can
+#wid
+#mor
+#pos
+#fan
