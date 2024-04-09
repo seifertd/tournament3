@@ -43,10 +43,12 @@ You can use this software to run your office or friend group NCAA pool.
       1. positive numbers specify a percentage of the total fees collected
       1. -1 specifies that rank gets the entry fee back.
       1. The sum of the percentages has to equal exactly 100
+   1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2024/config.txt)
 1. Create the `teams.txt` file in the directory. See the `./pool -h` for a
    link to a sample you can edit.
    1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
       short name. The long name is irrelevant
+   1. [Sample `teams.txt` file](https://seifertd.github.io/tournament3/2024/teams.txt)
 1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
       or send out the included bracket HTML entry collector page via email.
@@ -80,7 +82,7 @@ You can use this software to run your office or friend group NCAA pool.
 1. As games are played in the tournament, record the winners in the 
    `results.txt` file, one team short name per line. For play in games,
    you can use either the original `PI[1234]` short names or the mapped
-   short names of the play in from the step above.
+   short names of the play in games from the step above.
 1. Run the scores report: `./pool -d mypool scores` until the first round
    is complete.
 1. Run your first possibilities report as soon as your machine
