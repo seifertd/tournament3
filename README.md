@@ -83,6 +83,7 @@ You can use this software to run your office or friend group NCAA pool.
    `results.txt` file, one team short name per line. For play in games,
    you can use either the original `PI[1234]` short names or the mapped
    short names of the play in games from the step above.
+   1. [Sample `results.txt` file](https://seifertd.github.io/tournament3/2024/results.txt)
 1. Run the scores report: `./pool -d mypool scores` until the first round
    is complete.
 1. Run your first possibilities report as soon as your machine
