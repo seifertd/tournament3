@@ -89,6 +89,9 @@ You can use this software to run your office or friend group NCAA pool.
 1. Run your first possibilities report as soon as your machine
    can handle it: `./pool -d mypool poss` and pass
    around the results via email, slack, discord or whatever.
+1. When the final four teams are determined, run the Final Four
+   report to show all top 4 standings and payouts (if configured) for
+   each of the remaining possibilities: `./pool -d mypool ffour`
 
 Scorers
 -------
