@@ -35,6 +35,7 @@ Wis
 foe
 can
 wid
+spl
 mor
 pos
 fan

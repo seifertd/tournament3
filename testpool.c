@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
 #define POOL_IMPLEMENTATION
 #include "pool.h"
@@ -23,25 +24,29 @@ int main(void) {
   pool_print_entry(&poolTournamentBracket);
   pool_possibilities_report(PoolFormatText, true, 0, 1, false);
 
-#if 0
-  printf("Running Scoring Benchmark:\n");
-  clock_t start_t, end_t;
-  double total_t;
-  int iters = 1000000;
-  
-  start_t = clock();
-  for (int i = 0; i < iters; i++) {
-    for (int b = 0; b < pool_brackets_count; b++) {
-      PoolBracket *bracket = &poolBrackets[b];
-      pool_bracket_score(bracket,
-        &poolTournamentBracket);
+  // Advance pool to final four
+  time_t t;
+  srand((unsigned) time(&t));
+  uint8_t gameNum = pool_games_played();
+  size_t gamesRemaining = 63 - gameNum;
+  while (gamesRemaining > 3) {
+    uint8_t t1, t2;
+    uint8_t round = pool_round_of_game(gameNum);
+    pool_teams_of_game(gameNum, round, &poolTournamentBracket, &t1, &t2);
+    if (rand() % 2 == 0) {
+      poolTournamentBracket.winners[gameNum] = t1;
+      poolTeams[t2-1].eliminated = true;
+    } else {
+      poolTournamentBracket.winners[gameNum] = t2;
+      poolTeams[t1-1].eliminated = true;
     }
+    poolTournamentBracket.wins += 1;
+    gamesRemaining -= 1;
+    gameNum += 1;
   }
-  end_t = clock();
-  total_t = (double)(end_t - start_t)/CLOCKS_PER_SEC;
-  double scores_per_sec = iters * pool_brackets_count / total_t;
-  printf("%d scores of %d brackets in %f seconds, %f scores/sec\n",
-      iters, pool_brackets_count, total_t, scores_per_sec);
-#endif
+  printf("Random Final Four:\n");
+  pool_print_entry(&poolTournamentBracket);
+  pool_final_four_report();
+
   return 0;
 }

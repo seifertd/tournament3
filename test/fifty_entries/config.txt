@@ -1,3 +1,5 @@
 name=Supercalifragilistic Pool
 scorerType=SeedDiff
 roundScores=1,2,4,8,11,15
+payouts=60,30,10,-1
+fee=10
