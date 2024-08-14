@@ -361,7 +361,7 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
   uint8_t resultsLoser = pool_loser_of_game(game, results);
   uint8_t bracketLoser = pool_loser_of_game(game, bracket);
   uint8_t bonus = 0;
-  if ( (resultsLoser == 0 && !poolTeams[bracketLoser-1].eliminated) || resultsLoser == bracketLoser) {
+  if ( (resultsLoser == 0 && bracketLoser != 0 && !poolTeams[bracketLoser-1].eliminated) || resultsLoser == bracketLoser) {
     PoolTeam *losingTeam = &poolTeams[bracketLoser-1];
     uint8_t winner = bracket->winners[game];
     PoolTeam *winningTeam = &poolTeams[winner-1];
