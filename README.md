@@ -44,8 +44,7 @@ You can use this software to run your office or friend group NCAA pool.
       1. -1 specifies that rank gets the entry fee back.
       1. The sum of the percentages has to equal exactly 100
    1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2024/config.txt)
-1. Create the `teams.txt` file in the directory. See the `./pool -h` for a
-   link to a sample you can edit.
+1. Create the `teams.txt` file in the directory.
    1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
       short name. The long name is irrelevant
    1. [Sample `teams.txt` file](https://seifertd.github.io/tournament3/2024/teams.txt)

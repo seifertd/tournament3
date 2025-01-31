@@ -982,13 +982,6 @@ POOLDEF void pool_final_four_report(void) {
     exit(1);
   }
 
-  uint8_t numPayouts = 0;
-  for (uint8_t i = 0; i < POOL_MAX_PAYOUTS; i++) {
-    if (poolConfiguration.payouts[i] != 0) {
-       numPayouts++;
-    }
-  }
-  
   // Reserve space for stats
   PoolStats stats[POOL_BRACKET_CAPACITY] = {0};
   PoolBracket possibleBrackets[8] = {0};

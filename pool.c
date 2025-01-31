@@ -38,46 +38,98 @@ void usage(char *progName) {
 }
 
 void help(void) {
-  fprintf(stderr, "\nThe pool configuration directory DIR must contain the following:\n");
-  fprintf(stderr, "     config.txt: file containing basic configuration in name=value format\n");
-  fprintf(stderr, "          name: The name of the pool, default: 'NCAA Tournament'\n");
-  fprintf(stderr, "          scorerType: One of Basic, Upset, SeedDiff, RelaxedSeedDiff or JoshP (see Scorers below)\n");
-  fprintf(stderr, "          roundScores: 6 numeric round scores for the Scorer (See below)\n");
-  fprintf(stderr, "          fee: optional, the amount collected per entry (if running a for profit pool)\n");
-  fprintf(stderr, "          payouts: optional, payouts by final rank. Percentages or -1 to indicate that rank gets the entry fee back.\n");
-  fprintf(stderr, "     teams.txt: file containing the teams in the tournament in matchup order\n");
-  fprintf(stderr, "          1 team per line in the form 'Name,shortName'\n");
-  fprintf(stderr, "              name can be at most 32 chars, short name 3 chars\n");
-  fprintf(stderr, "          teams should be listed by region in seed matchup order:\n");
-  fprintf(stderr, "              1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15\n");
-  fprintf(stderr, "          region 1 first, region 2 second, etc\n");
-  fprintf(stderr, "          final four: region 1 vs region 2, region 3 vs. region 4\n");
-  fprintf(stderr, "          Play in games: The four play in games should use short names\n");
-  fprintf(stderr, "            PI1, PI2, PI3, PI4.  As each play in game concludes, modify\n");
-  fprintf(stderr, "            the config.txt to map the PI{n} names to actual winner short\n");
-  fprintf(stderr, "            names. The long name of the winner can be set in teams.txt\n");
-  fprintf(stderr, "     results.txt: file containing short names of winners of each match\n");
-  fprintf(stderr, "          winners can be reported in any order, EXCEPT:\n");
-  fprintf(stderr, "          all current round winners must be reported before next round winners may be reported\n");
-  fprintf(stderr, "          lines starting with '#' are ignored and may contain comments or notes\n");
-  fprintf(stderr, "          last line should be the actual total score of the championship\n");
-  fprintf(stderr, "     entries: a directory containing entry files\n");
-  fprintf(stderr, "          entry files are named for the entrant\n");
-  fprintf(stderr, "          same format as the results.txt file, except last line is the predicted\n");
-  fprintf(stderr, "          total points of the championship and is used to break ties.\n");
-  fprintf(stderr, "\nScorers:\n");
-  fprintf(stderr, "Each scorer uses the configured roundScores as follows:\n");
-  fprintf(stderr, "           Basic: each correct pick is worth the roundScore of the round\n");
-  fprintf(stderr, "           Upset: each correct pick is worth the roundScore plus the seed of the winner\n");
-  fprintf(stderr, "           JoshP: each correct pick is worth the roundScore multiplied by the seed of the winner\n");
-  fprintf(stderr, "        SeedDiff: each correct pick is worth the roundScore. If the loser is also picked correctly,\n");
-  fprintf(stderr, "           the difference between the winner's seed and loser's seed is added if > 0\n");
-  fprintf(stderr, " RelaxedSeedDiff: each correct pick is worth the roundScore. The difference between\n");
-  fprintf(stderr, "           the winner's seed and loser's seed is added if > 0\n");
-  fprintf(stderr, "\nExample Configuration File:\n");
-  fprintf(stderr, "name=Supercalifragilistic Pool\nscorerType=Upset\nroundScores=1,2,4,8,11,15\nfee=5\npayouts=80,20,-1");
-  fprintf(stderr, "\nSample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2024/teams.txt\n");
-  fprintf(stderr, "\nSample results.txt file: https://github.com/seifertd/tournament3/blob/main/2024/results.txt\n");
+  fprintf(stderr,
+    "\nRunning a Pool\n"
+    "\n"
+    "1.  Create a directory on your computer to hold the pool files.\n"
+    "2.  Create the config.txt file and set your pool’s name, scoring method\n"
+    "    and round multipliers.\n"
+    "    1.  If you are running this pool for profit, also fill in the fee\n"
+    "        and payouts lines.\n"
+    "    2.  The fee is the number of currency units you collect per entry.\n"
+    "    3.  The payouts line is a comma separated list of no more than 4\n"
+    "        integers which specify the payouts by rank.\n"
+    "        1.  positive numbers specify a percentage of the total fees\n"
+    "            collected\n"
+    "        2.  -1 specifies that rank gets the entry fee back.\n"
+    "        3.  The sum of the percentages has to equal exactly 100\n"
+    "    4.  Sample config.txt file: https://github.com/seifertd/tournament3/blob/main/2024/config.txt\n"
+    "3.  Create the teams.txt file in the directory.\n"
+    "    1.  For the four play in games, use PI1, PI2, PI3 and PI4 as the\n"
+    "        short name. The long name is irrelevant\n"
+    "    2.  Sample teams.txt file: https://github.com/seifertd/tournament3/blob/main/2024/teams.txt\n"
+    "4.  Collect entries\n"
+    "    1.  You can hand out forms, set up a pool on one of the free\n"
+    "        websites or send out the included bracket HTML entry collector\n"
+    "        page via email.\n"
+    "    2.  The HTML entry collector needs to be edited with the current\n"
+    "        year’s teams.\n"
+    "        1.  New for 2024: there is a ruby script to generate the web\n"
+    "            entry collector from the teams file. You need a working ruby\n"
+    "            install and can run it as follows:\n"
+    "            ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.svg\n"
+    "            -   1st argument: the location of the generator script in\n"
+    "                this repo\n"
+    "            -   2nd argument: the location of the teams file\n"
+    "            -   3rd argument: location where to save the bracket\n"
+    "            -   4th argument: the location of a logo svg file in urldata\n"
+    "                format\n"
+    "    3.  Latest NCAA Tournament Bracket: https://github.com/seifertd/tournament3/blob/main/web/2024_bracket.html\n"
+    "5.  Create the entries subfolder and copy/create/save any entry files\n"
+    "    you got from the pool entrants.\n"
+    "6.  Generate an entries report and send it out to everyone for\n"
+    "    confirmation: ./pool -d mypool entries\n"
+    "7.  Handle the play in games.\n"
+    "    1.  As the play in games are played, add to the pool config.txt file\n"
+    "        lines that map the place holder short team names (PI[1234]) with\n"
+    "        a new short name matching the winner. You will end up with lines\n"
+    "        like:\n"
+    "            PI1=Wag\n"
+    "            PI2=Cdo\n"
+    "            PI3=GrS\n"
+    "            PI4=CSt\n"
+    "    2.  Make sure to change the long name of the play in teams in the\n"
+    "        teams.txt file, but don’t modify the PI[1234] short names.\n"
+    "8.  As games are played in the tournament, record the winners in the\n"
+    "    results.txt file, one team short name per line. For play in games,\n"
+    "    you can use either the original PI[1234] short names or the mapped\n"
+    "    short names of the play in games from the step above.\n"
+    "    1.  Sample results.txt file: https://github.com/seifertd/tournament3/blob/main/2024/results.txt\n"
+    "9.  Run the scores report: ./pool -d mypool scores until the first round\n"
+    "    is complete.\n"
+    "10. Run your first possibilities report as soon as your machine can\n"
+    "    handle it: ./pool -d mypool poss and pass around the results via\n"
+    "    email, slack, discord or whatever.\n"
+    "11. When the final four teams are determined, run the Final Four report\n"
+    "    to show all top 4 standings and payouts (if configured) for each of\n"
+    "    the remaining possibilities: ./pool -d mypool ffour\n"
+    "\n"
+    "Scorers\n"
+    "\n"
+    "The pool configuration specifies the scorer to use in the pool. Each\n"
+    "scorer uses as input the bracket being scored, the round number and the\n"
+    "game number. In addition to the scorer, the pool configuration specifies\n"
+    "6 round multipliers that the scorer can use. The default multipliers are\n"
+    "1, 2, 4, 8, 16, 32 These are the supported scorers:\n"
+    "\n"
+  );
+  fprintf(stderr,
+    "1.  Basic: each correct pick is worth a constant amount - the round\n"
+    "    multiplier configured for that round.\n"
+    "2.  Upset: each correct pick is worth the round multiplier for the\n"
+    "    game’s round plus the seed number of the winning team.\n"
+    "3.  SeedDiff: each correct pick is worth the round multiplier for the\n"
+    "    game’s round plus the difference in seeds of the winning team and\n"
+    "    the losing team. The bonus points only apply if the loser was picked\n"
+    "    correctly and the winner’s seed is greater than the loser’s seed.\n"
+    "4.  RelaxedSeedDiff: each correct pick is worth the round multiplier for\n"
+    "    the game’s round plus the difference in seeds of the winning team\n"
+    "    and the losing team. The bonus points only apply if winner’s seed is\n"
+    "    greater than the loser’s seed. This differs from SeedDiff in that\n"
+    "    the loser in the game need not have been picked correctly.\n"
+    "5.  JoshP: each correct pick is worth the round multiplier for the\n"
+    "    game’s round multiplied by the seed number of the winning team.\n"
+  );
 }
 
 int main(int argc, char *argv[]) {

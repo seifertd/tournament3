@@ -5,7 +5,7 @@ CC=${CC:-cc}
 if [ "${CC}" = "clang" ]; then
   CFLAGS="-Wall -Wextra -Wno-string-concatenation -pedantic -std=c99 -O3"
 else
-  CFLAGS="-Wall -Wextra -Wno-stringop-truncation -pedantic -std=c99 -O3"
+  CFLAGS="-Wall -Wextra -Wunused-variable -Wno-stringop-truncation -pedantic -std=c99 -O3"
 fi
 
 rm -rf pool testpool benchmark
