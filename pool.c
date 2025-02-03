@@ -74,7 +74,7 @@ void help(void) {
     "            -   3rd argument: location where to save the bracket\n"
     "            -   4th argument: the location of a logo svg file in urldata\n"
     "                format\n"
-    "    3.  Latest NCAA Tournament Bracket: https://github.com/seifertd/tournament3/blob/main/web/2024_bracket.html\n"
+    "    3.  Latest NCAA Tournament Bracket: https://seifertd.github.io/tournament3/web/2024_bracket.html\n"
     "5.  Create the entries subfolder and copy/create/save any entry files\n"
     "    you got from the pool entrants.\n"
     "6.  Generate an entries report and send it out to everyone for\n"
