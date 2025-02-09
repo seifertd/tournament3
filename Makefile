@@ -12,8 +12,8 @@ programs=pool testpool benchmark scoredetail
 
 all: $(programs)
 
-%.o: %.c pool.h
-	$(CC) -c $(CFLAGS) $< -o $@
+%: %.c pool.h
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	rm -rf $(programs)
