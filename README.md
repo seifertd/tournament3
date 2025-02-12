@@ -55,11 +55,11 @@ You can use this software to run your office or friend group NCAA pool.
       teams.
       1. New for 2024: there is a ruby script to generate the web entry collector
          from the teams file. You need a working ruby install and can run it as
-         follows: `ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.svg`
+         follows: `ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.uri`
          * 1st argument: the location of the generator script in this repo
          * 2nd argument: the location of the teams file
          * 3rd argument: location where to save the bracket
-         * 4th argument: the location of a logo svg file in urldata format
+         * 4th argument: the location of a logo image file in urldata format.
    1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/2024_bracket.html)
 1. Create the `entries` subfolder and copy/create/save any entry files you
    got from the pool entrants. 
