@@ -7,6 +7,9 @@
 # Ignore score report .bin files
 *.bin
 
+# Ignore tags files
+tags
+
 # Prerequisites
 *.d
 
