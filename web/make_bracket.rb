@@ -59,7 +59,7 @@ teams = File.readlines(teams_file).each do |line|
   end
 end
 
-svg_logo = File.read(svg_logo_file)
+svg_logo = File.read(svg_logo_file).chomp
 template = File.read("#{__dir__}/bracket.html.erb")
 erb = ERB.new(template, trim_mode: "%<>")
 File.write(output_file, erb.result(binding))
