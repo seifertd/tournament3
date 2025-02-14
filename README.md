@@ -45,8 +45,16 @@ You can use this software to run your office or friend group NCAA pool.
       1. The sum of the percentages has to equal exactly 100
    1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2024/config.txt)
 1. Create the `teams.txt` file in the directory.
+   1. Each line is in the form "Long Name,3-character Short Name"
+   1. Each team must have a unique short name. 
+   1. The short names are case sensitive.
    1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
-      short name. The long name is irrelevant
+      short name. The long name is irrelevant.
+   1. The order of teams listed is as follows: top left region first, bottom left region second,
+      top right region third, bottom right region fourth. The left side plays the right side
+      in the championship. Within each region, teams are in order of seed as follows:
+      1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15
+   1. Lines starting with a '#' character are considered comments and ignored
    1. [Sample `teams.txt` file](https://seifertd.github.io/tournament3/2024/teams.txt)
 1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
