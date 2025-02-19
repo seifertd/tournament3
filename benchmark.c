@@ -9,7 +9,7 @@ int main(void) {
   printf("Running Scoring Benchmark:\n");
   clock_t start_t, end_t;
   double total_t;
-  uint32_t iters = 1000000;
+  uint32_t iters = 2000000;
   
   start_t = clock();
   for (uint32_t i = 0; i < iters; i++) {
