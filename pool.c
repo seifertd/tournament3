@@ -38,8 +38,10 @@ void usage(char *progName) {
 }
 
 void help(void) {
+  fprintf(stderr, "\n");
+  /* BEGIN HELP */
   fprintf(stderr,
-"Running a Pool\n"
+"Instructions\n"
 "\n"
 "1.  Create a directory on your computer to hold the pool files.\n"
 "2.  Create the config.txt file and set your pool’s name, scoring method\n"
@@ -53,7 +55,7 @@ void help(void) {
 "            collected\n"
 "        2.  -1 specifies that rank gets the entry fee back.\n"
 "        3.  The sum of the percentages has to equal exactly 100\n"
-"    4.  Sample config.txt file: https://seifertd.github.io/tournament3/2024/config.txt\n"
+"    4.  Sample config.txt file\n"
 "3.  Create the teams.txt file in the directory.\n"
 "    1.  Each line is in the form “Long Name,3-character Short Name”\n"
 "    2.  Each team must have a unique short name.\n"
@@ -67,7 +69,7 @@ void help(void) {
 "        follows: 1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15\n"
 "    6.  Lines starting with a ‘#’ character are considered comments and\n"
 "        ignored\n"
-"    7.  Sample teams.txt file: https://seifertd.github.io/tournament3/2024/teams.txt\n"
+"    7.  Sample teams.txt file\n"
 "4.  Collect entries\n"
 "    1.  You can hand out forms, set up a pool on one of the free\n"
 "        websites or send out the included bracket HTML entry collector\n"
@@ -75,7 +77,10 @@ void help(void) {
 "    2.  The HTML entry collector needs to be edited with the current\n"
 "        year’s teams.\n"
 "        1.  New for 2024: there is a ruby script to generate the web\n"
-"            entry collector from the teams file. You need a working ruby\n"
+"            entry collector from the\n"
+  );
+  fprintf(stderr,
+" teams file. You need a working ruby\n"
 "            install and can run it as follows:\n"
 "            ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.uri\n"
 "            -   1st argument: the location of the generator script in\n"
@@ -84,6 +89,10 @@ void help(void) {
 "            -   3rd argument: location where to save the bracket\n"
 "            -   4th argument: the location of a logo image file in\n"
 "                urldata format.\n"
+"        2.  NOTE: The teams file MUST contain a comment containing the\n"
+"            region name in front of each bracket of teams. NO OTHER\n"
+"            comments are allowed. See the sample teams.txt file above\n"
+"            for correct format.\n"
 "    3.  Here is what the HTML entry collector looks like: Latest NCAA\n"
 "        Tournament Bracket\n"
 "5.  Create the entries subfolder and copy/create/save any entry files\n"
@@ -103,14 +112,15 @@ void help(void) {
 "\n"
 "    2.  Make sure to change the long name of the play in teams in the\n"
 "        teams.txt file, but don’t modify the PI[1234] short names.\n"
-  );
-  fprintf(stderr,
 "8.  As games are played in the tournament, record the winners in the\n"
 "    results.txt file, one team short name per line. For play in games,\n"
 "    you can use either the original PI[1234] short names or the mapped\n"
 "    short names of the play in games from the step above.\n"
-"    1.  Sample results.txt file: https://seifertd.github.io/tournament3/2024/results.txt\n"
-"9.  Run the scores report: ./pool -d mypool scores until the first round\n"
+"    1.  Sample results.txt file\n"
+"9.  Run the scores report: ./pool -d mypool scores until the \n"
+  );
+  fprintf(stderr,
+"first round\n"
 "    is complete.\n"
 "10. Run your first possibilities report as soon as your machine can\n"
 "    handle it: ./pool -d mypool poss and pass around the results via\n"
@@ -125,7 +135,12 @@ void help(void) {
 "scorer uses as input the bracket being scored, the round number and the\n"
 "game number. In addition to the scorer, the pool configuration specifies\n"
 "6 round multipliers that the scorer can use. The default multipliers are\n"
-"1, 2, 4, 8, 16, 32 These are the supported scorers:\n"
+"1, 2, 4, 8, 16, 32. To override the default, supply a roundScores\n"
+"configuration option in the config.txt file:\n"
+"\n"
+"roundScores=1,2,4,8,12,24\n"
+"\n"
+"These are the supported scorers:\n"
 "\n"
 "1.  Basic: each correct pick is worth a constant amount - the round\n"
 "    multiplier configured for that round.\n"
@@ -142,7 +157,9 @@ void help(void) {
 "    the loser in the game need not have been picked correctly.\n"
 "5.  JoshP: each correct pick is worth the round multiplier for the\n"
 "    game’s round multiplied by the seed number of the winning team.\n"
+"\n"
   );
+  /* END HELP */
 }
 
 int main(int argc, char *argv[]) {

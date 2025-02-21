@@ -32,6 +32,8 @@ Running a Pool
 --------------
 You can use this software to run your office or friend group NCAA pool.
 
+Instructions
+------------
 1. Create a directory on your computer to hold the pool files.
 1. Create the `config.txt` file and set your pool's name, scoring method
    and round multipliers.
@@ -109,7 +111,11 @@ The pool configuration specifies the scorer to use in the pool.
 Each scorer uses as input the bracket being scored, the round number
 and the game number. In addition to the scorer, the pool configuration
 specifies 6 round multipliers that the scorer can use. The default
-multipliers are 1, 2, 4, 8, 16, 32
+multipliers are 1, 2, 4, 8, 16, 32. To override the default, supply
+a `roundScores` configuration option in the `config.txt` file:
+
+   ```roundScores=1,2,4,8,12,24```
+
 These are the supported scorers:
 
 1. Basic: each correct pick is worth a constant amount - the
@@ -130,9 +136,6 @@ These are the supported scorers:
 1. JoshP: each correct pick is worth the round multiplier
    for the game's round multiplied by the seed number of the
    winning team.
-
-The choice of scorer can affect the performance of the pool
-possibilities report.
 
 Possibilities Report
 ---------------------

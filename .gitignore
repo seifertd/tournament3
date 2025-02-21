@@ -3,6 +3,9 @@
 /testpool
 /benchmark
 /scoredetail
+code.txt
+help.txt
+update_help.sh
 
 # Ignore score report .bin files
 *.bin
