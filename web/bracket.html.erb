@@ -395,8 +395,8 @@ ul.game li.team {
 </header>
 <div class="bracket">
 	<figure class="logo"></figure>
-	<div class="region region-1" data-name="<%=regions[0].name%>">
-	<!-- Region 1 Round 1-->
+  <div class="region region-1" data-name="<%=regions[0].name%>">
+    <!-- Region 1 Round 1-->
 		<% regions[0].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+1%>">
 			<li class="team team-top" data-sn="<%=game.team1.short%>"><%=game.team1.seed%> <%=CGI.escapeHTML(game.team1.name)%></li>
@@ -443,8 +443,8 @@ ul.game li.team {
 		</ul>
 		
 	</div>
-	<div class="region-2 region">
-	<!-- Region 2 Round 1 -->
+  <div class="region-2 region" data-name="<%=regions[1].name%>">
+    <!-- Region 2 Round 1 -->
 		<% regions[1].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+9%>">
 			<li class="team team-top" data-sn="<%=game.team1.short%>"><%=game.team1.seed%> <%=CGI.escapeHTML(game.team1.name)%></li>
@@ -493,8 +493,7 @@ ul.game li.team {
 		</ul>
 		
 	</div>
-	<div class="region-3 region">
-	
+	<div class="region-3 region" data-name="<%=regions[2].name%>">
 		<!-- Region 3 Round 1 -->
 		<% regions[2].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+17%>">
@@ -541,7 +540,7 @@ ul.game li.team {
 		</ul>
 	</div>
 	
-	<div class="region-4 region">
+	<div class="region-4 region" data-name="<%=regions[3].name%>">
 		<!-- Region 4 Round 1 -->
 		<% regions[3].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+25%>">
