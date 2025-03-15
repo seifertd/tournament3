@@ -1305,9 +1305,9 @@ POOLDEF uint8_t pool_read_entry_to_bracket(const char *filePath, const char *ent
     PoolBracket *bracket, bool recordEliminations) {
   FILE *f = fopen(filePath, "rb");
   if (f == NULL) {
-    fprintf(stderr, "Could not open entry file %s: %s\n",
+    fprintf(stderr, "[WARN] Could not open entry file %s: %s\n",
         filePath, strerror(errno));
-    exit(1);
+    return 0;
   }
   if (entryNameSize > POOL_BRACKET_NAME_LIMIT) {
     fprintf(stderr, "Entry file name has to be less than %d chars long: %s\n",
