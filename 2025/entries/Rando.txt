@@ -1,0 +1,70 @@
+# Round 1:
+Aub
+Lou
+USD
+Yal
+PI2
+Lip
+Mar
+Bry
+NoS
+Okl
+CSt
+Mry
+Drk
+Wil
+Ark
+Oma
+Duk
+Bay
+Ore
+Ari
+BYU
+Wis
+StM
+RbM
+Hou
+Gon
+Cle
+Pur
+PI4
+Ken
+UCL
+Wof
+# Round 2:
+Aub
+USD
+Lip
+Bry
+Okl
+CSt
+Wil
+Oma
+Bay
+Ari
+BYU
+StM
+Hou
+Pur
+Ken
+UCL
+# Round 3:
+Aub
+Bry
+Okl
+Wil
+Ari
+BYU
+Pur
+Ken
+# Round 4:
+Aub
+Okl
+BYU
+Pur
+# Final Four:
+Aub
+BYU
+# Championship:
+Aub
+150
