@@ -1,0 +1,68 @@
+# South
+Auburn,Aub
+Ala St/St Fran,PI1
+Louisville,Lou
+Creighton,Cre
+Michigan,Mch
+UC San Diego,USD
+Texas A&M,A&M
+Yale,Yal
+Ole Miss,Ole
+SDS/N Carolina,PI2
+Iowa St.,IoS
+Lipscomb,Lip
+Marquette,Mar
+New Mexico,NMx
+Michigan St.,MSU
+Bryant,Bry
+# West
+Florida,Fla
+Norfolk St.,NoS
+UConn,UCn
+Oklahoma,Okl
+Memphis,Mem
+Colorado St.,CSt
+Maryland,Mry
+Grand Canyon,GCy
+Missouri,Msr
+Drake,Drk
+Texas Tech,TTU
+UNC Wilmington,Wil
+Kansas,Kan
+Arkansas,Ark
+St. John's,StJ
+Omaha,Oma
+# East
+Duke,Duk
+American/MSM,PI3
+Mississippi St,MiS
+Baylor,Bay
+Oregon,Ore
+Liberty,Lib
+Arizona,Ari
+Akron,Akr
+BYU,BYU
+VCU,VCU
+Wisconsin,Wis
+Montana,Mon
+Saint Mary's,StM
+Vanderbilt,Van
+Alabama,Ala
+Robert Morris,RbM
+# Midwest
+Houston,Hou
+SIU Edwardsville,SIU
+Gonzaga,Gon
+Georgia,UGa
+Clemson,Cle
+McNeese,McN
+Purdue,Pur
+High Point,HPt
+Illinois,Ill
+Texas/Xavier,PI4
+Kentucky,Ken
+Troy,Try
+UCLA,UCL
+Utah St,USt
+Tennessee,Ten
+Wofford,Wof
