@@ -1244,7 +1244,7 @@ POOLDEF void pool_score_report(void) {
       poolBrackets[i].name,
       poolBrackets[i].score,
       poolBrackets[i].maxScore,
-      poolBrackets[i].wins * 100.0 / pool_games_played(), 
+      poolBrackets[i].wins * 100.0 / (pool_games_played() == 0 ? 1 : pool_games_played()), 
       POOL_TEAM_SHORT_NAME(poolBrackets[i].winners[62]),
       poolTeams[poolBrackets[i].winners[62] - 1].eliminated ? 'N' : 'Y',
       poolBrackets[i].tieBreak
