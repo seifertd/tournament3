@@ -1,6 +1,6 @@
 # South
 Auburn,Aub
-Ala St/St Fran,PI1
+Alabama St.,PI1
 Louisville,Lou
 Creighton,Cre
 Michigan,Mch
@@ -8,7 +8,7 @@ UC San Diego,USD
 Texas A&M,A&M
 Yale,Yal
 Ole Miss,Ole
-SDS/N Carolina,PI2
+N. Carolina,PI2
 Iowa St.,IoS
 Lipscomb,Lip
 Marquette,Mar

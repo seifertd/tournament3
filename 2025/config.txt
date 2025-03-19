@@ -2,3 +2,5 @@ name=2025 NCAA BB Tourny: Americorp Challenge
 scorerType=RelaxedSeedDiff
 payouts=60,30,10,-1
 fee=5
+PI1=ASt
+PI2=NCa
