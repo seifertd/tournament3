@@ -34,7 +34,7 @@ St. John's,StJ
 Omaha,Oma
 # East
 Duke,Duk
-American/MSM,PI3
+Mt. St. Mary's,PI3
 Mississippi St,MiS
 Baylor,Bay
 Oregon,Ore
@@ -59,7 +59,7 @@ McNeese,McN
 Purdue,Pur
 High Point,HPt
 Illinois,Ill
-Texas/Xavier,PI4
+Xavier,PI4
 Kentucky,Ken
 Troy,Try
 UCLA,UCL

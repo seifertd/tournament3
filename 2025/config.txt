@@ -4,3 +4,5 @@ payouts=60,30,10,-1
 fee=5
 PI1=ASt
 PI2=NCa
+PI3=MSM
+PI4=Xav
