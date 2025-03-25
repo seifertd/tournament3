@@ -17,8 +17,37 @@ StJ
 Mch
 TTU
 # Round 1 Day 2
+Bay
+Ala
+IoS
+CSt
+Duk
+StM
+Ole
+Mry
+Fla
+Ken
+NMx
+Ari
+UCn
+Ill
+MSU
+Ore
 # Round 2 Day 1
+Pur
+Ark
+Mch
+TTU
+Aub
+BYU
+Hou
+Ten
 # Round 2 Day 2
+Fla
+Duk
+Ken
+Ala
+Mry
 # Round 3 Day 1
 # Round 3 Day 2
 # Round 4 Day 1
