@@ -48,6 +48,9 @@ Duk
 Ken
 Ala
 Mry
+MSU
+Ole
+Ari
 # Round 3 Day 1
 TTU
 Duk
