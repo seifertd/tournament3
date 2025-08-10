@@ -77,10 +77,9 @@ void help(void) {
 "    2.  The HTML entry collector needs to be edited with the current\n"
 "        year’s teams.\n"
 "        1.  New for 2024: there is a ruby script to generate the web\n"
-"            entry collector from the\n"
+"            entry collector from the teams file. You need a working ruby\n"
   );
   fprintf(stderr,
-" teams file. You need a working ruby\n"
 "            install and can run it as follows:\n"
 "            ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.uri\n"
 "            -   1st argument: the location of the generator script in\n"
@@ -117,10 +116,9 @@ void help(void) {
 "    you can use either the original PI[1234] short names or the mapped\n"
 "    short names of the play in games from the step above.\n"
 "    1.  Sample results.txt file\n"
-"9.  Run the scores report: ./pool -d mypool scores until the \n"
+"9.  Run the scores report: ./pool -d mypool scores until the first round\n"
   );
   fprintf(stderr,
-"first round\n"
 "    is complete.\n"
 "10. Run your first possibilities report as soon as your machine can\n"
 "    handle it: ./pool -d mypool poss and pass around the results via\n"
