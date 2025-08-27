@@ -8,7 +8,7 @@ else
 	CFLAGS := -Wall -Wextra -Wunused-variable -Wno-stringop-truncation -pedantic -std=c99 -O3
 endif
 
-programs=pool testpool benchmark scoredetail
+programs=pool testpool benchmark scoredetail testrelaxedseeddiff
 
 all: $(programs)
 
