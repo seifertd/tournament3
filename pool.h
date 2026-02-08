@@ -204,7 +204,7 @@ POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType);
 POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket);
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength);
 
-#define STRIKE(w, pw, f) ( (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m\033[31m" f "\033[0m" : (w != 0 && pw != 0 ? "\033[32m" f "\033[0m" : f) )
+#define STRIKE(w, pw, f) ( w == 0 ? f : (pw == 0 ? poolTeams[w-1].eliminated : w != pw ) ? "\033[9m\033[31m" f "\033[0m" : (pw != 0 ? "\033[32m" f "\033[0m" : f) )
 #define POOL_TEAM_SHORT_NAME(w) ( w == 0 ? "Unk" : poolTeams[w-1].shortName )
 #define POOL_TEAM_NAME(w) ( w == 0 ? "Unknown" : poolTeams[w-1].name )
 
@@ -369,11 +369,55 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
   }
   return poolConfiguration.roundScores[round] + bonus;
 }
+// Returns the minimum seed among non-eliminated teams that could still
+// reach this game slot. For played games, only the winner remains.
+// For unplayed games, recursively checks both feeder game subtrees.
+POOLDEF uint8_t pool_min_seed_reaching_game(uint8_t gameNum, PoolBracket *results) {
+  if (results->winners[gameNum] != 0) {
+    return poolTeams[results->winners[gameNum] - 1].seed;
+  }
+  uint8_t round = pool_round_of_game(gameNum);
+  if (round == 0) {
+    uint8_t team1 = gameNum * 2 + 1;
+    uint8_t team2 = team1 + 1;
+    uint8_t min = UINT8_MAX;
+    if (!poolTeams[team1 - 1].eliminated) min = poolTeams[team1 - 1].seed;
+    if (!poolTeams[team2 - 1].eliminated && poolTeams[team2 - 1].seed < min)
+      min = poolTeams[team2 - 1].seed;
+    return min;
+  }
+  uint8_t gameBase = round == 1 ? 0 : poolGamesInRound[round - 2];
+  uint8_t prevGame1 = gameBase + (gameNum - poolGamesInRound[round - 1]) * 2;
+  uint8_t prevGame2 = prevGame1 + 1;
+  uint8_t min1 = pool_min_seed_reaching_game(prevGame1, results);
+  uint8_t min2 = pool_min_seed_reaching_game(prevGame2, results);
+  return min1 < min2 ? min1 : min2;
+}
 POOLDEF uint32_t pool_relaxed_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
-  uint8_t loser = pool_loser_of_game(game, results);
-  PoolTeam *losingTeam = &poolTeams[loser-1];
   uint8_t winner = bracket->winners[game];
-  PoolTeam *winningTeam = &poolTeams[winner-1];
+  PoolTeam *winningTeam = &poolTeams[winner - 1];
+  uint8_t loser = pool_loser_of_game(game, results);
+  if (loser == 0) {
+    // Game not yet played — find min seed on the opponent's side of the bracket
+    uint8_t minSeed;
+    if (round == 0) {
+      uint8_t team1 = game * 2 + 1;
+      uint8_t team2 = team1 + 1;
+      uint8_t opponent = (team1 == winner) ? team2 : team1;
+      minSeed = poolTeams[opponent - 1].seed;
+    } else {
+      uint8_t gameBase = round == 1 ? 0 : poolGamesInRound[round - 2];
+      uint8_t prevGame1 = gameBase + (game - poolGamesInRound[round - 1]) * 2;
+      uint8_t prevGame2 = prevGame1 + 1;
+      // Winner came through one feeder game; opponent comes from the other
+      uint8_t opponentGame = (bracket->winners[prevGame1] == winner) ? prevGame2 : prevGame1;
+      minSeed = pool_min_seed_reaching_game(opponentGame, results);
+    }
+    if (minSeed == UINT8_MAX) return poolConfiguration.roundScores[round];
+    uint32_t bonus = winningTeam->seed > minSeed ? winningTeam->seed - minSeed : 0;
+    return poolConfiguration.roundScores[round] + bonus;
+  }
+  PoolTeam *losingTeam = &poolTeams[loser - 1];
   uint32_t bonus = winningTeam->seed > losingTeam->seed ? winningTeam->seed - losingTeam->seed : 0;
   return poolConfiguration.roundScores[round] + bonus;
 }
