@@ -200,6 +200,7 @@ POOLDEF uint32_t pool_upset_scorer(PoolBracket *bracket, PoolBracket *results, u
 POOLDEF uint32_t pool_josh_p_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
 POOLDEF uint32_t pool_relaxed_seed_diff_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game);
+POOLDEF uint32_t pool_dp_relaxed_max_score(PoolBracket *bracket, PoolBracket *results);
 POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType);
 POOLDEF uint8_t pool_loser_of_game(uint8_t gameNum, PoolBracket *bracket);
 POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength);
@@ -372,6 +373,9 @@ POOLDEF uint32_t pool_seed_diff_scorer(PoolBracket *bracket, PoolBracket *result
 // Returns the minimum seed among non-eliminated teams that could still
 // reach this game slot. For played games, only the winner remains.
 // For unplayed games, recursively checks both feeder game subtrees.
+// This is still not exact, however, as it overstates the maximum score since
+// you can get the seed bonus for picks against the same team more than one
+// time. Not sure how to solve this problem
 POOLDEF uint8_t pool_min_seed_reaching_game(uint8_t gameNum, PoolBracket *results) {
   if (results->winners[gameNum] != 0) {
     return poolTeams[results->winners[gameNum] - 1].seed;
@@ -420,6 +424,124 @@ POOLDEF uint32_t pool_relaxed_seed_diff_scorer(PoolBracket *bracket, PoolBracket
   PoolTeam *losingTeam = &poolTeams[loser - 1];
   uint32_t bonus = winningTeam->seed > losingTeam->seed ? winningTeam->seed - losingTeam->seed : 0;
   return poolConfiguration.roundScores[round] + bonus;
+}
+// Computes exact max possible score using tree DP, avoiding the double-counting
+// issue in pool_relaxed_seed_diff_scorer where the same low-seeded team can be
+// "used" as the ideal opponent in multiple games simultaneously.
+// dp[game][team] = max total bracket score from all games in this subtree,
+// if team emerges as winner of game. UINT32_MAX = impossible.
+POOLDEF uint32_t pool_dp_relaxed_max_score(PoolBracket *bracket, PoolBracket *results) {
+  uint32_t dp[POOL_NUM_GAMES][POOL_NUM_TEAMS];
+  memset(dp, 0xFF, sizeof(dp));
+
+  uint8_t round = 0;
+  for (uint8_t g = 0; g < POOL_NUM_GAMES; g++) {
+    if (g >= poolGamesInRound[round]) round++;
+
+    if (round == 0) {
+      uint8_t team1 = g * 2 + 1;
+      uint8_t team2 = team1 + 1;
+
+      if (results->winners[g] != 0) {
+        uint8_t winner = results->winners[g];
+        uint8_t loser = (winner == team1) ? team2 : team1;
+        uint32_t gameScore = 0;
+        if (bracket->winners[g] == winner) {
+          uint8_t wSeed = poolTeams[winner - 1].seed;
+          uint8_t lSeed = poolTeams[loser - 1].seed;
+          gameScore = poolConfiguration.roundScores[0] + (wSeed > lSeed ? wSeed - lSeed : 0);
+        }
+        dp[g][winner - 1] = gameScore;
+      } else {
+        if (!poolTeams[team1 - 1].eliminated) {
+          uint32_t gameScore = 0;
+          if (bracket->winners[g] == team1) {
+            uint8_t wSeed = poolTeams[team1 - 1].seed;
+            uint8_t lSeed = poolTeams[team2 - 1].seed;
+            gameScore = poolConfiguration.roundScores[0] + (wSeed > lSeed ? wSeed - lSeed : 0);
+          }
+          dp[g][team1 - 1] = gameScore;
+        }
+        if (!poolTeams[team2 - 1].eliminated) {
+          uint32_t gameScore = 0;
+          if (bracket->winners[g] == team2) {
+            uint8_t wSeed = poolTeams[team2 - 1].seed;
+            uint8_t lSeed = poolTeams[team1 - 1].seed;
+            gameScore = poolConfiguration.roundScores[0] + (wSeed > lSeed ? wSeed - lSeed : 0);
+          }
+          dp[g][team2 - 1] = gameScore;
+        }
+      }
+    } else {
+      uint8_t gameBase = round == 1 ? 0 : poolGamesInRound[round - 2];
+      uint8_t prevGame1 = gameBase + (g - poolGamesInRound[round - 1]) * 2;
+      uint8_t prevGame2 = prevGame1 + 1;
+
+      if (results->winners[g] != 0) {
+        uint8_t winner = results->winners[g];
+        uint8_t loser = pool_loser_of_game(g, results);
+        uint32_t dpW, dpL;
+        if (dp[prevGame1][winner - 1] != UINT32_MAX) {
+          dpW = dp[prevGame1][winner - 1];
+          dpL = dp[prevGame2][loser - 1];
+        } else {
+          dpW = dp[prevGame2][winner - 1];
+          dpL = dp[prevGame1][loser - 1];
+        }
+        uint32_t gameScore = 0;
+        if (bracket->winners[g] == winner) {
+          uint8_t wSeed = poolTeams[winner - 1].seed;
+          uint8_t lSeed = poolTeams[loser - 1].seed;
+          gameScore = poolConfiguration.roundScores[round] + (wSeed > lSeed ? wSeed - lSeed : 0);
+        }
+        dp[g][winner - 1] = dpW + dpL + gameScore;
+      } else {
+        for (uint8_t tl = 0; tl < POOL_NUM_TEAMS; tl++) {
+          if (dp[prevGame1][tl] == UINT32_MAX) continue;
+          for (uint8_t tr = 0; tr < POOL_NUM_TEAMS; tr++) {
+            if (dp[prevGame2][tr] == UINT32_MAX) continue;
+            uint32_t subtreeScore = dp[prevGame1][tl] + dp[prevGame2][tr];
+
+            // TL wins game g
+            {
+              uint32_t gameScore = 0;
+              if (bracket->winners[g] == tl + 1) {
+                uint8_t wSeed = poolTeams[tl].seed;
+                uint8_t lSeed = poolTeams[tr].seed;
+                gameScore = poolConfiguration.roundScores[round] + (wSeed > lSeed ? wSeed - lSeed : 0);
+              }
+              uint32_t candidate = subtreeScore + gameScore;
+              if (dp[g][tl] == UINT32_MAX || candidate > dp[g][tl]) {
+                dp[g][tl] = candidate;
+              }
+            }
+
+            // TR wins game g
+            {
+              uint32_t gameScore = 0;
+              if (bracket->winners[g] == tr + 1) {
+                uint8_t wSeed = poolTeams[tr].seed;
+                uint8_t lSeed = poolTeams[tl].seed;
+                gameScore = poolConfiguration.roundScores[round] + (wSeed > lSeed ? wSeed - lSeed : 0);
+              }
+              uint32_t candidate = subtreeScore + gameScore;
+              if (dp[g][tr] == UINT32_MAX || candidate > dp[g][tr]) {
+                dp[g][tr] = candidate;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  uint32_t maxScore = 0;
+  for (uint8_t t = 0; t < POOL_NUM_TEAMS; t++) {
+    if (dp[POOL_NUM_GAMES - 1][t] != UINT32_MAX && dp[POOL_NUM_GAMES - 1][t] > maxScore) {
+      maxScore = dp[POOL_NUM_GAMES - 1][t];
+    }
+  }
+  return maxScore;
 }
 POOLDEF uint32_t pool_josh_p_scorer(PoolBracket *bracket, PoolBracket *results, uint8_t round, uint8_t game) {
   UNUSED(results);
@@ -487,6 +609,9 @@ POOLDEF void pool_bracket_score(PoolBracket *bracket, PoolBracket *results) {
         bracket->maxScore += gameScore;
       }
     }
+  }
+  if (poolConfiguration.scorerType == PoolScorerRelaxedSeedDiff) {
+    bracket->maxScore = pool_dp_relaxed_max_score(bracket, results);
   }
   if (results->tieBreak > 0) {
     bracket->tieBreakDiff = abs(results->tieBreak - bracket->tieBreak);
