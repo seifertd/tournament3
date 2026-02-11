@@ -25,8 +25,8 @@ int main(void) {
   pool_possibilities_report(PoolFormatText, true, 0, 1, false);
 
   // Advance pool to final four
-  time_t t;
-  srand((unsigned) time(&t));
+  srand(time(NULL));
+  rand();
   uint8_t gameNum = pool_games_played();
   size_t gamesRemaining = 63 - gameNum;
   while (gamesRemaining > 3) {

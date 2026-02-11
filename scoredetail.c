@@ -20,32 +20,16 @@ int main(void) {
   printf("Score: %d\n", entry.score);
   printf("Max Score: %d\n", entry.maxScore);
   uint32_t total = 0;
-  uint32_t maxScore = 0;
   for (uint8_t g = 0; g < POOL_NUM_GAMES; g++) {
     uint8_t team1 = 0;
     uint8_t team2 = 0;
     uint8_t round = pool_round_of_game(g);
-    pool_teams_of_game(g, round, &entry, &team1, &team2); 
+    pool_teams_of_game(g, round, &entry, &team1, &team2);
     uint32_t score = 0;
-    if (poolTournamentBracket.winners[g] != 0) {
-      if (entry.winners[g] == poolTournamentBracket.winners[g]) {
-        score = (*poolConfiguration.poolScorer)(&entry, &poolTournamentBracket, round, g);
-        maxScore += score;
-      }
-    } else {
-      if (!poolTeams[entry.winners[g] - 1].eliminated) {
-        maxScore += (*poolConfiguration.poolScorer)(&entry, &poolTournamentBracket, round, g);
-      }
+    if (poolTournamentBracket.winners[g] != 0 && entry.winners[g] == poolTournamentBracket.winners[g]) {
+      uint8_t loser = pool_loser_of_game(g, &poolTournamentBracket);
+      score = (*poolConfiguration.poolScorer)(&entry, poolTournamentBracket.winners[g], loser, round, g);
     }
-    /*
-    if (entry.winners[g] == poolTournamentBracket.winners[g]) {
-      score = (*poolConfiguration.poolScorer)(&entry, &poolTournamentBracket, round, g);
-    }
-    if (!poolTeams[entry.winners[g]-1].eliminated &&
-      (entry.winners[g] == poolTournamentBracket.winners[g] || poolTournamentBracket.winners[g] == 0)) {
-      maxScore += (*poolConfiguration.poolScorer)(&entry, &poolTournamentBracket, round, g);
-    }
-    */
     total += score;
     PoolTeam *t1 = team1 > 0 ? &poolTeams[team1-1] : NULL;
     PoolTeam *t2 = team2 > 0 ? &poolTeams[team2-1] : NULL;
@@ -55,9 +39,9 @@ int main(void) {
     printf(STRIKE(team2, poolTournamentBracket.winners[g], "%s"), POOL_TEAM_SHORT_NAME(team2));
     printf(" (%d) => ", t2 ? t2->seed : 0);
     printf(STRIKE(entry.winners[g], poolTournamentBracket.winners[g], "%s"), POOL_TEAM_SHORT_NAME(entry.winners[g]));
-    printf(" =? %s: score: %u/%u/%u\n",
+    printf(" =? %s: score: %u/%u\n",
            POOL_TEAM_SHORT_NAME(poolTournamentBracket.winners[g]),
-           score, total, maxScore);
+           score, total);
   }
   return 0;
 }

@@ -9,7 +9,7 @@ else
 fi
 
 rm -rf pool testpool benchmark scoredetail
-${CC} ${CFLAGS} -o pool pool.c
-${CC} ${CFLAGS} -o testpool testpool.c
-${CC} ${CFLAGS} -o benchmark benchmark.c
-${CC} ${CFLAGS} -o scoredetail scoredetail.c
+${CC} ${CFLAGS} -lm -o pool pool.c
+${CC} ${CFLAGS} -lm -o testpool testpool.c
+${CC} ${CFLAGS} -lm -o benchmark benchmark.c
+${CC} ${CFLAGS} -lm -o scoredetail scoredetail.c
