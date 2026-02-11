@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <time.h>
+#include <math.h>
 
 #ifndef POOLDEF
 #define POOLDEF static inline
@@ -381,7 +382,7 @@ POOLDEF uint32_t pool_upset_multiplier_scorer(PoolBracket *bracket, uint8_t winn
   uint8_t wSeed = poolTeams[winner - 1].seed;
   uint8_t lSeed = poolTeams[loser - 1].seed;
   if (wSeed > lSeed) {
-    return poolConfiguration.roundScores[round] * wSeed / lSeed;
+    return ceilf(poolConfiguration.roundScores[round] * 1.0 * wSeed / lSeed);
   }
   return poolConfiguration.roundScores[round];
 }
@@ -390,7 +391,7 @@ POOLDEF uint32_t pool_upset_multiplier_scorer(PoolBracket *bracket, uint8_t winn
 // if team emerges as winner of game. UINT32_MAX = impossible.
 POOLDEF uint32_t pool_dp_max_score(PoolBracket *bracket, PoolBracket *results) {
   uint32_t dp[POOL_NUM_GAMES][POOL_NUM_TEAMS];
-  memset(dp, 0xFF, sizeof(dp));
+  memset(dp, 0XFF, sizeof(dp));
 
   uint8_t round = 0;
   for (uint8_t g = 0; g < POOL_NUM_GAMES; g++) {
