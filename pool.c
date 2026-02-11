@@ -154,7 +154,12 @@ void help(void) {
 "    greater than the loser’s seed. This differs from SeedDiff in that\n"
 "    the loser in the game need not have been picked correctly.\n"
 "5.  JoshP: each correct pick is worth the round multiplier for the\n"
-"    game’s round multiplied by the seed number of the winning team.\n"
+"    game's round multiplied by the seed number of the winning team.\n"
+"6.  UpsetMultiplier: each correct pick is worth the round multiplier\n"
+"    for the game's round multiplied by the winner's seed divided by\n"
+"    the loser's seed when the winner's seed is greater (an upset).\n"
+"    Otherwise it is worth just the round multiplier. The actual\n"
+"    opponent is used, like RelaxedSeedDiff.\n"
 "\n"
   );
   /* END HELP */
