@@ -506,6 +506,19 @@ POOLDEF PoolScorerFunction pool_get_scorer_function(PoolScorerType scorerType) {
   }
 }
 
+static inline uint32_t pool_call_scorer(PoolScorerType type, PoolBracket *bracket,
+    uint8_t winner, uint8_t loser, uint8_t round, uint8_t game) {
+  switch (type) {
+    case PoolScorerBasic: return pool_basic_scorer(bracket, winner, loser, round, game);
+    case PoolScorerUpset: return pool_upset_scorer(bracket, winner, loser, round, game);
+    case PoolScorerJoshP: return pool_josh_p_scorer(bracket, winner, loser, round, game);
+    case PoolScorerSeedDiff: return pool_seed_diff_scorer(bracket, winner, loser, round, game);
+    case PoolScorerRelaxedSeedDiff: return pool_relaxed_seed_diff_scorer(bracket, winner, loser, round, game);
+    case PoolScorerUpsetMultiplier: return pool_upset_multiplier_scorer(bracket, winner, loser, round, game);
+    default: return 0;
+  }
+}
+
 POOLDEF uint8_t pool_round_of_game(uint8_t gameNum) {
   return poolGamesRound[gameNum];
 }
@@ -794,7 +807,8 @@ POOLDEF void pool_possibilities_dfs(
     PoolProgress *prog,
     PoolBracket possibleBrackets[],
     uint8_t *possibleBracketCount,
-    uint16_t freq[], uint32_t maxFreqScore) {
+    uint16_t freq[], uint32_t maxFreqScore,
+    PoolScorerType scorerType) {
   if (game >= gamesLeftCount) {
     pool_inc_progress(prog);
     if (possibleBrackets && possibleBracketCount) {
@@ -855,7 +869,7 @@ POOLDEF void pool_possibilities_dfs(
     poolTeams[otherTeam-1].eliminated = true;
     uint32_t newMaxFreqScore = maxFreqScore;
     for (size_t i = 0; i < numBrackets; i++) {
-      bracketGameScores[i] = (*poolConfiguration.poolScorer)(stats[i].bracket, teams[t], otherTeam, round, gameNum);
+      bracketGameScores[i] = pool_call_scorer(scorerType, stats[i].bracket, teams[t], otherTeam, round, gameNum);
       freq[stats[i].possibleScore]--;
       stats[i].possibleScore += bracketGameScores[i];
       freq[stats[i].possibleScore]++;
@@ -872,7 +886,8 @@ POOLDEF void pool_possibilities_dfs(
       prog,
       possibleBrackets,
       possibleBracketCount,
-      freq, newMaxFreqScore);
+      freq, newMaxFreqScore,
+      scorerType);
 
     for (size_t i = 0; i < numBrackets; i++) {
       freq[stats[i].possibleScore]--;
@@ -1072,7 +1087,8 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
       progress ? &prog : NULL,
       possibleBrackets,
       possibleBracketCount,
-      freq, maxFreqScore);
+      freq, maxFreqScore,
+      poolConfiguration.scorerType);
   } else {
     pool_restore_stats_from_files(stats, poolBracketsCount);
   }
