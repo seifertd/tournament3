@@ -29,6 +29,7 @@
 #define POOL_NAME_LIMIT 256
 #define POOL_ROUNDS 6
 #define POOL_MAX_PAYOUTS 4
+#define POOL_FREQ_SIZE 4096
 
 typedef struct {
   char name[POOL_TEAM_NAME_LIMIT];
@@ -792,32 +793,33 @@ POOLDEF void pool_possibilities_dfs(
     PoolStats stats[], uint32_t numBrackets,
     PoolProgress *prog,
     PoolBracket possibleBrackets[],
-    uint8_t *possibleBracketCount) {
+    uint8_t *possibleBracketCount,
+    uint16_t freq[], uint32_t maxFreqScore) {
   if (game >= gamesLeftCount) {
     pool_inc_progress(prog);
-    PoolScoreStats copyStats[numBrackets];
     if (possibleBrackets && possibleBracketCount) {
       memcpy(&possibleBrackets[*possibleBracketCount], possibleBracket, sizeof(PoolBracket));
       *possibleBracketCount += 1;
     }
-    for (uint32_t i = 0; i < numBrackets; i++) {
-      copyStats[i].stats = &stats[i];
-      copyStats[i].possibleScore = stats[i].possibleScore;
-    }
-    qsort(copyStats, numBrackets, sizeof(PoolScoreStats), pool_stats_possible_score_cmpfunc);
-    uint32_t champScore = 0;
-    uint32_t lastScore = 0;
-    uint16_t lastRank = 0;
+
+    // Find the actual max score in the histogram
+    while (maxFreqScore > 0 && freq[maxFreqScore] == 0) maxFreqScore--;
+    uint32_t champScore = maxFreqScore;
+    uint16_t champCount = freq[champScore];
     uint8_t champ = possibleBracket->winners[POOL_NUM_GAMES - 1] - 1;
+
+    // Build rank lookup: rankOfScore[s] = 1 + count of brackets with score > s
+    uint16_t rankOfScore[POOL_FREQ_SIZE];
+    uint32_t cumulAbove = 0;
+    for (int s = (int)champScore; s >= 0; s--) {
+      rankOfScore[s] = (uint16_t)(cumulAbove + 1);
+      cumulAbove += freq[s];
+    }
+
+    // Update stats for all brackets
     for (uint32_t i = 0; i < numBrackets; i++) {
-      PoolStats *stat = copyStats[i].stats;
-      uint16_t realRank = i + 1;
-      if (i == 0 || stat->possibleScore != lastScore) {
-        lastRank = realRank;
-        lastScore = stat->possibleScore;
-      } else {
-        realRank = lastRank;
-      }
+      PoolStats *stat = &stats[i];
+      uint16_t realRank = rankOfScore[stat->possibleScore];
       if (stat->possibleScore > stat->maxScore) {
         stat->maxScore = stat->possibleScore;
       }
@@ -827,16 +829,11 @@ POOLDEF void pool_possibilities_dfs(
       if (stat->maxRank < realRank) {
         stat->maxRank = realRank;
       }
-      if (i == 0 || stat->possibleScore == champScore) {
-        champScore = stat->possibleScore;
+      if (stat->possibleScore == champScore) {
         stat->champCounts[champ] += 1;
-        if (i == 0) {
+        if (champCount == 1) {
           stat->timesWon += 1;
         } else {
-          if (i == 1) {
-            copyStats[i-1].stats->timesWon -= 1;
-            copyStats[i-1].stats->timesTied += 1;
-          }
           stat->timesTied += 1;
         }
       }
@@ -856,11 +853,17 @@ POOLDEF void pool_possibilities_dfs(
     possibleBracket->winners[gameNum] = teams[t];
     uint8_t otherTeam = teams[1-t];
     poolTeams[otherTeam-1].eliminated = true;
+    uint32_t newMaxFreqScore = maxFreqScore;
     for (size_t i = 0; i < numBrackets; i++) {
       bracketGameScores[i] = (*poolConfiguration.poolScorer)(stats[i].bracket, teams[t], otherTeam, round, gameNum);
+      freq[stats[i].possibleScore]--;
       stats[i].possibleScore += bracketGameScores[i];
+      freq[stats[i].possibleScore]++;
+      if (stats[i].possibleScore > newMaxFreqScore) {
+        newMaxFreqScore = stats[i].possibleScore;
+      }
     }
-    
+
     // RECURSE
     pool_possibilities_dfs(
       gamesLeft, gamesLeftCount, game + 1,
@@ -868,10 +871,13 @@ POOLDEF void pool_possibilities_dfs(
       stats, poolBracketsCount,
       prog,
       possibleBrackets,
-      possibleBracketCount);
+      possibleBracketCount,
+      freq, newMaxFreqScore);
 
     for (size_t i = 0; i < numBrackets; i++) {
+      freq[stats[i].possibleScore]--;
       stats[i].possibleScore -= bracketGameScores[i];
+      freq[stats[i].possibleScore]++;
       bracketGameScores[i] = 0;
     }
     possibleBracket->winners[gameNum] = 0;
@@ -1041,6 +1047,18 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
   }
 
   if (!restore) {
+    // Initialize score frequency histogram for DFS ranking
+    uint16_t freq[POOL_FREQ_SIZE];
+    memset(freq, 0, sizeof(freq));
+    uint32_t maxFreqScore = 0;
+    for (size_t i = 0; i < poolBracketsCount; i++) {
+      assert(stats[i].possibleScore < POOL_FREQ_SIZE);
+      freq[stats[i].possibleScore]++;
+      if (stats[i].possibleScore > maxFreqScore) {
+        maxFreqScore = stats[i].possibleScore;
+      }
+    }
+
     PoolProgress prog;
     prog.start = clock();
     prog.total = *possibleOutcomes;
@@ -1053,7 +1071,8 @@ bool setup_possibilities(PoolStats *stats, PoolReportFormat fmt, bool progress,
       stats, poolBracketsCount,
       progress ? &prog : NULL,
       possibleBrackets,
-      possibleBracketCount);
+      possibleBracketCount,
+      freq, maxFreqScore);
   } else {
     pool_restore_stats_from_files(stats, poolBracketsCount);
   }
