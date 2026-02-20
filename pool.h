@@ -1161,32 +1161,59 @@ POOLDEF void pool_final_four_report(void) {
       qsort(poolBrackets, poolBracketsCount, sizeof(PoolBracket), pool_score_cmpfunc);
       uint8_t ranks[poolBracketsCount];
       float payouts[poolBracketsCount];
-      uint8_t numRanks = 0;
-      while (numRanks < POOL_MAX_PAYOUTS && numRanks < poolBracketsCount) {
-        PoolBracket entry = poolBrackets[numRanks];
-        float payout = poolConfiguration.payouts[numRanks] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[numRanks] / 100.0;
+      memset(ranks, 0, poolBracketsCount * sizeof(uint8_t));
+      memset(payouts, 0, poolBracketsCount * sizeof(float));
+
+      // Process top 3 payouts (payouts[0..POOL_MAX_PAYOUTS-2])
+      uint8_t numTopRanks = 0;
+      while (numTopRanks < POOL_MAX_PAYOUTS - 1 && numTopRanks < poolBracketsCount) {
+        PoolBracket entry = poolBrackets[numTopRanks];
+        float payout = poolConfiguration.payouts[numTopRanks] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[numTopRanks] / 100.0;
         // Look ahead for ties
         uint8_t numTies = 1;
         float tiedPayoutPool = payout;
-        for (uint8_t j = numRanks+1; j < poolBracketsCount; j++) {
+        for (uint8_t j = numTopRanks+1; j < poolBracketsCount; j++) {
           if (poolBrackets[j].score == entry.score) {
             if (poolBrackets[j].tieBreakDiff == entry.tieBreakDiff) {
               numTies++;
-              if (j < POOL_MAX_PAYOUTS) {
+              if (j < POOL_MAX_PAYOUTS - 1) {
                 tiedPayoutPool += poolConfiguration.payouts[j] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[j] / 100.0;
               }
             }
           }
         }
         for (uint8_t j = 0; j < numTies; j++) {
-          ranks[numRanks+j] = numRanks + 1;
-          payouts[numRanks+j] = tiedPayoutPool / numTies;
+          ranks[numTopRanks+j] = numTopRanks + 1;
+          payouts[numTopRanks+j] = tiedPayoutPool / numTies;
         }
-        numRanks += numTies;
+        numTopRanks += numTies;
       }
+
+      // Process last place payout (payouts[POOL_MAX_PAYOUTS-1])
+      uint8_t lastStart = poolBracketsCount; // sentinel: no last place display
+      if (poolConfiguration.payouts[POOL_MAX_PAYOUTS - 1] != 0 && poolBracketsCount > numTopRanks) {
+        float lastPayout = poolConfiguration.payouts[POOL_MAX_PAYOUTS - 1] == -1 ? poolConfiguration.fee : totalPayout * poolConfiguration.payouts[POOL_MAX_PAYOUTS - 1] / 100.0;
+        PoolBracket lastEntry = poolBrackets[poolBracketsCount - 1];
+        uint8_t numLastTies = 1;
+        for (int j = (int)poolBracketsCount - 2; j >= (int)numTopRanks; j--) {
+          if (poolBrackets[j].score == lastEntry.score && poolBrackets[j].tieBreakDiff == lastEntry.tieBreakDiff) {
+            numLastTies++;
+          } else {
+            break;
+          }
+        }
+        lastStart = poolBracketsCount - numLastTies;
+        uint8_t lastRank = lastStart + 1;
+        float splitPayout = lastPayout / numLastTies;
+        for (uint8_t j = lastStart; j < poolBracketsCount; j++) {
+          ranks[j] = lastRank;
+          payouts[j] = splitPayout;
+        }
+      }
+
       printf("           Tie Break\n");
       printf("Rank Score Pts  Diff Payout  Name\n");
-      for (uint8_t i = 0; i < numRanks; i++) {
+      for (uint8_t i = 0; i < numTopRanks; i++) {
         PoolBracket entry = poolBrackets[i];
         char tieBreakDiff[10] = {0};
         if (entry.tieBreakDiff > 0) {
@@ -1195,6 +1222,22 @@ POOLDEF void pool_final_four_report(void) {
           sprintf(tieBreakDiff, "%s ", "?");
         }
         printf("%4d %5d %3d %4s  $%6.2f %s\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
+      }
+      if (lastStart < poolBracketsCount) {
+        uint8_t displayStart = lastStart > numTopRanks ? lastStart : numTopRanks;
+        if (displayStart > numTopRanks) {
+          printf("   ...\n");
+        }
+        for (uint8_t i = displayStart; i < poolBracketsCount; i++) {
+          PoolBracket entry = poolBrackets[i];
+          char tieBreakDiff[10] = {0};
+          if (entry.tieBreakDiff > 0) {
+            sprintf(tieBreakDiff, "%3d", entry.tieBreakDiff);
+          } else {
+            sprintf(tieBreakDiff, "%s ", "?");
+          }
+          printf("%4d %5d %3d %4s  $%6.2f %s\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
+        }
       }
       printf("\n");
     }
