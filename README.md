@@ -41,9 +41,11 @@ Instructions
       and `payouts` lines.
    1. The `fee` is the number of currency units you collect per entry.
    1. The `payouts` line is a comma separated list of no more than
-      4 integers which specify the payouts by rank.
+      4 integers which specify the payouts by rank. The first 3
+      values pay out 1st, 2nd, and 3rd place. The 4th value pays
+      out last place.
       1. positive numbers specify a percentage of the total fees collected
-      1. -1 specifies that rank gets the entry fee back.
+      1. -1 specifies that place gets the entry fee back.
       1. The sum of the percentages has to equal exactly 100
    1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2024/config.txt)
 1. Create the `teams.txt` file in the directory.
