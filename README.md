@@ -279,11 +279,15 @@ pool directory, then generate the possibilities report:
 ./pool -d test/fifty_entries -r poss
 ```
 
-Using this method and a compute cloud of 8,192 machines, we can generate a possibilities
-report after Day 1 is complete in less than 1 hour. LOL.
+Using this method and a compute cloud of 4,096 Spot instances, we can generate a possibilities
+report after Day 1 is complete in about 4 hours at a cost of roughly $280. See `aws/` for a
+complete implementation using AWS Batch.
 
-On a single machine, the best you are going to be able to do is generate the report
-in less than 1 hour by running 8 processes once there are about 38 teams remaining.
+On a single machine, run one process per core using `parallel.sh` (set `PROCS` to your
+core count). At 2.3M nodes/sec per process, a 12-core machine can generate the report
+in under 1 hour once there are 36 games remaining (about 37 teams), taking roughly 41
+minutes. With fewer cores the threshold is lower — for N cores it is when
+2^(games remaining) / (N × 2,300,000) falls under 3,600 seconds.
 
 Game Index
 -----------
