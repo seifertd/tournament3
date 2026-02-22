@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROCS=16
+PROCS=${PROCS:-16}
 DIR=${1}
 
 if [ -z "$DIR" ]; then
