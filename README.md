@@ -13,17 +13,16 @@ Building
 Run
 
 ```console
-$ ./build.sh
+$ make
 $ ./pool -h
 ```
 
-Build script uses value of CC environment variable or `cc` if it is not set
-as the compiler.
+Uses the value of CC environment variable, or `cc` by default (`clang` on Darwin).
 
-Use clang:
+Use clang explicitly:
 
 ```console
-$ CC=clang ./build.sh
+$ CC=clang make
 ```
 
 Tested on Linux Mint, Ubuntu, Windows 11 (MinGW), Windows 11 (WSL) and Mac OS X (M1).
