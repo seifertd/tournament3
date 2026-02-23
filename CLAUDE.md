@@ -7,14 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 make                # builds pool, testpool, benchmark, scoredetail
 make clean all      # clean then rebuild
-CC=clang make clean all  # use clang instead of cc
-```
-
-Alternatively, using the shell script:
-
-```bash
-./build.sh
-CC=clang ./build.sh
+CC=clang make clean all  # use clang instead of cc (default on Darwin)
 ```
 
 Flags used: `-Wall -Wextra -pedantic -std=c99 -O3 -lm` (clang uses `-Wno-string-concatenation`; gcc uses `-Wno-stringop-truncation`).
