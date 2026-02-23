@@ -290,7 +290,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
   prog->complete += 1;
   if (prog->nextPercent == 0) {
     fprintf(stderr, "DFS BPS: %12.0f 0%% ETA: --\r", 0.0);
-    fflush(stdout);
+    fflush(stderr);
     prog->nextPercent += 1;
   } else if (prog->complete < prog->total) {
     double perc = (double) prog->complete / (double) prog->total * 100.0;
@@ -303,7 +303,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
       uint64_t minutes = (eta - hours * 3600) / 60;
       uint64_t secs = eta % 60;
       fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ETA: %02" PRIu64 ":%02" PRIu64 ":%02" PRIu64 "\r", bps, perc, hours, minutes, secs);
-      fflush(stdout);
+      fflush(stderr);
       prog->nextPercent += 1;
     }
   } else {
@@ -314,7 +314,7 @@ POOLDEF void pool_inc_progress(PoolProgress *prog) {
     uint64_t minutes = (elapsed_t - hours * 3600) / 60;
     uint64_t secs = elapsed_t % 60;
     fprintf(stderr, "DFS BPS: %12.0f %3.0f%% ELAPSED: %02" PRIu64 ":%02" PRIu64 ":%02" PRIu64 "\n", bps, 100.0, hours, minutes, secs);
-    fflush(stdout);
+    fflush(stderr);
   }
 }
 
@@ -739,11 +739,15 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
 
 
 POOLDEF void pool_team_report(void) {
+  const char *top = "┌────┬──────────────────────────────────┬───────┬──────┬─────────────┐";
+  const char *mid = "├────┼──────────────────────────────────┼───────┼──────┼─────────────┤";
+  const char *bot = "└────┴──────────────────────────────────┴───────┴──────┴─────────────┘";
   printf("%s: Team Report\n", poolConfiguration.poolName);
-  printf("%2s %32s %5s %4s %11s\n", "No", "Name", "Short", "Seed", "Eliminated?");
-  printf("%2s %32s %5s %4s %11s\n", "--", "----", "-----", "----", "-----------");
+  printf("%s\n", top);
+  printf("│ No │               Name               │ Short │ Seed │ Eliminated? │\n");
+  printf("%s\n", mid);
   for (int i = 0; i < POOL_NUM_TEAMS; i++) {
-    printf("%2d %32s  %3s  %2d     %3s\n",
+    printf("│ %2d │ %-32s │  %3s  │ %4d │     %-3s     │\n",
         i + 1,
         poolTeams[i].name,
         poolTeams[i].shortName,
@@ -751,6 +755,7 @@ POOLDEF void pool_team_report(void) {
         poolTeams[i].eliminated ? "Yes" : "No"
         );
   }
+  printf("%s\n", bot);
 }
 
 int power_of_two(int num) {
@@ -1211,8 +1216,14 @@ POOLDEF void pool_final_four_report(void) {
         }
       }
 
-      printf("           Tie Break\n");
-      printf("Rank Score Pts  Diff Payout  Name\n");
+      const char *ff_top  = "┌──────┬───────┬────────────┬─────────┬──────────────────────┐";
+      const char *ff_mid  = "├──────┼───────┼─────┼──────┼─────────┼──────────────────────┤";
+      const char *ff_skip = "├╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤";
+      const char *ff_bot  = "└──────┴───────┴─────┴──────┴─────────┴──────────────────────┘";
+      printf("%s\n", ff_top);
+      printf("│      │       │  Tie Break │         │                      │\n");
+      printf("│ Rank │ Score │ Pts │ Diff │  Payout │ %-20s │\n", "Name");
+      printf("%s\n", ff_mid);
       for (uint8_t i = 0; i < numTopRanks; i++) {
         PoolBracket entry = poolBrackets[i];
         char tieBreakDiff[10] = {0};
@@ -1221,12 +1232,12 @@ POOLDEF void pool_final_four_report(void) {
         } else {
           sprintf(tieBreakDiff, "%s ", "?");
         }
-        printf("%4d %5d %3d %4s  $%6.2f %s\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
+        printf("│ %4d │ %5d │ %3d │ %4s │ $%6.2f │ %-20.20s │\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
       }
       if (lastStart < poolBracketsCount) {
         uint8_t displayStart = lastStart > numTopRanks ? lastStart : numTopRanks;
         if (displayStart > numTopRanks) {
-          printf("   ...\n");
+          printf("%s\n", ff_skip);
         }
         for (uint8_t i = displayStart; i < poolBracketsCount; i++) {
           PoolBracket entry = poolBrackets[i];
@@ -1236,10 +1247,10 @@ POOLDEF void pool_final_four_report(void) {
           } else {
             sprintf(tieBreakDiff, "%s ", "?");
           }
-          printf("%4d %5d %3d %4s  $%6.2f %s\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
+          printf("│ %4d │ %5d │ %3d │ %4s │ $%6.2f │ %-20.20s │\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
         }
       }
-      printf("\n");
+      printf("%s\n\n", ff_bot);
     }
   }
 }
@@ -1258,21 +1269,20 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
     qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
 
     switch (fmt) {
-      case PoolFormatText:
-        printf("%20s %4s %4s %5s %5s %6s %6s %6s\n", "",
-            "Min", "Max", "Curr", "Max ", "Win ", "Times", "Times");
-        printf("%20s %4s %4s %5s %5s %6s %6s %6s %-20s\n", "Name  ",
-            "Rank", "Rank", "Score", "Score", "Chance", "Won ", "Tied", "Top Champs");
+      case PoolFormatText: {
+        const char *sep_top = "┌──────────────────────┬──────┬──────┬───────┬───────┬────────┬────────┬────────┬──────────────────────┐";
+        const char *sep_mid = "├──────────────────────┼──────┼──────┼───────┼───────┼────────┼────────┼────────┼──────────────────────┤";
+        const char *sep_bot = "└──────────────────────┴──────┴──────┴───────┴───────┴────────┴────────┴────────┴──────────────────────┘";
+        printf("%s\n", sep_top);
+        printf("│                      │  Min │  Max │  Curr │  Max  │   Win  │  Times │  Times │                      │\n");
+        printf("│ %-20s │ Rank │ Rank │ Score │ Score │ Chance │   Won  │   Tied │ %-20s │\n",
+            "Name", "Top Champs");
+        printf("%s\n", sep_mid);
         for (size_t i = 0; i < poolBracketsCount; i++) {
           PoolStats *stat = &stats[i];
-          float winChance = (double) stat->timesWon / (double) possibleOutcomes * 100.0;
-          printf("%20.20s %4d %4d %5d %5d %6.2f ", stat->bracket->name,
-              stat->minRank, stat->maxRank, stat->bracket->score,
-              stat->maxScore, winChance);
-          pool_print_humanized(stdout, stat->timesWon, 5);
-          printf(" ");
-          pool_print_humanized(stdout, stat->timesTied, 5);
-          printf(" ");
+          float winChance = possibleOutcomes == 0 ? (stat->timesWon > 0 ? 100.0f : 0.0f)
+                                                  : (double) stat->timesWon / (double) possibleOutcomes * 100.0;
+          char champsStr[32] = "";
           if (stat->timesWon > 0 || stat->timesTied > 0) {
             PoolTeamWins top5[5] = {0};
             for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
@@ -1290,16 +1300,26 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
                 }
               }
             }
+            char *cp = champsStr;
             for (size_t w = 0; w < 5; w++) {
               if (top5[w].team != 0) {
-                if (w > 0) { printf(","); }
-                printf("%s", POOL_TEAM_SHORT_NAME(top5[w].team));
+                if (w > 0) cp += sprintf(cp, ",");
+                cp += sprintf(cp, "%s", POOL_TEAM_SHORT_NAME(top5[w].team));
               }
             }
           }
-          printf("\n");
+          printf("│ %-20.20s │ %4d │ %4d │ %5d │ %5d │ %6.2f │ ",
+              stat->bracket->name,
+              stat->minRank, stat->maxRank, stat->bracket->score,
+              stat->maxScore, winChance);
+          pool_print_humanized(stdout, stat->timesWon, 5);
+          printf(" │ ");
+          pool_print_humanized(stdout, stat->timesTied, 5);
+          printf(" │ %-20.20s │\n", champsStr);
         }
+        printf("%s\n", sep_bot);
         break;
+      }
       case PoolFormatJson:
         printf("{");
         printf("\"pool\": {");
@@ -1311,7 +1331,8 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
         printf("\"entries\": [");
         for (size_t i = 0; i < poolBracketsCount; i++) {
           PoolStats *stat = &stats[i];
-          float winChance = (float) stat->timesWon / (float) possibleOutcomes * 100.0;
+          float winChance = possibleOutcomes == 0 ? (stat->timesWon > 0 ? 100.0f : 0.0f)
+                                                  : (float) stat->timesWon / (float) possibleOutcomes * 100.0;
           if (i > 0) { printf(","); }
           printf("{");
           printf("\"name\": \"%s\",", stat->bracket->name);
@@ -1391,9 +1412,13 @@ POOLDEF void pool_score_report(void) {
       printf("UNK\n");
     }
   }
-  printf("                           Curr  Max  Correct Champ/  Tie            Round Scores\n");
-  printf("Rank          Name        Score Score  Picks   Live? Break Diff  1   2   3   4   5   6\n");
-  printf("---- -------------------- ----- ----- ------- ------ ----- ---- --- --- --- --- --- ---\n");
+  const char *top = "┌──────┬──────────────────────┬───────┬───────┬─────────┬───────┬───────┬──────┬───────────────────────────────────┐";
+  const char *mid = "├──────┼──────────────────────┼───────┼───────┼─────────┼───────┼───────┼──────┼─────┼─────┼─────┼─────┼─────┼─────┤";
+  const char *bot = "└──────┴──────────────────────┴───────┴───────┴─────────┴───────┴───────┴──────┴─────┴─────┴─────┴─────┴─────┴─────┘";
+  printf("%s\n", top);
+  printf("│      │                      │  Curr │  Max  │ Correct │ Champ │  Tie  │      │           Round Scores            │\n");
+  printf("│ Rank │ Name                 │ Score │ Score │  Picks  │ Live? │ Break │ Diff │  1  │  2  │  3  │  4  │  5  │  6  │\n");
+  printf("%s\n", mid);
   for (size_t i = 0; i < poolBracketsCount; i++) {
     if (i > 0) {
       if (poolBrackets[i].score != lastScore || poolTournamentBracket.tieBreak > 0) {
@@ -1403,22 +1428,22 @@ POOLDEF void pool_score_report(void) {
     } else {
       lastScore = poolBrackets[i].score;
     }
-    printf("%4d %20.20s %5d %5d %6.2f%%  %3s %c %5d ",
+    char diff_str[8];
+    if (poolTournamentBracket.tieBreak > 0) {
+      snprintf(diff_str, sizeof(diff_str), "%4d", poolBrackets[i].tieBreakDiff);
+    } else {
+      memcpy(diff_str, "   ?", 5);
+    }
+    printf("│ %4d │ %-20.20s │ %5d │ %5d │ %6.2f%% │ %3s %c │ %5d │ %s │ %3d │ %3d │ %3d │ %3d │ %3d │ %3d │\n",
       rank,
       poolBrackets[i].name,
       poolBrackets[i].score,
       poolBrackets[i].maxScore,
-      poolBrackets[i].wins * 100.0 / (pool_games_played() == 0 ? 1 : pool_games_played()), 
+      poolBrackets[i].wins * 100.0 / (pool_games_played() == 0 ? 1 : pool_games_played()),
       POOL_TEAM_SHORT_NAME(poolBrackets[i].winners[62]),
       poolTeams[poolBrackets[i].winners[62] - 1].eliminated ? 'N' : 'Y',
-      poolBrackets[i].tieBreak
-    );
-    if (poolTournamentBracket.tieBreak > 0) {
-      printf("%4d ", poolBrackets[i].tieBreakDiff);
-    } else {
-      printf("  ?  ");
-    }
-    printf("%3d %3d %3d %3d %3d %3d\n",
+      poolBrackets[i].tieBreak,
+      diff_str,
       poolBrackets[i].roundScores[0],
       poolBrackets[i].roundScores[1],
       poolBrackets[i].roundScores[2],
@@ -1427,6 +1452,7 @@ POOLDEF void pool_score_report(void) {
       poolBrackets[i].roundScores[5]
     );
   }
+  printf("%s\n", bot);
   int gamesLeftCount = 63 - pool_games_played();
   if (gamesLeftCount > 0) {
     uint64_t possibleOutcomes = 2L << (gamesLeftCount - 1);
