@@ -1247,7 +1247,7 @@ POOLDEF void pool_final_four_report(void) {
           } else {
             sprintf(tieBreakDiff, "%s ", "?");
           }
-          printf("│ %4d │ %5d │ %3d │ %4s │ $%6.2f │ %-20.20s │\n", ranks[i], entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
+          printf("│ %4s │ %5d │ %3d │ %4s │ $%6.2f │ %-20.20s │\n", "LAST", entry.score, entry.tieBreak, tieBreakDiff, payouts[i], entry.name);
         }
       }
       printf("%s\n\n", ff_bot);
