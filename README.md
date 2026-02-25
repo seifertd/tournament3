@@ -300,7 +300,7 @@ statistical error margins.
 
 Game outcomes are sampled using seed-weighted probabilities. For a matchup between
 seed S1 and seed S2, the probability that the lower seed wins is S2 / (S1 + S2)
-(e.g. a 1 vs 16 gives the 1-seed a ~94% chance; a 5 vs 12 gives ~71%).
+(e.g. a 1 vs 16 gives the 1-seed a ~94% chance; a 5 vs 12 gives ~71%).This model is admittedly pretty poor.
 
 ```console
 ./pool -d mypool -s 1000000 mc
