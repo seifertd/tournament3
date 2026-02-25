@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+foe
+par
+mar
+Pru
+wid
+spl
+Pai
+mor
+pyl
+bla
+sac
+blo
+Cle
+end
+chu
+max
+Mao
+ove
+Cha
+coe
+sca
+plo
+pin
+gre
+lan
+cla
+sli
+slu
+pkd
+sec
+Wis
+# ROUND: 2
+foe
+par
+Pru
+Pai
+mor
+sac
+Cle
+chu
+Mao
+ove
+coe
+plo
+gre
+cla
+slu
+Wis
+# ROUND: 3
+foe
+Pai
+mor
+chu
+ove
+plo
+gre
+slu
+# ROUND: 4
+foe
+chu
+ove
+slu
+# ROUND: 5
+chu
+ove
+# ROUND: 6
+chu
+141

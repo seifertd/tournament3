@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+shi
+can
+dis
+Pru
+bar
+spl
+cir
+Sau
+dee
+bla
+ext
+blo
+Cle
+end
+chu
+dum
+Mao
+sid
+Cha
+hea
+gri
+moo
+Tor
+gre
+sky
+Big
+mas
+san
+pkd
+sec
+Wis
+# ROUND: 2
+sho
+dis
+bar
+cir
+Sau
+ext
+Cle
+chu
+dum
+Cha
+gri
+Tor
+sky
+Big
+pkd
+sec
+# ROUND: 3
+dis
+bar
+ext
+Cle
+dum
+gri
+Big
+sec
+# ROUND: 4
+dis
+Cle
+gri
+sec
+# ROUND: 5
+dis
+sec
+# ROUND: 6
+sec
+122

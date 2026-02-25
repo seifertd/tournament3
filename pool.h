@@ -1571,30 +1571,30 @@ POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, 
         double p = numSamples > 0 ? (double)stat->timesWon / (double)numSamples : 0.0;
         double tiedPct = numSamples > 0 ? (double)stat->timesTied / (double)numSamples * 100.0 : 0.0;
 
-        // Build Top Champs string (top 3 by champCounts)
+        // Build Top Champs string (top 5 by champCounts)
         char champsStr[32] = "";
         if (stat->timesWon > 0 || stat->timesTied > 0) {
-          PoolTeamWins top3[3] = {0};
+          PoolTeamWins top5[5] = {0};
           for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
             if (stat->champCounts[t] > 0) {
-              for (size_t j = 0; j < 3; j++) {
-                if (stat->champCounts[t] > top3[j].count) {
-                  for (size_t k = 2; k > j; k--) {
-                    top3[k].team = top3[k-1].team;
-                    top3[k].count = top3[k-1].count;
+              for (size_t j = 0; j < 5; j++) {
+                if (stat->champCounts[t] > top5[j].count) {
+                  for (size_t k = 4; k > j; k--) {
+                    top5[k].team = top5[k-1].team;
+                    top5[k].count = top5[k-1].count;
                   }
-                  top3[j].team = (uint8_t)(t + 1);
-                  top3[j].count = stat->champCounts[t];
+                  top5[j].team = (uint8_t)(t + 1);
+                  top5[j].count = stat->champCounts[t];
                   break;
                 }
               }
             }
           }
           char *cp = champsStr;
-          for (size_t w = 0; w < 3; w++) {
-            if (top3[w].team != 0) {
+          for (size_t w = 0; w < 5; w++) {
+            if (top5[w].team != 0) {
               if (w > 0) cp += sprintf(cp, ",");
-              cp += sprintf(cp, "%s", POOL_TEAM_SHORT_NAME(top3[w].team));
+              cp += sprintf(cp, "%s", POOL_TEAM_SHORT_NAME(top5[w].team));
             }
           }
         }

@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+foe
+can
+mar
+Pru
+bar
+opi
+Pai
+mor
+dee
+pos
+ext
+blo
+aba
+wil
+mus
+dum
+Mao
+ove
+wor
+coe
+gri
+plo
+Tor
+gre
+sky
+Big
+sli
+slu
+rap
+ten
+amp
+# ROUND: 2
+foe
+can
+bar
+Pai
+mor
+ext
+blo
+mus
+Mao
+ove
+gri
+plo
+gre
+Big
+slu
+amp
+# ROUND: 3
+can
+bar
+ext
+mus
+ove
+gri
+Big
+slu
+# ROUND: 4
+bar
+mus
+gri
+Big
+# ROUND: 5
+mus
+Big
+# ROUND: 6
+Big
+110

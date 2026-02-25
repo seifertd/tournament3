@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+shi
+can
+dis
+ane
+bar
+opi
+cir
+mor
+dee
+pos
+ext
+blo
+aba
+end
+chu
+max
+Mao
+ove
+wor
+hea
+sca
+plo
+pin
+Cat
+sky
+cla
+sli
+slu
+rap
+sec
+Wis
+# ROUND: 2
+ram
+dis
+bar
+opi
+mor
+pos
+blo
+end
+Mao
+wor
+hea
+plo
+sky
+sli
+rap
+sec
+# ROUND: 3
+dis
+bar
+pos
+end
+Mao
+hea
+sky
+sec
+# ROUND: 4
+bar
+pos
+hea
+sec
+# ROUND: 5
+bar
+hea
+# ROUND: 6
+bar
+115

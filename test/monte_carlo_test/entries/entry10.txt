@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+foe
+par
+mar
+Pru
+bar
+opi
+Pai
+Sau
+dee
+bla
+sac
+fan
+Cle
+end
+chu
+dum
+dur
+sid
+Cha
+coe
+sca
+plo
+pin
+Cat
+sky
+cla
+mas
+san
+pkd
+sec
+amp
+# ROUND: 2
+sho
+mar
+bar
+Pai
+Sau
+bla
+fan
+end
+dum
+Cha
+sca
+plo
+sky
+mas
+san
+amp
+# ROUND: 3
+mar
+Pai
+Sau
+fan
+dum
+plo
+mas
+san
+# ROUND: 4
+mar
+fan
+plo
+san
+# ROUND: 5
+mar
+plo
+# ROUND: 6
+plo
+137

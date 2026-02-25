@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+shi
+can
+mar
+ane
+wid
+opi
+cir
+mor
+pyl
+bla
+ext
+blo
+aba
+wil
+mus
+dum
+Mao
+sid
+wor
+coe
+sca
+moo
+pin
+Cat
+sky
+Big
+mas
+slu
+rap
+sec
+amp
+# ROUND: 2
+shi
+can
+wid
+cir
+pyl
+bla
+blo
+wil
+Mao
+wor
+sca
+pin
+Cat
+mas
+slu
+sec
+# ROUND: 3
+can
+wid
+pyl
+blo
+wor
+pin
+mas
+sec
+# ROUND: 4
+can
+blo
+pin
+sec
+# ROUND: 5
+can
+sec
+# ROUND: 6
+sec
+104
