@@ -19,15 +19,16 @@ bool is_power_of_2(int n) {
 }
 
 void usage(char *progName) {
-  fprintf(stderr, "Usage: %s [-hpr] [-f FMT] [-b BATCH] [-n NUMBATCHES] -d DIR REPORT\n", progName);
+  fprintf(stderr, "Usage: %s [-hpr] [-f FMT] [-b BATCH] [-n NUMBATCHES] [-s SAMPLES] -d DIR REPORT\n", progName);
   fprintf(stderr, "   -h get extended help\n");
   fprintf(stderr, "   -d DIR: A directory with pool configuration files\n");
   fprintf(stderr, "   Options for the possibilities ('poss') report:\n");
-  fprintf(stderr, "   -p show progress and ETA for possibilities report\n");
+  fprintf(stderr, "   -p show progress and ETA for possibilities or Monte Carlo report\n");
   fprintf(stderr, "   -r generate possibilities report from saved bin files\n");
   fprintf(stderr, "   -f FMT: Format of report, one of 'text', 'bin' or 'json'\n");
   fprintf(stderr, "   -b BATCH: Batch number for multi process possibilities, should be less than numBatches\n");
   fprintf(stderr, "   -n NUMBATCHES: Number of batches, must be a power of 2\n");
+  fprintf(stderr, "   -s SAMPLES: Number of Monte Carlo simulations for 'mc' report (default 1000000)\n");
   fprintf(stderr, "   REPORT: report to run\n");
   fprintf(stderr, "     teams: show configured teams\n");
   fprintf(stderr, "     results: show tournament bracket\n");
@@ -35,6 +36,7 @@ void usage(char *progName) {
   fprintf(stderr, "     scores: show current scores\n");
   fprintf(stderr, "     poss: show possibilities stats\n");
   fprintf(stderr, "     ffour: show final four possibilities\n");
+  fprintf(stderr, "     mc: Monte Carlo win probability estimate (seed-weighted, fast alternative to poss)\n");
 }
 
 void help(void) {
@@ -175,7 +177,8 @@ int main(int argc, char *argv[]) {
   bool restore = false;
   int batch = 0;
   int numBatches = 1;
-  while ((opt = getopt(argc, argv, "d:f:b:n:prh")) != -1) {
+  uint64_t numSamples = 1000000;
+  while ((opt = getopt(argc, argv, "d:f:b:n:s:prh")) != -1) {
     switch (opt) {
       case 'r':
         restore = true;
@@ -205,6 +208,14 @@ int main(int argc, char *argv[]) {
         numBatches = atoi(optarg);
         if (!is_power_of_2(numBatches)) {
           fprintf(stderr, "[ERROR] numBatches %d is not a power of 2\n", numBatches);
+          usage(argv[0]);
+          exit(EXIT_FAILURE);
+        }
+        break;
+      case 's':
+        numSamples = (uint64_t)atoll(optarg);
+        if (numSamples == 0) {
+          fprintf(stderr, "[ERROR] numSamples must be greater than 0\n");
           usage(argv[0]);
           exit(EXIT_FAILURE);
         }
@@ -243,6 +254,8 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(command, "results") == 0) {
     printf("%s: Results\n", poolConfiguration.poolName);
     pool_print_entry(&poolTournamentBracket);
+  } else if (strcmp(command, "mc") == 0) {
+    pool_monte_carlo_report(numSamples, format, progress);
   } else {
     fprintf(stderr, "Unknown REPORT: %s\n", command);
     usage(argv[0]);

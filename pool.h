@@ -181,6 +181,7 @@ POOLDEF void pool_entries_report(void);
 POOLDEF void pool_score_report(void);
 POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
 POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches, bool restore);
+POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress);
 POOLDEF void pool_final_four_report(void);
 POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCount);
 
@@ -1388,6 +1389,287 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
         fprintf(stderr, "ERROR: Unreachable, unknown or invalid PoolReportFormat\n");
         exit(1);
     }
+  }
+}
+
+// xorshift64 RNG — fast, no external dependencies
+static uint64_t pool_rng_next(uint64_t *state) {
+  *state ^= *state << 13;
+  *state ^= *state >> 7;
+  *state ^= *state << 17;
+  return *state;
+}
+
+// Returns winning team number (1-indexed) using seed-weighted probability.
+// P(team1 wins) = s2 / (s1 + s2), biasing toward lower seeds.
+static uint8_t pool_mc_pick_winner(uint8_t team1, uint8_t team2, uint64_t *rng) {
+  uint8_t s1 = poolTeams[team1 - 1].seed;
+  uint8_t s2 = poolTeams[team2 - 1].seed;
+  return (pool_rng_next(rng) % (s1 + s2) < s2) ? team1 : team2;
+}
+
+POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress) {
+  if (poolBracketsCount == 0) {
+    fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
+    return;
+  }
+
+  // Build possibleBracket from current tournament state
+  PoolBracket possibleBracket;
+  memset(&possibleBracket, 0, sizeof(possibleBracket));
+  memcpy(possibleBracket.winners, poolTournamentBracket.winners, sizeof(uint8_t) * POOL_NUM_TEAMS);
+  possibleBracket.tieBreak = poolTournamentBracket.tieBreak;
+  strncpy(possibleBracket.name, "possible", POOL_BRACKET_NAME_LIMIT - 1);
+
+  // Build gamesLeft[] — games without a known result yet
+  uint8_t gamesLeft[POOL_NUM_GAMES];
+  int gamesLeftCount = 0;
+  for (uint8_t g = 0; g < POOL_NUM_GAMES; g++) {
+    if (poolTournamentBracket.winners[g] == 0) {
+      gamesLeft[gamesLeftCount++] = g;
+    }
+  }
+
+  if (fmt == PoolFormatText) {
+    printf("There are %d games remaining, ", gamesLeftCount);
+    pool_print_humanized(stdout, numSamples, 6);
+    printf(" Monte Carlo simulations\n");
+    printf("%s: Monte Carlo Possibilities Report\n", poolConfiguration.poolName);
+  }
+
+  // Pre-compute base scores (against current results, no future games)
+  uint32_t baseScore[POOL_BRACKET_CAPACITY];
+  for (size_t i = 0; i < poolBracketsCount; i++) {
+    pool_bracket_score(&poolBrackets[i], &possibleBracket);
+    baseScore[i] = poolBrackets[i].score;
+  }
+
+  // Initialize stats
+  PoolStats stats[POOL_BRACKET_CAPACITY];
+  memset(stats, 0, sizeof(stats));
+  for (size_t i = 0; i < poolBracketsCount; i++) {
+    stats[i].bracket = &poolBrackets[i];
+    stats[i].possibleScore = baseScore[i];
+    stats[i].minRank = (uint16_t)(poolBracketsCount + 1);
+  }
+
+  // Seed RNG from current time; avoid zero state
+  uint64_t rng = (uint64_t)time(NULL);
+  if (rng == 0) rng = 0xDEADBEEFCAFEULL;
+  // Warm up RNG
+  for (int w = 0; w < 16; w++) pool_rng_next(&rng);
+
+  // Reusable per-iteration buffers
+  uint32_t totalScore[POOL_BRACKET_CAPACITY];
+  uint16_t freq[POOL_FREQ_SIZE];
+  uint16_t rankOfScore[POOL_FREQ_SIZE];
+
+  clock_t startTime = clock();
+  uint64_t progressStep = numSamples / 100;
+  if (progressStep == 0) progressStep = 1;
+
+  for (uint64_t sim = 0; sim < numSamples; sim++) {
+    // Build simulated bracket: copy current state then fill remaining games
+    PoolBracket simBracket;
+    memcpy(simBracket.winners, possibleBracket.winners, sizeof(uint8_t) * POOL_NUM_TEAMS);
+
+    for (int gi = 0; gi < gamesLeftCount; gi++) {
+      uint8_t gameNum = gamesLeft[gi];
+      uint8_t round = pool_round_of_game(gameNum);
+      uint8_t team1, team2;
+      pool_teams_of_game(gameNum, round, &simBracket, &team1, &team2);
+      simBracket.winners[gameNum] = (team2 == 0) ? team1
+                                                  : pool_mc_pick_winner(team1, team2, &rng);
+    }
+
+    // Score all entries incrementally (base + contribution from simulated games)
+    for (size_t i = 0; i < poolBracketsCount; i++) {
+      totalScore[i] = baseScore[i];
+    }
+    for (int gi = 0; gi < gamesLeftCount; gi++) {
+      uint8_t gameNum = gamesLeft[gi];
+      uint8_t round = pool_round_of_game(gameNum);
+      uint8_t winner = simBracket.winners[gameNum];
+      uint8_t loser = pool_loser_of_game(gameNum, &simBracket);
+      for (size_t i = 0; i < poolBracketsCount; i++) {
+        totalScore[i] += pool_call_scorer(poolConfiguration.scorerType,
+                                          &poolBrackets[i], winner, loser, round, gameNum);
+      }
+    }
+
+    // Build score frequency histogram
+    memset(freq, 0, sizeof(freq));
+    uint32_t maxFreqScore = 0;
+    for (size_t i = 0; i < poolBracketsCount; i++) {
+      assert(totalScore[i] < POOL_FREQ_SIZE);
+      freq[totalScore[i]]++;
+      if (totalScore[i] > maxFreqScore) maxFreqScore = totalScore[i];
+    }
+
+    // Find champion score (highest score with at least one entry)
+    uint32_t champScore = maxFreqScore;
+    while (champScore > 0 && freq[champScore] == 0) champScore--;
+    uint16_t champCount = freq[champScore];
+    uint8_t champ = simBracket.winners[POOL_NUM_GAMES - 1] - 1;  // 0-indexed team
+
+    // Build rank lookup: rankOfScore[s] = 1 + count of entries scoring above s
+    uint32_t cumulAbove = 0;
+    for (int s = (int)champScore; s >= 0; s--) {
+      rankOfScore[s] = (uint16_t)(cumulAbove + 1);
+      cumulAbove += freq[s];
+    }
+
+    // Update stats for each entry
+    for (size_t i = 0; i < poolBracketsCount; i++) {
+      PoolStats *stat = &stats[i];
+      uint16_t realRank = rankOfScore[totalScore[i]];
+      if (totalScore[i] > stat->maxScore) stat->maxScore = totalScore[i];
+      if (stat->minRank > realRank) stat->minRank = realRank;
+      if (stat->maxRank < realRank) stat->maxRank = realRank;
+      if (totalScore[i] == champScore) {
+        stat->champCounts[champ]++;
+        if (champCount == 1) {
+          stat->timesWon++;
+        } else {
+          stat->timesTied++;
+        }
+      }
+    }
+
+    // Progress display
+    if (progress && (sim + 1) % progressStep == 0) {
+      double perc = (double)(sim + 1) / (double)numSamples * 100.0;
+      clock_t curr = clock();
+      double elapsed = (double)(curr - startTime) / CLOCKS_PER_SEC;
+      double sps = elapsed > 0 ? (double)(sim + 1) / elapsed : 0.0;
+      uint64_t remaining = numSamples - sim - 1;
+      uint64_t eta = sps > 0 ? (uint64_t)((double)remaining / sps) : 0;
+      fprintf(stderr, "MC SPS: %12.0f %3.0f%% ETA: %02" PRIu64 ":%02" PRIu64 ":%02" PRIu64 "\r",
+              sps, perc, eta / 3600, (eta % 3600) / 60, eta % 60);
+      fflush(stderr);
+    }
+  }
+  if (progress) {
+    fprintf(stderr, "\n");
+  }
+
+  // Sort by best win chance (same comparator as poss report)
+  qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
+
+  switch (fmt) {
+    case PoolFormatText: {
+      const char *sep_top = "┌──────────────────────┬──────┬──────┬────────────────┬─────────┬────────┬──────────────────────┐";
+      const char *sep_mid = "├──────────────────────┼──────┼──────┼────────────────┼─────────┼────────┼──────────────────────┤";
+      const char *sep_bot = "└──────────────────────┴──────┴──────┴────────────────┴─────────┴────────┴──────────────────────┘";
+      printf("%s\n", sep_top);
+      printf("│                      │  Min │  Max │                │  Tied%%  │  Simul │                      │\n");
+      printf("│ %-20s │ Rank │ Rank │      Win%%      │         │   Won  │ %-20s │\n",
+             "Name", "Top Champs");
+      printf("%s\n", sep_mid);
+      for (size_t i = 0; i < poolBracketsCount; i++) {
+        PoolStats *stat = &stats[i];
+        double p = numSamples > 0 ? (double)stat->timesWon / (double)numSamples : 0.0;
+        double tiedPct = numSamples > 0 ? (double)stat->timesTied / (double)numSamples * 100.0 : 0.0;
+
+        // Build Top Champs string (top 3 by champCounts)
+        char champsStr[32] = "";
+        if (stat->timesWon > 0 || stat->timesTied > 0) {
+          PoolTeamWins top3[3] = {0};
+          for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
+            if (stat->champCounts[t] > 0) {
+              for (size_t j = 0; j < 3; j++) {
+                if (stat->champCounts[t] > top3[j].count) {
+                  for (size_t k = 2; k > j; k--) {
+                    top3[k].team = top3[k-1].team;
+                    top3[k].count = top3[k-1].count;
+                  }
+                  top3[j].team = (uint8_t)(t + 1);
+                  top3[j].count = stat->champCounts[t];
+                  break;
+                }
+              }
+            }
+          }
+          char *cp = champsStr;
+          for (size_t w = 0; w < 3; w++) {
+            if (top3[w].team != 0) {
+              if (w > 0) cp += sprintf(cp, ",");
+              cp += sprintf(cp, "%s", POOL_TEAM_SHORT_NAME(top3[w].team));
+            }
+          }
+        }
+
+        // Print name, min/max rank
+        printf("│ %-20.20s │ %4d │ %4d │ ",
+               stat->bracket->name, stat->minRank, stat->maxRank);
+
+        // Win% column: 14 display chars
+        if (stat->timesWon == 0) {
+          printf("  0.00%%       ");
+        } else if (stat->timesWon < 5) {
+          printf("< 0.001%%      ");
+        } else {
+          double margin = 1.96 * sqrt(p * (1.0 - p) / (double)numSamples);
+          printf("%6.2f%% \xc2\xb1%4.2f%%", p * 100.0, margin * 100.0);
+        }
+
+        // Tied%, Simul Won, Top Champs
+        printf(" │ %6.2f%% │ ", tiedPct);
+        pool_print_humanized(stdout, stat->timesWon, 5);
+        printf(" │ %-20.20s │\n", champsStr);
+      }
+      printf("%s\n", sep_bot);
+      break;
+    }
+    case PoolFormatJson: {
+      printf("{");
+      printf("\"pool\": {");
+      printf("\"name\": \"%s\",", poolConfiguration.poolName);
+      printf("\"numSamples\": %" PRIu64, numSamples);
+      printf("},");
+      printf("\"entries\": [");
+      for (size_t i = 0; i < poolBracketsCount; i++) {
+        PoolStats *stat = &stats[i];
+        double p = numSamples > 0 ? (double)stat->timesWon / (double)numSamples : 0.0;
+        double margin = (stat->timesWon >= 5)
+            ? 1.96 * sqrt(p * (1.0 - p) / (double)numSamples)
+            : 0.0;
+        double tiedPct = numSamples > 0 ? (double)stat->timesTied / (double)numSamples * 100.0 : 0.0;
+        if (i > 0) { printf(","); }
+        printf("{");
+        printf("\"name\": \"%s\",", stat->bracket->name);
+        printf("\"minRank\": %d,", stat->minRank);
+        printf("\"maxRank\": %d,", stat->maxRank);
+        printf("\"winPct\": %.6f,", p * 100.0);
+        printf("\"winMargin\": %.6f,", margin * 100.0);
+        printf("\"tiedPct\": %.6f,", tiedPct);
+        printf("\"timesWon\": %" PRIu64 ",", stat->timesWon);
+        printf("\"timesTied\": %" PRIu64 ",", stat->timesTied);
+        printf("\"champs\": [");
+        bool first = true;
+        for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
+          if (stat->champCounts[t] > 0) {
+            if (!first) { printf(","); }
+            printf("{");
+            printf("\"team\": {");
+            printf("\"number\": %zu,", t + 1);
+            printf("\"shortName\": \"%s\"", POOL_TEAM_SHORT_NAME(t + 1));
+            printf("},");
+            printf("\"timesWon\": %" PRIu64, stat->champCounts[t]);
+            printf("}");
+            first = false;
+          }
+        }
+        printf("]");
+        printf("}");
+      }
+      printf("]");
+      printf("}\n");
+      break;
+    }
+    default:
+      fprintf(stderr, "ERROR: mc command only supports 'text' and 'json' formats\n");
+      exit(1);
   }
 }
 
