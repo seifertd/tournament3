@@ -23,6 +23,7 @@ int main(void) {
   printf("Tournament Results:\n");
   pool_print_entry(&poolTournamentBracket);
   pool_possibilities_report(PoolFormatText, true, 0, 1, false);
+  pool_monte_carlo_report(1000000, PoolFormatText, true);
 
   // Advance pool to final four
   srand(time(NULL));
