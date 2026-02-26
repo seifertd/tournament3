@@ -290,6 +290,30 @@ in under 1 hour once there are 36 games remaining (about 37 teams), taking rough
 minutes. With fewer cores the threshold is lower — for N cores it is when
 2^(games remaining) / (N × 2,300,000) falls under 3,600 seconds.
 
+Monte Carlo Possibilities Report
+---------------------------------
+When there are more than ~36 games remaining (e.g. immediately after Day 1 with
+31 games left), the exhaustive DFS is not practical on a single machine. The `mc`
+command runs a fast Monte Carlo simulation instead: it generates N random tournament
+completions, scores all entries against each one, and reports win probabilities with
+statistical error margins.
+
+Game outcomes are sampled using seed-weighted probabilities. For a matchup between
+seed S1 and seed S2, the probability that the lower seed wins is S2 / (S1 + S2)
+(e.g. a 1 vs 16 gives the 1-seed a ~94% chance; a 5 vs 12 gives ~71%).This model is admittedly pretty poor.
+
+```console
+./pool -d mypool -s 1000000 mc
+```
+
+With 1,000,000 simulations the worst-case statistical margin of error is ±0.1% at
+95% confidence. Runtime is a few seconds on any modern machine. The `-p` flag shows
+progress, and `-f json` outputs JSON. The `-s` flag controls sample count (default
+1,000,000).
+
+The output table mirrors the `poss` report format with an inline ±margin on the
+Win% column showing the statistical uncertainty for each entry's win probability.
+
 Game Index
 -----------
 Game numbers by round and what game numbers teams will play in

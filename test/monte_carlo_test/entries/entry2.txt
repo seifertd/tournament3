@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+foe
+can
+mar
+ane
+wid
+spl
+cir
+mor
+pyl
+pos
+sac
+blo
+Cle
+wil
+chu
+dum
+Mao
+ove
+Cha
+coe
+gri
+plo
+pin
+Cat
+sky
+Big
+mas
+slu
+rap
+ten
+amp
+# ROUND: 2
+sho
+mar
+ane
+spl
+mor
+sac
+Cle
+wil
+dum
+ove
+coe
+plo
+Cat
+Big
+rap
+ten
+# ROUND: 3
+mar
+ane
+sac
+wil
+ove
+coe
+Cat
+ten
+# ROUND: 4
+mar
+wil
+coe
+ten
+# ROUND: 5
+mar
+ten
+# ROUND: 6
+ten
+110

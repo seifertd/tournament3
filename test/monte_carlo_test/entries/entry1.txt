@@ -1,0 +1,70 @@
+# ROUND: 1
+sho
+foe
+can
+dis
+Pru
+bar
+opi
+cir
+mor
+dee
+bla
+ext
+fan
+Cle
+wil
+mus
+max
+dur
+sid
+Cha
+coe
+sca
+moo
+Tor
+Cat
+sky
+cla
+mas
+slu
+rap
+ten
+Wis
+# ROUND: 2
+sho
+can
+Pru
+cir
+dee
+bla
+fan
+wil
+max
+sid
+sca
+moo
+Cat
+mas
+rap
+Wis
+# ROUND: 3
+can
+Pru
+bla
+fan
+max
+moo
+Cat
+rap
+# ROUND: 4
+can
+fan
+max
+Cat
+# ROUND: 5
+can
+max
+# ROUND: 6
+max
+140

@@ -1,0 +1,5 @@
+name=Monte Carlo Test Pool
+scorerType=Basic
+roundScores=1,2,4,8,16,32
+fee=10
+payouts=60,30,10,-1

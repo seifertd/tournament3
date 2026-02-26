@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+shi
+can
+dis
+ane
+wid
+opi
+Pai
+Sau
+dee
+bla
+sac
+blo
+aba
+end
+chu
+max
+dur
+sid
+Cha
+hea
+sca
+moo
+pin
+gre
+sky
+cla
+mas
+slu
+pkd
+sec
+Wis
+# ROUND: 2
+ram
+can
+ane
+opi
+dee
+sac
+aba
+chu
+dur
+sid
+hea
+pin
+gre
+mas
+pkd
+sec
+# ROUND: 3
+ram
+opi
+sac
+aba
+dur
+pin
+mas
+pkd
+# ROUND: 4
+ram
+sac
+dur
+pkd
+# ROUND: 5
+sac
+pkd
+# ROUND: 6
+pkd
+129

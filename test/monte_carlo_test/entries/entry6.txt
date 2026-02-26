@@ -1,0 +1,70 @@
+# ROUND: 1
+ram
+foe
+can
+mar
+ane
+bar
+opi
+Pai
+Sau
+dee
+bla
+sac
+fan
+Cle
+end
+mus
+max
+dur
+ove
+Cha
+hea
+sca
+moo
+Tor
+gre
+sky
+cla
+mas
+slu
+rap
+sec
+amp
+# ROUND: 2
+foe
+mar
+ane
+Pai
+dee
+sac
+Cle
+mus
+dur
+ove
+sca
+Tor
+sky
+cla
+slu
+amp
+# ROUND: 3
+mar
+Pai
+sac
+mus
+ove
+sca
+cla
+slu
+# ROUND: 4
+mar
+sac
+sca
+cla
+# ROUND: 5
+sac
+cla
+# ROUND: 6
+cla
+106
