@@ -35,7 +35,7 @@ Instructions
 ------------
 1. Create a directory on your computer to hold the pool files.
 1. Create the `config.txt` file and set your pool's name, scoring method
-   and round multipliers.
+   and round scores.
    1. If you are running this pool for profit, also fill in the `fee`
       and `payouts` lines.
    1. The `fee` is the number of currency units you collect per entry.
@@ -112,8 +112,8 @@ The pool configuration specifies the scorer to use in the pool.
 Each scorer uses as input the bracket being scored, the winning
 team number, the losing team number, the round number and the
 game number. In addition to the scorer, the pool configuration
-specifies 6 round multipliers that the scorer can use. The default
-multipliers are 1, 2, 4, 8, 16, 32. To override the default,
+specifies 6 round scores that the scorer can use. The default
+round scores are 1, 2, 4, 8, 16, 32. To override the default,
 supply a `roundScores` configuration option in the `config.txt`
 file:
 
@@ -123,26 +123,26 @@ file:
 These are the supported scorers:
 
 1. Basic: each correct pick is worth a constant amount - the round
-   multiplier configured for that round.
-1. Upset: each correct pick is worth the round multiplier for the
+   round score configured for that round.
+1. Upset: each correct pick is worth the round score for the
    game’s round plus the seed number of the winning team.
-1. SeedDiff: each correct pick is worth the round multiplier for the
+1. SeedDiff: each correct pick is worth the round score for the
    game’s round plus the difference in seeds of the winning team and
    the losing team. The bonus points only apply if the loser was
    picked correctly and the winner’s seed is greater than the
    loser’s seed.
-1. RelaxedSeedDiff: each correct pick is worth the round multiplier
+1. RelaxedSeedDiff: each correct pick is worth the round score
    for the game’s round plus the difference in seeds of the winning
    team and the losing team. The bonus points only apply if
    winner’s seed is greater than the loser’s seed. This differs
    from SeedDiff in that the loser in the game need not have been
    picked correctly.
-1. JoshP: each correct pick is worth the round multiplier for the
+1. JoshP: each correct pick is worth the round score for the
    game's round multiplied by the seed number of the winning team.
-1. UpsetMultiplier: each correct pick is worth the round multiplier
+1. UpsetMultiplier: each correct pick is worth the round score
    for the game's round multiplied by the winner's seed divided by
    the loser's seed when the winner's seed is greater (an upset).
-   Otherwise it is worth just the round multiplier. The actual
+   Otherwise it is worth just the round score. The actual
    opponent is used, like RelaxedSeedDiff.
 
 Possibilities Report
