@@ -71,7 +71,7 @@ header li span {
 .bracket {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(94, 8px);
+  grid-template-rows: repeat(94, 10px);
   grid-gap: 2px 6px;
   grid-auto-flow: column;
   margin: 20px auto;
@@ -87,9 +87,32 @@ header li span {
 .region {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(46, 8px);
+  grid-template-rows: repeat(46, 10px);
   grid-gap: 2px 6px;
   grid-auto-flow: column;
+}
+
+.region-label {
+  background-color: #7a2535;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 28px;
+  grid-row: 19/span 3;
+  align-self: center;
+}
+
+.region-1 .region-label,
+.region-2 .region-label {
+  grid-column: 4/span 1;
+}
+
+.region-3 .region-label,
+.region-4 .region-label {
+  grid-column: -5/span 1;
 }
 
 .region-1 {
@@ -102,7 +125,7 @@ header li span {
   grid-row: 45/span 6;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(6, 8px);
+  grid-template-rows: repeat(6, 10px);
   grid-gap: 2px 6px;
   grid-auto-flow: column;
 }
@@ -138,9 +161,9 @@ ul.game li.team {
 
 .team, .champion {
   background-color: white;
-  font-size: 11px;
-  height: 18px;
-  line-height: 18px;
+  font-size: 13px;
+  height: 20px;
+  line-height: 20px;
   padding: 0 5px;
 }
 
@@ -345,15 +368,87 @@ ul.game li.team {
 .championship {
   grid-column: 2/span 1;
   grid-row: 1/span 4;
-  width: 150px;
-}
-.championship .team, .championship .champion, .championship .tie-break, .entry-name {
-  height: 28px;
-  line-height: 28px;
+  width: 170px;
 }
 
-#tie-break, #entry-name {
-  width: 135px;
+.championship .team, .championship .champion {
+  height: 30px;
+  line-height: 30px;
+}
+
+.champion-header {
+  margin-top: 12px;
+  padding: 5px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #04314c;
+  background: none;
+  height: auto;
+  line-height: normal;
+}
+
+.championship .champion {
+  height: 33px;
+  line-height: 33px;
+}
+
+.championship .form-group {
+  padding: 4px 4px;
+}
+
+.championship input[type="number"],
+.championship input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #04314c;
+  padding: 6px 6px;
+  font-family: "Signika", sans-serif;
+  font-size: 13px;
+  outline: none;
+  background: white;
+}
+
+.championship input[type="number"]:focus,
+.championship input[type="text"]:focus {
+  border-color: #7a2535;
+  box-shadow: 0 0 0 1px #7a2535;
+}
+
+.championship button {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #04314c;
+  color: white;
+  border: none;
+  padding: 7px 4px;
+  font-family: "Signika", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.championship button:hover {
+  background-color: #0a5c88;
+}
+
+.championship label[for="load-entry"] {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #04314c;
+  margin-bottom: 2px;
+}
+
+.championship input[type="file"] {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
 }
 
 .logo {
@@ -362,11 +457,10 @@ ul.game li.team {
   margin: 0;
   padding: 5px;
   margin-left: 120px;
-  background: url(<%=svg_logo%>)
-    no-repeat
-    left center;
-    max-width: 350px;
-    height: 160px;
+  max-width: 350px;
+  height: 160px;
+  background: url(<%=svg_logo%>) no-repeat left center;
+  background-size: contain;
 }
 @media (min-width: 1450px) {
   .logo {
@@ -396,6 +490,7 @@ ul.game li.team {
 <div class="bracket">
 	<figure class="logo"></figure>
   <div class="region region-1" data-name="<%=regions[0].name%>">
+    <div class="region-label"><%=regions[0].name%></div>
     <!-- Region 1 Round 1-->
 		<% regions[0].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+1%>">
@@ -444,6 +539,7 @@ ul.game li.team {
 		
 	</div>
   <div class="region-2 region" data-name="<%=regions[1].name%>">
+    <div class="region-label"><%=regions[1].name%></div>
     <!-- Region 2 Round 1 -->
 		<% regions[1].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+9%>">
@@ -494,6 +590,7 @@ ul.game li.team {
 		
 	</div>
 	<div class="region-3 region" data-name="<%=regions[2].name%>">
+		<div class="region-label"><%=regions[2].name%></div>
 		<!-- Region 3 Round 1 -->
 		<% regions[2].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+17%>">
@@ -541,6 +638,7 @@ ul.game li.team {
 	</div>
 	
 	<div class="region-4 region" data-name="<%=regions[3].name%>">
+		<div class="region-label"><%=regions[3].name%></div>
 		<!-- Region 4 Round 1 -->
 		<% regions[3].games.each.with_index do |game, index| %>
 		<ul class="game game-<%=index+25%>">
@@ -602,23 +700,23 @@ ul.game li.team {
 		<ul class="game game-63 championship">
 			<li class="team team-top" data-sn=""></li>
 			<li class="team team-bottom" data-sn=""></li>
-      <li style="margin-top:40px"><span>CHAMPION:</span></li>
-			<li class="champion" style="padding: 5px; height: 18px; line-height: 18px;"></li>
-      <li class="tie-break" style="padding: 5px">
-        <input type="number" id="tie-break" name="tiebreak" size="20" placeholder="Tie breaker" title="Tie Break: Total points scored in championship game"/>
+      <li class="champion-header">Champion</li>
+			<li class="champion"></li>
+      <li class="form-group">
+        <input type="number" id="tie-break" name="tiebreak" placeholder="Tie breaker" title="Tie Break: Total points scored in championship game"/>
       </li>
-      <li class="entry-name" style="padding: 5px">
-        <input type="text" id="entry-name" name="entryname" size="20" placeholder="Entry name" title="Entry name"/>
+      <li class="form-group">
+        <input type="text" id="entry-name" name="entryname" placeholder="Entry name" title="Entry name"/>
       </li>
-      <li style="padding: 5px">
+      <li class="form-group">
         <button id="generate-entry">Save Entry</button>
       </li>
-      <li style="padding: 5px">
+      <li class="form-group">
         <button id="random-picks">Random Picks</button>
       </li>
-      <li style="padding: 5px">
-	<label for="load-entry">Load Entry:</label>
-	<input type="file" id="load-entry" name="loadfile" size="20" title="Load Entry">
+      <li class="form-group">
+        <label for="load-entry">Load Entry:</label>
+        <input type="file" id="load-entry" name="loadfile" title="Load Entry">
       </li>
 		</ul>
 	</div>

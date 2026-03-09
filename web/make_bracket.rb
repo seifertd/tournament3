@@ -44,9 +44,9 @@ end
 
 teams = File.readlines(teams_file).each do |line|
   line.chomp!
-  next if line.start_with?("##")
-  if line.start_with?("#")
-    name = line[2..-1]
+  next if line.start_with?("#")
+  if line.start_with?("Region:")
+    name = line[7..].strip
     regions << Region.new(name)
     seed_idx = 0
   else

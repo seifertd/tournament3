@@ -1,6 +1,6 @@
-## Preliminary seedings, not final until (3/15/2026 after 6pm eastern time).
-## Left Bracket (play each other in Final Four)
-# East
+# Preliminary seedings, not final until (3/15/2026 after 6pm eastern time).
+# Left Bracket (play each other in Final Four)
+Region: East
 Duke,Duk,1
 UMBC,Umb,16
 Georgia,UGa,8
@@ -17,7 +17,7 @@ Villanova,Vil,7
 NC State,NCS,10
 Michigan St.,MSU,2
 Tennessee St.,TeS,15
-# Midwest
+Region: Midwest
 Michigan,Mch,1
 Long Island/Howard,PI2,16
 Clemson,Cle,8
@@ -34,8 +34,8 @@ Kentucky,Ken,7
 Iowa,Iow,10
 UConn,UCn,2
 Merrimack,Mer,15
-## Right Bracket (play each other in Final Four)
-# South
+# Right Bracket (play each other in Final Four)
+Region: South
 Floria,Fla,1
 B-CU/Lehigh,PI3,16
 Utah St.,USt,8
@@ -52,7 +52,7 @@ Saint Mary's,StM,7
 Missouri,Mis,10
 Houston,Hou,2
 Portland St.,PoS,15
-# West
+Region: West
 Arizona,Ari,1
 Queens,Que,16
 UCLA,UCL,8

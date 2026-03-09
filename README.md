@@ -57,7 +57,10 @@ Instructions
       top right region third, bottom right region fourth. The left side plays the right side
       in the championship. Within each region, teams are in order of seed as follows:
       1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15
-   1. Lines starting with a '#' character are considered comments and ignored
+   1. Lines starting with a `#` character are considered comments and ignored
+   1. Optionally, include exactly 4 `Region: Name` lines to name the four regions
+      (e.g. `Region: East`). They can appear anywhere in the file. If omitted,
+      regions are labeled Region 1 through Region 4 in the teams report.
    1. [Sample `teams.txt` file](https://seifertd.github.io/tournament3/2026/teams.txt)
 1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
@@ -71,8 +74,8 @@ Instructions
          * 2nd argument: the location of the teams file
          * 3rd argument: location where to save the bracket
          * 4th argument: the location of a logo image file in urldata format.
-      1. NOTE: The teams file MUST contain a comment containing the region name in front
-         of each bracket of teams. NO OTHER comments are allowed. See the sample teams.txt 
+      1. NOTE: The teams file MUST contain exactly 4 `Region: Name` lines for the
+         bracket generator to label the regions correctly. See the sample teams.txt
          file above for correct format.
    1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/2026_bracket.html)
 1. Create the `entries` subfolder and copy/create/save any entry files you

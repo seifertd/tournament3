@@ -225,6 +225,7 @@ typedef struct {
   char pi2[POOL_TEAM_SHORT_NAME_LIMIT];
   char pi3[POOL_TEAM_SHORT_NAME_LIMIT];
   char pi4[POOL_TEAM_SHORT_NAME_LIMIT];
+  char regionNames[4][32];
 } PoolConfiguration;
 static PoolConfiguration poolConfiguration = {0};
 
@@ -564,6 +565,10 @@ POOLDEF void pool_defaults(void) {
   poolConfiguration.roundScores[5] = 32;
   poolConfiguration.scorerType = PoolScorerBasic;
   poolConfiguration.poolScorer = pool_get_scorer_function(poolConfiguration.scorerType);
+  strcpy(poolConfiguration.regionNames[0], "Region 1");
+  strcpy(poolConfiguration.regionNames[1], "Region 2");
+  strcpy(poolConfiguration.regionNames[2], "Region 3");
+  strcpy(poolConfiguration.regionNames[3], "Region 4");
 }
 
 POOLDEF void pool_initialize(const char *dirPath) {
@@ -740,23 +745,32 @@ POOLDEF int pool_stats_times_won_cmpfunc (const void * a, const void * b) {
 
 
 POOLDEF void pool_team_report(void) {
-  const char *top = "┌────┬──────────────────────────────────┬───────┬──────┬─────────────┐";
-  const char *mid = "├────┼──────────────────────────────────┼───────┼──────┼─────────────┤";
-  const char *bot = "└────┴──────────────────────────────────┴───────┴──────┴─────────────┘";
+  const char *reg_top = "┌────────────────────────────────────────────────────────────────────┐";
+  const char *col_top = "├────┬──────────────────────────────────┬───────┬──────┬─────────────┤";
+  const char *mid     = "├────┼──────────────────────────────────┼───────┼──────┼─────────────┤";
+  const char *bot     = "└────┴──────────────────────────────────┴───────┴──────┴─────────────┘";
   printf("%s: Team Report\n", poolConfiguration.poolName);
-  printf("%s\n", top);
-  printf("│ No │               Name               │ Short │ Seed │ Eliminated? │\n");
-  printf("%s\n", mid);
-  for (int i = 0; i < POOL_NUM_TEAMS; i++) {
-    printf("│ %2d │ %-32s │  %3s  │ %4d │     %-3s     │\n",
-        i + 1,
-        poolTeams[i].name,
-        poolTeams[i].shortName,
-        poolTeams[i].seed,
-        poolTeams[i].eliminated ? "Yes" : "No"
-        );
+  for (int r = 0; r < 4; r++) {
+    if (r > 0) printf("\n");
+    int nameLen = (int)strlen(poolConfiguration.regionNames[r]);
+    int left = (68 - nameLen) / 2;
+    int right = 68 - nameLen - left;
+    printf("%s\n", reg_top);
+    printf("│%*s%s%*s│\n", left, "", poolConfiguration.regionNames[r], right, "");
+    printf("%s\n", col_top);
+    printf("│ No │               Name               │ Short │ Seed │ Eliminated? │\n");
+    printf("%s\n", mid);
+    for (int i = r * 16; i < (r + 1) * 16; i++) {
+      printf("│ %2d │ %-32s │  %3s  │ %4d │     %-3s     │\n",
+          i + 1,
+          poolTeams[i].name,
+          poolTeams[i].shortName,
+          poolTeams[i].seed,
+          poolTeams[i].eliminated ? "Yes" : "No"
+          );
+    }
+    printf("%s\n", bot);
   }
-  printf("%s\n", bot);
 }
 
 int power_of_two(int num) {
@@ -2028,6 +2042,7 @@ POOLDEF void pool_read_team_file(const char *filePath) {
     exit(1);
   }
   char buffer[1024];
+  int regionCount = 0;
   for (uint8_t i = 0; i < POOL_NUM_TEAMS; i++) {
     char *line = fgets(buffer, 1023, f);
     if (line == NULL) {
@@ -2035,7 +2050,20 @@ POOLDEF void pool_read_team_file(const char *filePath) {
           filePath, strerror(errno));
       exit(1);
     }
-    while (buffer[0] == '#') {
+    while (buffer[0] == '#' || strncmp(buffer, "Region:", 7) == 0) {
+      if (strncmp(buffer, "Region:", 7) == 0) {
+        if (regionCount < 4) {
+          char *nameStart = buffer + 7;
+          while (*nameStart == ' ') nameStart++;
+          size_t nameLen = strlen(nameStart);
+          while (nameLen > 0 && (nameStart[nameLen-1] == '\n' || nameStart[nameLen-1] == '\r')) {
+            nameStart[--nameLen] = 0;
+          }
+          strncpy(poolConfiguration.regionNames[regionCount], nameStart, 31);
+          poolConfiguration.regionNames[regionCount][31] = 0;
+        }
+        regionCount++;
+      }
       line = fgets(buffer, 1023, f);
       if (line == NULL) {
         fprintf(stderr, "Could not read a line from file %s: %s\n",
@@ -2078,6 +2106,10 @@ POOLDEF void pool_read_team_file(const char *filePath) {
         exit(1);
       }
     }
+  }
+  if (regionCount != 0 && regionCount != 4) {
+    fprintf(stderr, "teams.txt must contain exactly 0 or 4 Region: lines, found %d\n", regionCount);
+    exit(1);
   }
   fclose(f);
 }
