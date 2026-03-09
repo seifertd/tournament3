@@ -1,0 +1,71 @@
+## Preliminary seedings, not final until (3/15/2026 after 6pm eastern time).
+## Left Bracket (play each other in Final Four)
+# East
+Duke,Duk,1
+UMBC,Umb,16
+Georgia,UGa,8
+Ohio State,OSU,9
+Arkansas,Ark,5
+South Florida,SFl,12
+Texas Tech,TTU,4
+SF Austin,SFA,13
+Wisconsin,Wis,6
+Santa Clara/SMU,PI1,11
+Iowa State,IoS,3
+ETSU,ETS,14
+Villanova,Vil,7
+NC State,NCS,10
+Michigan St.,MSU,2
+Tennessee St.,TeS,15
+# Midwest
+Michigan,Mch,1
+Long Island/Howard,PI2,16
+Clemson,Cle,8
+Saint Louis,StL,9
+Vanderbilt,Van,5
+High Point,HPt,12
+Kansas,Kan,4
+N. Dakota St.,NDS,13
+North Carolina,NCU,6
+Miami OH,MiO,11
+Purdue,Pur,3
+Hofstra,Hof,14
+Kentucky,Ken,7
+Iowa,Iow,10
+UConn,UCn,2
+Merrimack,Mer,15
+## Right Bracket (play each other in Final Four)
+# South
+Floria,Fla,1
+B-CU/Lehigh,PI3,16
+Utah St.,USt,8
+TCU,TCU,9
+St. John's,StJ,5
+Yale,Yal,12
+Virginia,Vir,4
+Liberty,Lib,13
+Louisville,Lou,6
+VCU/Auburn,PI4,11
+Nebraska,Neb,3
+UC Irivine,UCI,14
+Saint Mary's,StM,7
+Missouri,Mis,10
+Houston,Hou,2
+Portland St.,PoS,15
+# West
+Arizona,Ari,1
+Queens,Que,16
+UCLA,UCL,8
+Texas A&M,A&M,9
+Tennessee,Ten,5
+Northern Iowa,NIo,12
+Gonzaga,Gon,4
+Utah Valley,UtV,13
+BYU,BYU,6
+UCF,UCF,11
+Alabama,Ala,3
+Troy,Try,14
+Miami FL,MiF,7
+Texas,Tex,10
+Illinois,Ill,2
+Wright St.,WSt,15
