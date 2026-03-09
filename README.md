@@ -46,7 +46,7 @@ Instructions
       1. positive numbers specify a percentage of the total fees collected
       1. -1 specifies that place gets the entry fee back.
       1. The sum of the percentages has to equal exactly 100
-   1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2024/config.txt)
+   1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2026/config.txt)
 1. Create the `teams.txt` file in the directory.
    1. Each line is in the form "Long Name,3-character Short Name"
    1. Each team must have a unique short name. 
@@ -58,7 +58,7 @@ Instructions
       in the championship. Within each region, teams are in order of seed as follows:
       1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15
    1. Lines starting with a '#' character are considered comments and ignored
-   1. [Sample `teams.txt` file](https://seifertd.github.io/tournament3/2024/teams.txt)
+   1. [Sample `teams.txt` file](https://seifertd.github.io/tournament3/2026/teams.txt)
 1. Collect entries
    1. You can hand out forms, set up a pool on one of the free websites
       or send out the included bracket HTML entry collector page via email.
@@ -66,7 +66,7 @@ Instructions
       teams.
       1. New for 2024: there is a ruby script to generate the web entry collector
          from the teams file. You need a working ruby install and can run it as
-         follows: `ruby web/make_bracket.rb ./2024/teams.txt ./web/2024_bracket.html ./2024/logo.uri`
+         follows: `ruby web/make_bracket.rb ./2026/teams.txt ./web/2026_bracket.html ./2026/ncaa_2026.logo`
          * 1st argument: the location of the generator script in this repo
          * 2nd argument: the location of the teams file
          * 3rd argument: location where to save the bracket
@@ -74,7 +74,7 @@ Instructions
       1. NOTE: The teams file MUST contain a comment containing the region name in front
          of each bracket of teams. NO OTHER comments are allowed. See the sample teams.txt 
          file above for correct format.
-   1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/2024_bracket.html)
+   1. Here is what the HTML entry collector looks like: [Latest NCAA Tournament Bracket](https://seifertd.github.io/tournament3/web/2026_bracket.html)
 1. Create the `entries` subfolder and copy/create/save any entry files you
    got from the pool entrants. 
 1. Generate an entries report and send it out to everyone for confirmation:
@@ -96,7 +96,7 @@ Instructions
    `results.txt` file, one team short name per line. For play in games,
    you can use either the original `PI[1234]` short names or the mapped
    short names of the play in games from the step above.
-   1. [Sample `results.txt` file](https://seifertd.github.io/tournament3/2024/results.txt)
+   1. [Sample `results.txt` file](https://seifertd.github.io/tournament3/2025/results.txt)
 1. Run the scores report: `./pool -d mypool scores` until the first round
    is complete.
 1. Run your first possibilities report as soon as your machine
