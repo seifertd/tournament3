@@ -44,6 +44,7 @@ end
 
 teams = File.readlines(teams_file).each do |line|
   line.chomp!
+  next if line.start_with?("##")
   if line.start_with?("#")
     name = line[2..-1]
     regions << Region.new(name)
