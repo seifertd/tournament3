@@ -6,6 +6,7 @@
 code.txt
 help.txt
 update_help.sh
+mise.toml
 
 # Ignore score report .bin files
 *.bin
