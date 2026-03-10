@@ -12,14 +12,14 @@ SF Austin,SFA,13
 Wisconsin,Wis,6
 Santa Clara/SMU,PI1,11
 Iowa State,IoS,3
-ETSU,ETS,14
+Wright St.,WSt,14
 Villanova,Vil,7
 NC State,NCS,10
 Michigan St.,MSU,2
-Tennessee St.,TeS,15
+Queens,Que,15
 Region: Midwest
 Michigan,Mch,1
-Long Island/Howard,PI2,16
+B-CU/Lehigh,PI2,16
 Clemson,Cle,8
 Saint Louis,StL,9
 Vanderbilt,Van,5
@@ -37,7 +37,7 @@ Merrimack,Mer,15
 # Right Bracket (play each other in Final Four)
 Region: South
 Floria,Fla,1
-B-CU/Lehigh,PI3,16
+Furman/Howard,PI3,16
 Utah St.,USt,8
 TCU,TCU,9
 St. John's,StJ,5
@@ -54,7 +54,7 @@ Houston,Hou,2
 Portland St.,PoS,15
 Region: West
 Arizona,Ari,1
-Queens,Que,16
+Long Island,LIs,16
 UCLA,UCL,8
 Texas A&M,A&M,9
 Tennessee,Ten,5
@@ -68,4 +68,4 @@ Troy,Try,14
 Miami FL,MiF,7
 Texas,Tex,10
 Illinois,Ill,2
-Wright St.,WSt,15
+Tennessee St.,TeS,15

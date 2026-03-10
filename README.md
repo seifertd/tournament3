@@ -48,14 +48,14 @@ Instructions
       1. The sum of the percentages has to equal exactly 100
    1. [Sample `config.txt` file](https://seifertd.github.io/tournament3/2026/config.txt)
 1. Create the `teams.txt` file in the directory.
-   1. Each line is in the form "Long Name,3-character Short Name"
+   1. Each line is in the form "Long Name,3-character Short Name". Any extra fields (like seed number) are ignored.
    1. Each team must have a unique short name. 
    1. The short names are case sensitive.
    1. For the four play in games, use `PI1`, `PI2`, `PI3` and `PI4` as the
       short name. The long name is irrelevant.
    1. The order of teams listed is as follows: top left region first, bottom left region second,
       top right region third, bottom right region fourth. The left side plays the right side
-      in the championship. Within each region, teams are in order of seed as follows:
+      in the championship. Within each region, teams are in play order by seed as follows:
       1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15
    1. Lines starting with a `#` character are considered comments and ignored
    1. Optionally, include exactly 4 `Region: Name` lines to name the four regions
@@ -103,7 +103,7 @@ Instructions
 1. Run the scores report: `./pool -d mypool scores` until the first round
    is complete.
 1. Run your first possibilities report as soon as your machine
-   can handle it: `./pool -d mypool poss` and pass
+   can handle it: `./pool -d mypool -p poss` and pass
    around the results via email, slack, discord or whatever.
 1. When the final four teams are determined, run the Final Four
    report to show all top 4 standings and payouts (if configured) for
