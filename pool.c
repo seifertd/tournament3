@@ -29,6 +29,8 @@ void usage(char *progName) {
   fprintf(stderr, "   -b BATCH: Batch number for multi process possibilities, should be less than numBatches\n");
   fprintf(stderr, "   -n NUMBATCHES: Number of batches, must be a power of 2\n");
   fprintf(stderr, "   -s SAMPLES: Number of Monte Carlo simulations for 'mc' report (default 1000000)\n");
+  fprintf(stderr, "   -m MODE: Selection mode for 'mc' report: 'seed' (default) or 'model'\n");
+  fprintf(stderr, "            'model' requires stats.csv and weights.json in the pool directory\n");
   fprintf(stderr, "   REPORT: report to run\n");
   fprintf(stderr, "     teams: show configured teams\n");
   fprintf(stderr, "     results: show tournament bracket\n");
@@ -186,7 +188,8 @@ int main(int argc, char *argv[]) {
   int batch = 0;
   int numBatches = 1;
   uint64_t numSamples = 1000000;
-  while ((opt = getopt(argc, argv, "d:f:b:n:s:prh")) != -1) {
+  PoolMCSelectionMode mcMode = PoolMCSelectionSeedWeighted;
+  while ((opt = getopt(argc, argv, "d:f:b:n:s:m:prh")) != -1) {
     switch (opt) {
       case 'r':
         restore = true;
@@ -228,6 +231,17 @@ int main(int argc, char *argv[]) {
           exit(EXIT_FAILURE);
         }
         break;
+      case 'm':
+        if (strcmp(optarg, "model") == 0) {
+          mcMode = PoolMCSelectionModelWeighted;
+        } else if (strcmp(optarg, "seed") == 0) {
+          mcMode = PoolMCSelectionSeedWeighted;
+        } else {
+          fprintf(stderr, "[ERROR] Unknown mc mode '%s'; use 'seed' or 'model'\n", optarg);
+          usage(argv[0]);
+          exit(EXIT_FAILURE);
+        }
+        break;
       default:
         usage(argv[0]);
         exit(EXIT_FAILURE);
@@ -263,7 +277,7 @@ int main(int argc, char *argv[]) {
     printf("%s: Results\n", poolConfiguration.poolName);
     pool_print_entry(&poolTournamentBracket);
   } else if (strcmp(command, "mc") == 0) {
-    pool_monte_carlo_report(numSamples, format, progress);
+    pool_monte_carlo_report(numSamples, format, progress, mcMode);
   } else {
     fprintf(stderr, "Unknown REPORT: %s\n", command);
     usage(argv[0]);

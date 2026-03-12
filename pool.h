@@ -30,6 +30,9 @@
 #define POOL_ROUNDS 6
 #define POOL_MAX_PAYOUTS 4
 #define POOL_FREQ_SIZE 4096
+#define POOL_NUM_MODEL_STATS 24
+#define POOL_STATS_FILE_NAME "stats.csv"
+#define POOL_WEIGHTS_FILE_NAME "weights.json"
 
 typedef struct {
   char name[POOL_TEAM_NAME_LIMIT];
@@ -172,6 +175,7 @@ typedef struct {
 
 typedef enum { PoolScorerBasic = 0,  PoolScorerUpset, PoolScorerJoshP, PoolScorerSeedDiff, PoolScorerRelaxedSeedDiff, PoolScorerUpsetMultiplier } PoolScorerType;
 typedef enum { PoolFormatInvalid = 0, PoolFormatText, PoolFormatJson, PoolFormatBin } PoolReportFormat;
+typedef enum { PoolMCSelectionSeedWeighted = 0, PoolMCSelectionModelWeighted } PoolMCSelectionMode;
 
 POOLDEF void pool_defaults(void);
 POOLDEF void pool_initialize(const char *dirPath);
@@ -181,7 +185,8 @@ POOLDEF void pool_entries_report(void);
 POOLDEF void pool_score_report(void);
 POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
 POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches, bool restore);
-POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress);
+POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress, PoolMCSelectionMode selectionMode);
+POOLDEF bool pool_load_model_data(void);
 POOLDEF void pool_final_four_report(void);
 POOLDEF void pool_restore_stats_from_files(PoolStats stats[], uint32_t bracketCount);
 
@@ -228,6 +233,9 @@ typedef struct {
   char regionNames[4][32];
 } PoolConfiguration;
 static PoolConfiguration poolConfiguration = {0};
+static float poolTeamModelStats[POOL_NUM_TEAMS][POOL_NUM_MODEL_STATS] = {{0}};
+static float poolModelWeights[POOL_NUM_MODEL_STATS] = {0};
+static bool poolModelStatsLoaded = false;
 
 #endif // POOL_C_ IMPLEMENTATION
 
@@ -1406,6 +1414,172 @@ POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int 
   }
 }
 
+// Stat IDs (matching weights.json keys) and corresponding CSV column headers.
+// Index 0 is Seed, which is treated specially during scoring (inverted).
+static const char *pool_model_stat_ids[POOL_NUM_MODEL_STATS] = {
+  "Seed", "WP", "SS", "PG", "OPG", "FGP", "3PFGP", "FTP", "OR", "DR",
+  "ASM", "RP", "ORP", "EFGP", "TSP", "OTSP", "P", "TP", "OTP", "TM",
+  "AP", "AT", "FTFGA", "OFTFGA"
+};
+static const char *pool_model_stat_csv_names[POOL_NUM_MODEL_STATS] = {
+  "Seed", "Win %", "SoS", "Pts / Gm", "Opp Pts / Gm", "FG %", "3Pt FG %",
+  "Free Throw %", "Offense Rating", "Defense Rating", "Adj. Score Margin",
+  "Rebound %", "Off. Rebound %", "Effective FG %", "True Shooting %",
+  "Opp. True Shoot %", "Pace", "Turnover %", "Opp. Turnover %",
+  "Turnover Margin", "Assist %", "Assists / Turnover", "FT / FGA", "Opp. FT / FGA"
+};
+
+// Split a CSV line into fields by replacing commas with NUL terminators.
+// Trims trailing CR/LF from the last field. Returns the number of fields.
+static int pool_csv_split(char *line, char *fields[], int maxFields) {
+  int n = 0;
+  char *p = line;
+  while (n < maxFields) {
+    fields[n++] = p;
+    p = strchr(p, ',');
+    if (!p) break;
+    *p++ = '\0';
+  }
+  if (n > 0) {
+    char *end = fields[n - 1] + strlen(fields[n - 1]) - 1;
+    while (end >= fields[n - 1] && (*end == '\n' || *end == '\r')) *end-- = '\0';
+  }
+  return n;
+}
+
+// Load weights.json from the pool directory into poolModelWeights[].
+static bool pool_load_model_weights_file(const char *dirPath) {
+  char path[2048];
+  snprintf(path, sizeof(path), "%s/%s", dirPath, POOL_WEIGHTS_FILE_NAME);
+  FILE *f = fopen(path, "r");
+  if (!f) { fprintf(stderr, "Cannot open %s: %s\n", path, strerror(errno)); return false; }
+  char line[256];
+  int loaded = 0;
+  while (fgets(line, sizeof(line), f)) {
+    char key[32];
+    double val;
+    if (sscanf(line, " \"%31[^\"]\" : %lf", key, &val) == 2) {
+      for (int i = 0; i < POOL_NUM_MODEL_STATS; i++) {
+        if (strcmp(key, pool_model_stat_ids[i]) == 0) {
+          poolModelWeights[i] = (float)val;
+          loaded++;
+          break;
+        }
+      }
+    }
+  }
+  fclose(f);
+  return loaded > 0;
+}
+
+// Load stats.csv from the pool directory into poolTeamModelStats[][].
+// The file must begin with front-matter comment lines mapping anglebracket
+// region integers to pool region names, e.g.:
+//   # region 0: South
+//   # region 1: East
+//   # region 2: West
+//   # region 3: Midwest
+// Teams are matched by (region, seed) — no name matching required.
+static bool pool_load_model_stats_file(const char *dirPath) {
+  char path[2048];
+  snprintf(path, sizeof(path), "%s/%s", dirPath, POOL_STATS_FILE_NAME);
+  FILE *f = fopen(path, "r");
+  if (!f) { fprintf(stderr, "Cannot open %s: %s\n", path, strerror(errno)); return false; }
+
+  int regionMap[4] = {-1, -1, -1, -1};  // anglebracket region int -> pool region index
+  char line[4096];
+  char headerLine[4096] = {0};
+
+  // Read front matter (# lines) until the CSV header
+  while (fgets(line, sizeof(line), f)) {
+    if (line[0] == '#') {
+      int regNum;
+      char regName[64];
+      if (sscanf(line, "# region %d: %63[^\n\r]", &regNum, regName) == 2 &&
+          regNum >= 0 && regNum < 4) {
+        for (int r = 0; r < 4; r++) {
+          if (strcasecmp(poolConfiguration.regionNames[r], regName) == 0) {
+            regionMap[regNum] = r;
+            break;
+          }
+        }
+      }
+    } else {
+      strncpy(headerLine, line, sizeof(headerLine) - 1);
+      break;
+    }
+  }
+
+  if (headerLine[0] == '\0') {
+    fprintf(stderr, "stats.csv: no CSV header found\n");
+    fclose(f); return false;
+  }
+  for (int r = 0; r < 4; r++) {
+    if (regionMap[r] < 0) {
+      fprintf(stderr, "stats.csv: anglebracket region %d not mapped to a pool region\n", r);
+      fclose(f); return false;
+    }
+  }
+
+  // Parse CSV header for column indices
+  char *fields[64];
+  int regionCol = -1, seedCol = -1;
+  int statCol[POOL_NUM_MODEL_STATS];
+  for (int i = 0; i < POOL_NUM_MODEL_STATS; i++) statCol[i] = -1;
+
+  int numCols = pool_csv_split(headerLine, fields, 64);
+  for (int c = 0; c < numCols; c++) {
+    if (strcmp(fields[c], "Region") == 0) { regionCol = c; continue; }
+    if (strcmp(fields[c], "Seed")   == 0) { seedCol   = c; continue; }
+    for (int s = 0; s < POOL_NUM_MODEL_STATS; s++) {
+      if (strcmp(fields[c], pool_model_stat_csv_names[s]) == 0) {
+        statCol[s] = c; break;
+      }
+    }
+  }
+  // Seed is both a match key and a stat; find its stat column via csv name
+  if (seedCol >= 0 && statCol[0] < 0) statCol[0] = seedCol;
+
+  if (regionCol < 0 || seedCol < 0) {
+    fprintf(stderr, "stats.csv: missing Region or Seed column\n");
+    fclose(f); return false;
+  }
+
+  // Read data rows and populate poolTeamModelStats by region+seed lookup
+  int matched = 0;
+  while (fgets(line, sizeof(line), f)) {
+    int n = pool_csv_split(line, fields, 64);
+    if (n <= regionCol || n <= seedCol) continue;
+    int abRegion = atoi(fields[regionCol]);
+    int seed     = atoi(fields[seedCol]);
+    if (abRegion < 0 || abRegion >= 4 || regionMap[abRegion] < 0) continue;
+    int poolRegion = regionMap[abRegion];
+
+    int teamIdx = -1;
+    for (int i = poolRegion * 16; i < poolRegion * 16 + 16; i++) {
+      if (poolTeams[i].seed == (uint8_t)seed) { teamIdx = i; break; }
+    }
+    if (teamIdx < 0) continue;
+
+    for (int s = 0; s < POOL_NUM_MODEL_STATS; s++) {
+      if (statCol[s] < 0 || statCol[s] >= n) continue;
+      poolTeamModelStats[teamIdx][s] = (float)atof(fields[statCol[s]]);
+    }
+    matched++;
+  }
+
+  fclose(f);
+  if (matched == 0) fprintf(stderr, "stats.csv: no teams matched\n");
+  return matched > 0;
+}
+
+POOLDEF bool pool_load_model_data(void) {
+  bool weights_ok = pool_load_model_weights_file(poolConfiguration.dirPath);
+  bool stats_ok   = pool_load_model_stats_file(poolConfiguration.dirPath);
+  poolModelStatsLoaded = weights_ok && stats_ok;
+  return poolModelStatsLoaded;
+}
+
 // xorshift64 RNG — fast, no external dependencies
 static uint64_t pool_rng_next(uint64_t *state) {
   *state ^= *state << 13;
@@ -1422,10 +1596,43 @@ static uint8_t pool_mc_pick_winner(uint8_t team1, uint8_t team2, uint64_t *rng) 
   return (pool_rng_next(rng) % (s1 + s2) < s2) ? team1 : team2;
 }
 
-POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress) {
+// Compute the anglebracket model score for a team (0-indexed teamIdx).
+// Seed (stat index 0) is inverted so that lower seeds score higher.
+static float pool_mc_model_score(int teamIdx) {
+  float score = 0.0f;
+  for (int i = 0; i < POOL_NUM_MODEL_STATS; i++) {
+    if (poolModelWeights[i] == 0.0f) continue;
+    float sv = poolTeamModelStats[teamIdx][i];
+    if (i == 0) sv = (16.0f - sv) / 16.0f;  // invert seed
+    score += sv * poolModelWeights[i];
+  }
+  return score;
+}
+
+// Pick a winner using model score ratio as win probability.
+// P(team1 wins) = score1 / (score1 + score2).
+// Falls back to seed-weighted if scores are unavailable.
+static uint8_t pool_mc_pick_winner_model(uint8_t team1, uint8_t team2, uint64_t *rng) {
+  float s1 = pool_mc_model_score(team1 - 1);
+  float s2 = pool_mc_model_score(team2 - 1);
+  float total = s1 + s2;
+  assert(total > 0.0f);
+  uint64_t threshold = (uint64_t)(s1 / total * 1000000.0f);
+  return (pool_rng_next(rng) % 1000000 < threshold) ? team1 : team2;
+}
+
+POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress, PoolMCSelectionMode selectionMode) {
   if (poolBracketsCount == 0) {
     fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
     return;
+  }
+
+  // Load model data if needed
+  if (selectionMode == PoolMCSelectionModelWeighted && !poolModelStatsLoaded) {
+    if (!pool_load_model_data()) {
+      fprintf(stderr, "Model data failed to load; cannot run Monte Carlo report\n");
+      return;
+    }
   }
 
   // Build possibleBracket from current tournament state
@@ -1492,8 +1699,21 @@ POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, 
       uint8_t round = pool_round_of_game(gameNum);
       uint8_t team1, team2;
       pool_teams_of_game(gameNum, round, &simBracket, &team1, &team2);
-      simBracket.winners[gameNum] = (team2 == 0) ? team1
-                                                  : pool_mc_pick_winner(team1, team2, &rng);
+      uint8_t winner;
+      if (team2 == 0) {
+        winner = team1;
+      } else {
+        switch (selectionMode) {
+          case PoolMCSelectionModelWeighted:
+            winner = pool_mc_pick_winner_model(team1, team2, &rng);
+            break;
+          case PoolMCSelectionSeedWeighted:
+          default:
+            winner = pool_mc_pick_winner(team1, team2, &rng);
+            break;
+        }
+      }
+      simBracket.winners[gameNum] = winner;
     }
 
     // Score all entries incrementally (base + contribution from simulated games)
