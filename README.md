@@ -301,12 +301,59 @@ command runs a fast Monte Carlo simulation instead: it generates N random tourna
 completions, scores all entries against each one, and reports win probabilities with
 statistical error margins.
 
-Game outcomes are sampled using seed-weighted probabilities. For a matchup between
-seed S1 and seed S2, the probability that the lower seed wins is S2 / (S1 + S2)
-(e.g. a 1 vs 16 gives the 1-seed a ~94% chance; a 5 vs 12 gives ~71%).This model is admittedly pretty poor.
+Game outcomes are sampled using one of two selection modes, controlled by the `-m`
+flag.
+
+### Selection modes
+
+**`-m seed` (default)** — Seed-weighted probability. For a matchup between seed S1
+and seed S2, the probability that the lower-seeded team wins is S2 / (S1 + S2)
+(e.g. a 1 vs 16 gives the 1-seed a ~94% chance; a 5 vs 12 gives ~71%). Simple and
+requires no extra data, but is a rough approximation.
+
+**`-m model`** — Statistical model weighted by 24 team statistics sourced from
+[algebracket.com](https://algebracket.com). Each team is scored by computing a
+weighted sum of its normalized statistics; the win probability for a matchup is
+`score1 / (score1 + score2)`. This requires two additional files in the pool
+directory:
+
+- `weights.json` — a JSON object mapping each of the 24 stat IDs to its weight
+  (0–10). Use your own slider values from [algebracket.com](https://algebracket.com)
+  to reflect your own prediction preferences. The JSON key for each slider is
+  derived from the stat name by removing lowercase letters, spaces, and punctuation
+  (replacing `%` with `P`):
+
+  | JSON key  | Stat name              | JSON key  | Stat name              |
+  |-----------|------------------------|-----------|------------------------|
+  | `Seed`    | Seed                   | `OTSP`    | Opp. True Shoot %      |
+  | `WP`      | Win %                  | `P`       | Pace                   |
+  | `SS`      | SoS                    | `TP`      | Turnover %             |
+  | `PG`      | Pts / Gm               | `OTP`     | Opp. Turnover %        |
+  | `OPG`     | Opp Pts / Gm           | `TM`      | Turnover Margin        |
+  | `FGP`     | FG %                   | `AP`      | Assist %               |
+  | `3PFGP`   | 3Pt FG %               | `AT`      | Assists / Turnover     |
+  | `FTP`     | Free Throw %           | `FTFGA`   | FT / FGA               |
+  | `OR`      | Offense Rating         | `OFTFGA`  | Opp. FT / FGA          |
+  | `DR`      | Defense Rating         | `RP`      | Rebound %              |
+  | `ASM`     | Adj. Score Margin      | `ORP`     | Off. Rebound %         |
+  | `EFGP`    | Effective FG %         | `TSP`     | True Shooting %        |
+
+- `stats.csv` — per-team statistics in the algebracket CSV format (one row per
+  team, normalized stats in columns). The file must begin with front-matter comment
+  lines that map each anglebracket region integer to its pool region name, so teams
+  can be matched by (region, seed) rather than by name:
+
+```
+# region 0: East
+# region 1: South
+# region 2: West
+# region 3: Midwest
+Rank,Name,Games Won,Region,Seed,Win %,SoS,...
+```
 
 ```console
-./pool -d mypool -s 1000000 mc
+./pool -d mypool -s 1000000 mc                  # seed-weighted (default)
+./pool -d mypool -s 1000000 -m model mc         # algebracket model
 ```
 
 With 1,000,000 simulations the worst-case statistical margin of error is ±0.1% at
