@@ -2,70 +2,70 @@
 # Left Bracket (play each other in Final Four)
 Region: East
 Duke,Duk,1
-UMBC,Umb,16
-Georgia,UGa,8
-Ohio State,OSU,9
-Arkansas,Ark,5
-South Florida,SFl,12
-Texas Tech,TTU,4
-SF Austin,SFA,13
-Wisconsin,Wis,6
-Santa Clara/SMU,PI1,11
-Iowa State,IoS,3
-Wright St.,WSt,14
-Villanova,Vil,7
-NC State,NCS,10
-Michigan St.,MSU,2
-Queens,Que,15
-Region: Midwest
-Michigan,Mch,1
-B-CU/Lehigh,PI2,16
-Clemson,Cle,8
-Saint Louis,StL,9
-Vanderbilt,Van,5
-High Point,HPt,12
-Kansas,Kan,4
-N. Dakota St.,NDS,13
-North Carolina,NCU,6
-Miami OH,MiO,11
-Purdue,Pur,3
-Hofstra,Hof,14
-Kentucky,Ken,7
-Iowa,Iow,10
-UConn,UCn,2
-Merrimack,Mer,15
-# Right Bracket (play each other in Final Four)
-Region: South
-Floria,Fla,1
-Furman/Howard,PI3,16
-Utah St.,USt,8
+Siena,Sie,16
+Ohio State,OSU,8
 TCU,TCU,9
 St. John's,StJ,5
-Yale,Yal,12
-Virginia,Vir,4
-Liberty,Lib,13
+Northern Iowa,NIo,12
+Kansas,Kan,4
+Cal Baptist,CaB,13
 Louisville,Lou,6
-VCU/Auburn,PI4,11
-Nebraska,Neb,3
-UC Irivine,UCI,14
+South Florida,SFl,11
+Michigan St.,MSU,3
+N. Dakota St.,NDS,14
+UCLA,UCL,7
+UCF,UCF,10
+UConn,UCn,2
+Furman,Fur,15
+Region: South
+Florida,Fla,1
+PV A&M/Lehigh,PI1,16
+Clemson,Cle,8
+Iowa,Iow,9
+Vanderbilt,Van,5
+McNeese,McN,12
+Nebraska,Neb,4
+Troy,Try,13
+North Carolina,NCU,6
+VCU,VCU,11
+Illinois,Ill,3
+Penn,Pen,14
 Saint Mary's,StM,7
-Missouri,Mis,10
+Texas A&M,A&M,10
 Houston,Hou,2
-Portland St.,PoS,15
+Idaho,Ida,15
+# Right Bracket (play each other in Final Four)
 Region: West
 Arizona,Ari,1
 Long Island,LIs,16
-UCLA,UCL,8
-Texas A&M,A&M,9
-Tennessee,Ten,5
-Northern Iowa,NIo,12
-Gonzaga,Gon,4
-Utah Valley,UtV,13
+Villanova,Vil,8
+Utah St.,USt,9
+Wisconsin,Wis,5
+High Point,HPt,12
+Arkansas,Ark,4
+Hawaii,Haw,13
 BYU,BYU,6
-UCF,UCF,11
-Alabama,Ala,3
-Troy,Try,14
+Texas/NCSt,PI2,11
+Gonzaga,Gon,3
+Kennesaw St.,KeS,14
 Miami FL,MiF,7
-Texas,Tex,10
-Illinois,Ill,2
+Missouri,Mis,10
+Purdue,Pur,2
+Queens (NC),QNC,15
+Region: Midwest
+Michigan,Mch,1
+UMBC/Howard,PI3,16
+Georgia,Geo,8
+Saint Louis,StL,9
+Texas Tech,TTU,5
+Akron,Akr,12
+Alabama,Ala,4
+Hofstra,Hof,13
+Tennessee,Ten,6
+Mia-OH/SMU,PI4,11
+Virginia,Vir,3
+Wright St.,WSt,14
+Kentucky,Ken,7
+Santa Clara,SCl,10
+Iowa State,IoS,2
 Tennessee St.,TeS,15
