@@ -39,6 +39,7 @@ void usage(char *progName) {
   fprintf(stderr, "     poss: show possibilities stats\n");
   fprintf(stderr, "     ffour: show final four possibilities\n");
   fprintf(stderr, "     mc: Monte Carlo win probability estimate (seed-weighted, fast alternative to poss)\n");
+  fprintf(stderr, "     scoredetail NAME: per-game score breakdown for a single entry (substring match on name)\n");
 }
 
 void help(void) {
@@ -278,6 +279,13 @@ int main(int argc, char *argv[]) {
     pool_print_entry(&poolTournamentBracket);
   } else if (strcmp(command, "mc") == 0) {
     pool_monte_carlo_report(numSamples, format, progress, mcMode);
+  } else if (strcmp(command, "scoredetail") == 0) {
+    if (optind + 1 >= argc) {
+      fprintf(stderr, "scoredetail requires an entry name argument\n");
+      usage(argv[0]);
+      exit(EXIT_FAILURE);
+    }
+    pool_scoredetail_report(argv[optind + 1]);
   } else {
     fprintf(stderr, "Unknown REPORT: %s\n", command);
     usage(argv[0]);

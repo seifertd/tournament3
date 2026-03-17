@@ -183,6 +183,7 @@ POOLDEF void pool_team_report(void);
 POOLDEF void pool_add_entries_in_dir(const char *dirPath);
 POOLDEF void pool_entries_report(void);
 POOLDEF void pool_score_report(void);
+POOLDEF void pool_scoredetail_report(const char *entryName);
 POOLDEF PoolReportFormat pool_str_to_format(const char *fmtStr);
 POOLDEF void pool_possibilities_report(PoolReportFormat fmt, bool progress, int batch, int numBatches, bool restore);
 POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, bool progress, PoolMCSelectionMode selectionMode);
@@ -1977,6 +1978,58 @@ POOLDEF void pool_score_report(void) {
     pool_print_humanized(stdout, possibleOutcomes, 6);
     printf(" possible outcomes\n");
   }
+}
+
+POOLDEF void pool_scoredetail_report(const char *entryName) {
+  if (poolBracketsCount == 0) {
+    fprintf(stderr, ">>>> There are no entries in this pool. <<<<\n");
+    return;
+  }
+  PoolBracket *bracket = NULL;
+  for (size_t i = 0; i < poolBracketsCount; i++) {
+    if (strstr(poolBrackets[i].name, entryName) != NULL) {
+      bracket = &poolBrackets[i];
+      break;
+    }
+  }
+  if (bracket == NULL) {
+    fprintf(stderr, "No entry found matching '%s'\n", entryName);
+    return;
+  }
+  pool_bracket_score(bracket, &poolTournamentBracket);
+  static const char *roundNames[] = {"R1", "R2", "R3", "R4", "F4", "Ch"};
+  printf("Entry: %-20s  Score: %u\n", bracket->name, bracket->score);
+  printf("┌──────┬────┬────────────┬────────────┬────────────┬─────────┬──────┐\n");
+  printf("│ Game │ Rd │ Team 1     │ Team 2     │ Your Pick  │ Correct │  Pts │\n");
+  printf("├──────┼────┼────────────┼────────────┼────────────┼─────────┼──────┤\n");
+  for (uint8_t g = 0; g < POOL_NUM_GAMES; g++) {
+    uint8_t round = pool_round_of_game(g);
+    uint8_t team1 = 0, team2 = 0;
+    pool_teams_of_game(g, round, &poolTournamentBracket, &team1, &team2);
+    uint8_t pw = poolTournamentBracket.winners[g];
+    uint8_t ew = bracket->winners[g];
+    bool played = pw != 0;
+    bool correct = played && ew == pw;
+    uint32_t pts = 0;
+    if (correct) {
+      uint8_t loser = pool_loser_of_game(g, &poolTournamentBracket);
+      pts = (*poolConfiguration.poolScorer)(bracket, pw, loser, round, g);
+    }
+    const char *t1name = team1 > 0 ? poolTeams[team1-1].shortName : "?";
+    const char *t2name = team2 > 0 ? poolTeams[team2-1].shortName : "?";
+    const char *ename  = ew   > 0 ? poolTeams[ew-1].shortName   : "?";
+    if (!played) {
+      printf("│ %4u │ %s │ %-10s │ %-10s │ %-10s │    -    │    - │\n",
+             g, roundNames[round], t1name, t2name, ename);
+    } else if (correct) {
+      printf("│ %4u │ %s │ %-10s │ %-10s │ %-10s │ \033[32m%-9s\033[0m │ %4u │\n",
+             g, roundNames[round], t1name, t2name, ename, "   ✓", pts);
+    } else {
+      printf("│ %4u │ %s │ %-10s │ %-10s │ %-10s │ \033[31m%-9s\033[0m │ %4u │\n",
+             g, roundNames[round], t1name, t2name, ename, "   ✗", pts);
+    }
+  }
+  printf("└──────┴────┴────────────┴────────────┴────────────┴─────────┴──────┘\n");
 }
 
 POOLDEF int pool_name_cmpfunc (const void * a, const void * b) {
