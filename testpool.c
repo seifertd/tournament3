@@ -20,6 +20,8 @@ int main(void) {
   pool_team_report();
   pool_entries_report();
   pool_score_report();
+  printf("entry4:\n");
+  pool_scoredetail_report("entry4");
   printf("Tournament Results:\n");
   pool_print_entry(&poolTournamentBracket);
   pool_possibilities_report(PoolFormatText, true, 0, 1, false);
