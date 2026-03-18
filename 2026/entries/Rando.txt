@@ -1,0 +1,70 @@
+# Round 1:
+Duk
+TCU
+NIo
+Kan
+Lou
+NDS
+UCL
+Fur
+PI1
+Cle
+Van
+Try
+NCU
+Ill
+A&M
+Hou
+LIs
+Vil
+HPt
+Haw
+BYU
+Gon
+Mis
+QNC
+PI3
+Geo
+TTU
+Hof
+Ten
+Vir
+Ken
+IoS
+# Round 2:
+Duk
+NIo
+NDS
+UCL
+Cle
+Van
+Ill
+Hou
+Vil
+HPt
+Gon
+QNC
+Geo
+TTU
+Ten
+IoS
+# Round 3:
+NIo
+UCL
+Cle
+Hou
+Vil
+Gon
+TTU
+IoS
+# Round 4:
+NIo
+Cle
+Gon
+IoS
+# Final Four:
+Cle
+IoS
+# Championship:
+IoS
+144
