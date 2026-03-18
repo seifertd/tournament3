@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
-    /* Round pick chips in entry cards */
+    /* Round pick chips — used in entry cards and bracket view */
     .pick-correct   { background:#dcfce7; color:#166534; box-shadow:0 0 0 1px #86efac; }
     .pick-wrong     { background:#fee2e2; color:#b91c1c; box-shadow:0 0 0 1px #fca5a5; text-decoration:line-through; }
     .pick-future    { background:#f1f5f9; color:#475569; box-shadow:0 0 0 1px #cbd5e1; }
@@ -17,6 +17,42 @@
     .entry-gallery::-webkit-scrollbar { height: 6px; }
     .entry-gallery::-webkit-scrollbar-track { background: #f1f5f9; }
     .entry-gallery::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+
+    /* Bracket view modal */
+    #bracket-modal { border:none; border-radius:8px; padding:0; max-height:92vh; width:min(95vw,1100px); overflow:auto; }
+    #bracket-modal::backdrop { background:rgba(0,0,0,.75); }
+    .bv-bar { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:10px;
+              background:#1e293b; color:white; padding:8px 16px; }
+    .bv-bar button { margin-left:auto; background:#7f1d1d; border:none; color:white;
+                     border-radius:4px; padding:4px 12px; font-size:13px; cursor:pointer; }
+    .bv-bar button:hover { background:#991b1b; }
+    .bv-header { display:flex; flex-wrap:wrap; align-items:baseline; gap:12px;
+                 padding:10px 16px; background:#334155; color:white; }
+    .bv-name   { font-size:16px; font-weight:700; }
+    .bv-meta   { font-size:12px; color:#cbd5e1; }
+    .bv-meta strong { color:white; }
+    .bv-body   { padding:8px; background:#f1f5f9; }
+    .bv-halves  { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+    .bv-half    { display:flex; flex-direction:column; gap:6px; }
+    .bv-ff      { display:flex; justify-content:center; align-items:flex-start; gap:12px;
+                  background:white; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.1); padding:10px; }
+    .bv-region  { background:white; border-radius:6px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.1); }
+    .bv-rname   { background:#475569; color:white; padding:3px 8px;
+                  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .bv-rhdr    { display:grid; grid-template-columns:repeat(4,1fr); padding:2px 4px;
+                  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+                  color:#94a3b8; text-align:center; background:#f8fafc; }
+    .bv-grid    { display:grid; grid-template-columns:repeat(4,1fr);
+                  grid-template-rows:repeat(8,24px); gap:2px; padding:4px; }
+    .bv-cell    { display:flex; align-items:center; }
+    .bv-chip    { display:block; font-size:10px; font-family:ui-monospace,monospace;
+                  text-align:center; border-radius:3px; padding:1px 2px;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; line-height:1.4; }
+    .bv-empty   { background:#f1f5f9; color:#94a3b8; }
+    .bv-ff-panel { text-align:center; min-width:100px; }
+    .bv-ff-lbl   { font-size:9px; font-weight:700; text-transform:uppercase;
+                   letter-spacing:.08em; color:#64748b; margin-bottom:4px; }
+    .bv-ff-panel.champ .bv-ff-lbl { color:#92400e; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
@@ -48,6 +84,92 @@
     elsif n >= 1_000     then format('%.3gK', n / 1_000.0)
     else                      n.to_s
     end
+  }
+
+  # Regional game structure for the bracket view modal
+  region_game_structure = [
+    { r1: (0..7).to_a,   r2: (32..35).to_a, s16: [48,49], e8: 56 },
+    { r1: (8..15).to_a,  r2: (36..39).to_a, s16: [50,51], e8: 57 },
+    { r1: (16..23).to_a, r2: (40..43).to_a, s16: [52,53], e8: 58 },
+    { r1: (24..31).to_a, r2: (44..47).to_a, s16: [54,55], e8: 59 },
+  ]
+
+  # Renders one pick chip as an HTML string
+  bv_chip = ->(game, winners) {
+    pick = winners[game]
+    return '<span class="bv-chip bv-empty">—</span>' if !pick || pick == 0
+    t = teams[pick]
+    return '<span class="bv-chip bv-empty">?</span>' unless t
+    css   = pick_chip_class.call(pick_status(game, pick, t_winners, eliminated))
+    label = CGI.escapeHTML("#{t[:seed]} #{t[:short]}")
+    title = CGI.escapeHTML(t[:name])
+    %(<span class="bv-chip #{css}" title="#{title}">#{label}</span>)
+  }
+
+  # Renders the full bracket-view HTML for one entry (goes inside <template>)
+  render_bracket_view = ->(entry, lb) {
+    w   = entry['winners']
+    rnk = lb ? lb['rank']      : nil
+    tb  = lb ? lb['tieBreak'].to_s : ''
+    h   = +''
+
+    h << %(<div class="bv-header">)
+    h << %(<span class="bv-name">#{CGI.escapeHTML(entry['name'])}</span>)
+    h << %(<span class="bv-meta">\##{rnk}</span>) if rnk
+    h << %(<span class="bv-meta">Score: <strong>#{entry['score']}</strong></span>)
+    h << %(<span class="bv-meta">Max: <strong>#{entry['maxScore']}</strong></span>)
+    h << %(<span class="bv-meta">Tie Break: <strong>#{CGI.escapeHTML(tb)}</strong></span>)
+    h << %(</div>)
+
+    h << %(<div class="bv-body">)
+
+    # Helper: render one region panel; reversed=true flips columns (E8 on left, R64 on right)
+    bv_region_html = ->(ri, reversed) {
+      rg    = region_game_structure[ri]
+      rname = CGI.escapeHTML(regions[ri] || "Region #{ri + 1}")
+      hdr   = reversed ? '<span>E8</span><span>S16</span><span>R32</span><span>R64</span>'
+                       : '<span>R64</span><span>R32</span><span>S16</span><span>E8</span>'
+      s = +''
+      s << %(<div class="bv-region"><div class="bv-rname">#{rname}</div>)
+      s << %(<div class="bv-rhdr">#{hdr}</div><div class="bv-grid">)
+      if reversed
+        s << %(<span class="bv-cell" style="grid-column:1;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w)}</span>)
+        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w)}</span>) }
+        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w)}</span>) }
+        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:4;grid-row:#{i+1}">#{bv_chip.call(g,w)}</span>) }
+      else
+        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:1;grid-row:#{i+1}">#{bv_chip.call(g,w)}</span>) }
+        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w)}</span>) }
+        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w)}</span>) }
+        s << %(<span class="bv-cell" style="grid-column:4;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w)}</span>)
+      end
+      s << %(</div></div>)
+      s
+    }
+
+    # Left (R1+R2 normal) and right (R3+R4 reversed) side by side, FF+Champ below
+    h << %(<div class="bv-halves">)
+
+    h << %(<div class="bv-half">)
+    h << bv_region_html.call(0, false)
+    h << bv_region_html.call(1, false)
+    h << %(</div>)
+
+    h << %(<div class="bv-half">)
+    h << bv_region_html.call(2, true)
+    h << bv_region_html.call(3, true)
+    h << %(</div>)
+
+    h << %(</div>)  # bv-halves
+
+    h << %(<div class="bv-ff">)
+    h << %(<div class="bv-ff-panel"><div class="bv-ff-lbl">Final Four</div>#{bv_chip.call(60,w)}</div>)
+    h << %(<div class="bv-ff-panel champ"><div class="bv-ff-lbl">Champion</div>#{bv_chip.call(62,w)}</div>)
+    h << %(<div class="bv-ff-panel"><div class="bv-ff-lbl">Final Four</div>#{bv_chip.call(61,w)}</div>)
+    h << %(</div>)  # bv-ff
+
+    h << %(</div>)  # bv-body
+    h
   }
 %>
 
@@ -348,8 +470,9 @@
       <%
         # Merge leaderboard rank info into bracket display
         rank_by_name = leaderboard.each_with_object({}) { |e, h| h[e['name']] = e['rank'] }
+        bracket_templates = +''
       %>
-      <% entry_brackets.each do |entry| %>
+      <% entry_brackets.each_with_index do |entry, idx| %>
       <%
         name  = entry['name']
         rank  = rank_by_name[name]
@@ -359,6 +482,7 @@
         champ_pick = entry['winners'][62]  # game 62 = championship
         champ_team = teams[champ_pick]
         champ_alive = champ_pick > 0 && !eliminated.include?(champ_pick)
+        bracket_templates << %(<template id="bv-#{idx}">#{render_bracket_view.call(entry, lb)}</template>)
       %>
       <div class="flex-none w-80 rounded-xl ring-1 ring-slate-200 shadow-sm bg-white overflow-hidden">
         <!-- Card header -->
@@ -368,6 +492,8 @@
             <% if rank %>
             <span class="flex-none text-xs bg-slate-600 rounded-full px-2 py-0.5">#<%= rank %></span>
             <% end %>
+            <button class="view-bracket-btn flex-none text-xs bg-slate-500 hover:bg-slate-400 rounded px-2 py-0.5 cursor-pointer border-0 text-white"
+                    data-idx="<%= idx %>">Bracket ↗</button>
           </div>
           <div class="flex gap-3 mt-1 text-xs text-slate-300">
             <span>Score: <strong class="text-white"><%= score %></strong></span>
@@ -423,6 +549,33 @@
 <footer class="mt-10 border-t border-slate-200 bg-white text-center py-4 text-xs text-slate-400">
   <%= pool_name %> &bull; Generated <%= generated_at %>
 </footer>
+
+<%= bracket_templates %>
+
+<!-- =========================================================
+     BRACKET VIEW MODAL
+     ========================================================= -->
+<dialog id="bracket-modal">
+  <div class="bv-bar">
+    <span style="font-size:12px;color:#94a3b8;font-style:italic">Bracket View</span>
+    <button id="bracket-close-btn">✕ Close</button>
+  </div>
+  <div id="bracket-modal-content"></div>
+</dialog>
+
+<script>
+  const bModal   = document.getElementById('bracket-modal');
+  const bContent = document.getElementById('bracket-modal-content');
+  document.querySelectorAll('.view-bracket-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tmpl = document.getElementById('bv-' + btn.dataset.idx);
+      bContent.innerHTML = tmpl ? tmpl.innerHTML : '';
+      bModal.showModal();
+    });
+  });
+  document.getElementById('bracket-close-btn').addEventListener('click', () => bModal.close());
+  bModal.addEventListener('click', e => { if (e.target === bModal) bModal.close(); });
+</script>
 
 </body>
 </html>

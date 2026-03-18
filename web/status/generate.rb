@@ -7,6 +7,7 @@ require 'optparse'
 require 'open3'
 require 'time'
 require 'set'
+require 'cgi'
 
 POOL_BINARY = File.expand_path('../../pool', __dir__)
 
@@ -21,9 +22,9 @@ SEED_ORDER   = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15].freeze
 options = { output: 'status.html', binary: POOL_BINARY }
 OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} -d DIR [-o OUTPUT] [--pool BINARY]"
-  opts.on('-d DIR',    'Pool directory')                    { |d| options[:dir] = d }
-  opts.on('-o FILE',   'Output HTML file (status.html)')    { |f| options[:output] = f }
-  opts.on('--pool BIN','Path to pool binary')               { |b| options[:binary] = b }
+  opts.on('-d DIR',    'Pool directory')                 { |d| options[:dir] = d }
+  opts.on('-o FILE',   'Output HTML file (status.html)') { |f| options[:output] = f }
+  opts.on('--pool BIN','Path to pool binary')            { |b| options[:binary] = b }
 end.parse!
 
 abort "Error: -d DIR is required\nUsage: #{$0} -d DIR [-o OUTPUT]" unless options[:dir]
