@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pool_name %> — Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    /* Round pick chips in entry cards */
+    .pick-correct   { background:#dcfce7; color:#166534; box-shadow:0 0 0 1px #86efac; }
+    .pick-wrong     { background:#fee2e2; color:#b91c1c; box-shadow:0 0 0 1px #fca5a5; text-decoration:line-through; }
+    .pick-future    { background:#f1f5f9; color:#475569; box-shadow:0 0 0 1px #cbd5e1; }
+    .pick-impossible{ background:#ffedd5; color:#c2410c; box-shadow:0 0 0 1px #fdba74; text-decoration:line-through; }
+
+    /* Slim scrollbar for entry gallery */
+    .entry-gallery::-webkit-scrollbar { height: 6px; }
+    .entry-gallery::-webkit-scrollbar-track { background: #f1f5f9; }
+    .entry-gallery::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
+
+<%
+  # ---------------------------------------------------------------------------
+  # Helper lambdas available throughout the template
+  # ---------------------------------------------------------------------------
+  team_display = ->(num) {
+    t = teams[num]
+    t ? "(#{t[:seed]}) #{t[:short]}" : '?'
+  }
+  team_name = ->(num) {
+    t = teams[num]
+    t ? t[:name] : 'Unknown'
+  }
+  pick_chip_class = ->(status) {
+    case status
+    when :correct    then 'pick-correct'
+    when :wrong      then 'pick-wrong'
+    when :impossible then 'pick-impossible'
+    else                  'pick-future'
+    end
+  }
+  win_bar_width = ->(pct) { [[pct.to_f, 0.5].max, 100].min }
+  humanize = ->(n) {
+    n = n.to_i
+    if    n >= 1_000_000 then format('%.3gM', n / 1_000_000.0)
+    elsif n >= 1_000     then format('%.3gK', n / 1_000.0)
+    else                      n.to_s
+    end
+  }
+%>
+
+<!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+<header class="bg-slate-800 text-white shadow-md">
+  <div class="max-w-screen-2xl mx-auto px-4 py-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <h1 class="text-2xl font-bold tracking-tight"><%= pool_name %></h1>
+    <span class="text-slate-400 text-sm">Generated <%= generated_at %></span>
+    <span class="ml-auto text-sm text-slate-300">
+      <%= games_played %> games played &bull; <%= games_remaining %> remaining
+    </span>
+  </div>
+</header>
+
+<main class="max-w-screen-2xl mx-auto px-4 py-6 space-y-10">
+
+<!-- =========================================================
+     LEADERBOARD
+     ========================================================= -->
+<section x-data="{ open: true }">
+  <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+    <h2 class="text-xl font-semibold">Leaderboard</h2>
+    <% if champion_short
+         champ_team = teams[short_to_num[champion_short]]
+    %>
+    <span class="text-sm font-medium bg-yellow-100 text-yellow-800 ring-1 ring-yellow-300 rounded-full px-3 py-0.5">
+      Champion: (<%= champ_team ? champ_team[:seed] : '?' %>) <%= champion_short %>
+      <% if final_points_known %>— Final score: <%= final_points %><% end %>
+    </span>
+    <% end %>
+    <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+  </div>
+
+  <div x-show="open" x-cloak>
+    <div class="overflow-x-auto rounded-lg shadow-sm ring-1 ring-slate-200">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-700 text-white text-xs uppercase tracking-wide">
+          <tr>
+            <th class="px-3 py-2 text-right w-12">Rank</th>
+            <th class="px-3 py-2 text-left">Name</th>
+            <th class="px-3 py-2 text-right">Score</th>
+            <th class="px-3 py-2 text-right">Max</th>
+            <th class="px-3 py-2 text-right">Correct</th>
+            <th class="px-3 py-2 text-center">Champ</th>
+            <th class="px-3 py-2 text-right">Tie Brk</th>
+            <% if final_points_known %>
+            <th class="px-3 py-2 text-right">TB Diff</th>
+            <% end %>
+            <th class="px-3 py-2 text-right">R1</th>
+            <th class="px-3 py-2 text-right">R2</th>
+            <th class="px-3 py-2 text-right">R3</th>
+            <th class="px-3 py-2 text-right">R4</th>
+            <th class="px-3 py-2 text-right">R5</th>
+            <th class="px-3 py-2 text-right">R6</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% leaderboard.each_with_index do |entry, idx| %>
+          <%
+            row_bg = idx.even? ? 'bg-white' : 'bg-slate-50'
+            champ_alive_class = entry['champAlive'] ? 'text-green-700 font-semibold' : 'text-red-600 line-through'
+          %>
+          <tr class="<%= row_bg %> hover:bg-blue-50 transition-colors">
+            <td class="px-3 py-2 text-right font-mono text-slate-500"><%= entry['rank'] %></td>
+            <td class="px-3 py-2 font-medium"><%= entry['name'] %></td>
+            <td class="px-3 py-2 text-right font-semibold"><%= entry['score'] %></td>
+            <td class="px-3 py-2 text-right text-slate-500"><%= entry['maxScore'] %></td>
+            <td class="px-3 py-2 text-right text-slate-500"><%= entry['correctPicks'] %></td>
+            <td class="px-3 py-2 text-center text-xs <%= champ_alive_class %>"><%= entry['champShortName'] %></td>
+            <td class="px-3 py-2 text-right text-slate-500"><%= entry['tieBreak'] %></td>
+            <% if final_points_known %>
+            <td class="px-3 py-2 text-right text-slate-500"><%= entry['tieBreakDiff'] %></td>
+            <% end %>
+            <% entry['roundScores'].each do |rs| %>
+            <td class="px-3 py-2 text-right text-slate-600"><%= rs %></td>
+            <% end %>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     WIN PROBABILITY
+     ========================================================= -->
+<%
+  # Build a unified list of datasets to render: [[label, entries, meta], ...]
+  win_prob_datasets = []
+  if poss
+    outcomes_str = poss['pool']['outcomes'].to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
+    win_prob_datasets << {
+      label:   "Possibilities — #{outcomes_str} outcomes",
+      entries: poss['entries'].sort_by { |e| -e['winChance'].to_f },
+      win_key: 'winChance',
+      score_key: 'currentScore',
+    }
+  end
+  if mc_seed
+    win_prob_datasets << {
+      label:   'Monte Carlo — Seed weighted',
+      entries: mc_seed['entries'].sort_by { |e| -e['winPct'].to_f },
+      win_key: 'winPct',
+      score_key: 'currentScore',
+    }
+  end
+  if mc_model
+    win_prob_datasets << {
+      label:   'Monte Carlo — Model weighted',
+      entries: mc_model['entries'].sort_by { |e| -e['winPct'].to_f },
+      win_key: 'winPct',
+      score_key: 'currentScore',
+    }
+  end
+%>
+<% if win_prob_datasets.any? %>
+<section x-data="{ open: true }">
+  <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+    <h2 class="text-xl font-semibold">Win Probability</h2>
+    <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+  </div>
+
+  <div x-show="open" x-cloak class="space-y-6">
+  <% win_prob_datasets.each do |ds| %>
+    <div>
+    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2"><%= ds[:label] %></h3>
+    <div class="overflow-x-auto rounded-lg shadow-sm ring-1 ring-slate-200">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-700 text-white text-xs uppercase tracking-wide">
+          <tr>
+            <th class="px-3 py-2 text-left">Name</th>
+            <th class="px-3 py-2 text-right">Win %</th>
+            <th class="px-3 py-2 text-left w-32"></th>
+            <th class="px-3 py-2 text-right">Min Rank</th>
+            <th class="px-3 py-2 text-right">Max Rank</th>
+            <th class="px-3 py-2 text-right">Score</th>
+            <th class="px-3 py-2 text-right">Max Score</th>
+            <th class="px-3 py-2 text-right">Won</th>
+            <th class="px-3 py-2 text-right">Tied</th>
+            <th class="px-3 py-2 text-left">Top Champs</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% ds[:entries].each_with_index do |e, idx| %>
+          <%
+            row_bg  = idx.even? ? 'bg-white' : 'bg-slate-50'
+            win_pct = e[ds[:win_key]].to_f
+            bar_w   = win_bar_width.call(win_pct)
+            top_champs = (e['champs'] || []).first(3)
+          %>
+          <tr class="<%= row_bg %>">
+            <td class="px-3 py-2 font-medium"><%= e['name'] %></td>
+            <td class="px-3 py-2 text-right font-mono <%= win_pct > 0 ? 'text-green-700 font-semibold' : 'text-slate-400' %>">
+              <%= format('%.2f%%', win_pct) %>
+            </td>
+            <td class="px-3 py-2">
+              <div class="h-3 rounded bg-slate-200">
+                <div class="h-3 rounded bg-green-500" style="width: <%= bar_w %>%"></div>
+              </div>
+            </td>
+            <td class="px-3 py-2 text-right text-slate-500"><%= e['minRank'] %></td>
+            <td class="px-3 py-2 text-right text-slate-500"><%= e['maxRank'] %></td>
+            <td class="px-3 py-2 text-right"><%= e[ds[:score_key]] %></td>
+            <td class="px-3 py-2 text-right text-slate-500"><%= e['maxScore'] %></td>
+            <td class="px-3 py-2 text-right font-mono text-slate-600"><%= humanize.call(e['timesWon']) %></td>
+            <td class="px-3 py-2 text-right font-mono text-slate-500"><%= humanize.call(e['timesTied']) %></td>
+            <td class="px-3 py-2 text-xs text-slate-500">
+              <%= top_champs.map { |c| c['team']['shortName'] }.join(', ') %>
+            </td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    </div>
+  <% end %><!-- each dataset -->
+  </div><!-- /x-show -->
+</section>
+<% end %>
+
+<!-- =========================================================
+     FINAL FOUR / CHAMPIONSHIP PAYOUTS
+     ========================================================= -->
+<% if ffour %>
+<%
+  ff_pool      = ffour['pool']
+  ff_scenarios = ffour['possibilities'] || []
+%>
+<section x-data="{ open: true, expanded: null }">
+  <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+    <h2 class="text-xl font-semibold"><%= ff_pool['title'] %></h2>
+    <span class="text-slate-500 text-sm">
+      Fees: <%= format('$%.2f', ff_pool['feesCollected']) %>
+      <% if ff_pool['finalPointsKnown'] %>&bull; Final score: <%= ff_pool['finalPoints'] %><% end %>
+    </span>
+    <% if ff_pool['finalFour'] %>
+    <span class="text-sm text-slate-600">
+      &bull; <%= ff_pool['finalFour'].map { |t| "(#{t['seed']}) #{t['shortName']}" }.join(' vs ') %>
+    </span>
+    <% end %>
+    <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+  </div>
+
+  <div x-show="open" x-cloak class="space-y-4">
+    <% ff_scenarios.each_with_index do |scenario, pidx| %>
+    <%
+      champ = scenario['champion']
+      f1    = scenario['finalist1']
+      f2    = scenario['finalist2']
+      label = ff_scenarios.length > 1 ? "Possibility #{pidx + 1}" : 'Final Result'
+    %>
+    <div class="rounded-lg ring-1 ring-slate-200 shadow-sm overflow-hidden">
+      <div class="bg-slate-100 px-4 py-2 flex flex-wrap gap-x-6 gap-y-1 items-center text-sm cursor-pointer"
+           @click="expanded = (expanded === <%= pidx %>) ? null : <%= pidx %>">
+        <span class="font-semibold text-slate-700"><%= label %></span>
+        <span>(<%= f1['seed'] %>) <%= f1['name'] %> vs. (<%= f2['seed'] %>) <%= f2['name'] %></span>
+        <span class="text-yellow-700 font-medium">Champion: (<%= champ['seed'] %>) <%= champ['name'] %></span>
+        <span class="ml-auto text-slate-400" x-text="expanded === <%= pidx %> ? '▲' : '▼'"></span>
+      </div>
+      <div x-show="expanded === <%= pidx %>" x-cloak>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
+              <tr>
+                <th class="px-3 py-2 text-right w-12">Rank</th>
+                <th class="px-3 py-2 text-left">Name</th>
+                <th class="px-3 py-2 text-right">Score</th>
+                <th class="px-3 py-2 text-right">Tie Brk</th>
+                <% if ff_pool['finalPointsKnown'] %>
+                <th class="px-3 py-2 text-right">TB Diff</th>
+                <% end %>
+                <th class="px-3 py-2 text-right">Payout</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% scenario['entries'].each_with_index do |e, eidx| %>
+              <%
+                row_bg      = e['isLast'] ? 'bg-red-50' : (eidx.even? ? 'bg-white' : 'bg-slate-50')
+                payout_cls  = e['payout'].to_f > 0 ? 'text-green-700 font-semibold' : 'text-slate-400'
+              %>
+              <tr class="<%= row_bg %>">
+                <td class="px-3 py-2 text-right font-mono text-slate-500">
+                  <%= e['isLast'] ? 'Last' : e['rank'] %>
+                </td>
+                <td class="px-3 py-2 font-medium"><%= e['name'] %></td>
+                <td class="px-3 py-2 text-right font-semibold"><%= e['score'] %></td>
+                <td class="px-3 py-2 text-right text-slate-500"><%= e['tieBreak'] %></td>
+                <% if ff_pool['finalPointsKnown'] %>
+                <td class="px-3 py-2 text-right text-slate-500"><%= e['tieBreakDiff'] %></td>
+                <% end %>
+                <td class="px-3 py-2 text-right <%= payout_cls %>">
+                  <% if e['payout'].to_f > 0 %>$<%= format('%.2f', e['payout']) %><% else %>—<% end %>
+                </td>
+              </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</section>
+<% end %>
+
+<!-- =========================================================
+     ENTRIES GALLERY
+     ========================================================= -->
+<section x-data="{ open: true }">
+  <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+    <h2 class="text-xl font-semibold">All Entries</h2>
+    <span class="text-slate-500 text-sm"><%= entry_brackets.length %> entries</span>
+    <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+  </div>
+
+  <div x-show="open" x-cloak>
+    <!-- Legend -->
+    <div class="flex flex-wrap gap-3 mb-4 text-xs">
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-correct"></span> Correct
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-wrong"></span> Wrong
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-impossible"></span> Impossible (team eliminated)
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-future"></span> Future game
+      </span>
+    </div>
+
+    <!-- Horizontally scrollable card gallery -->
+    <div class="entry-gallery flex gap-4 overflow-x-auto pb-4">
+      <%
+        # Merge leaderboard rank info into bracket display
+        rank_by_name = leaderboard.each_with_object({}) { |e, h| h[e['name']] = e['rank'] }
+      %>
+      <% entry_brackets.each do |entry| %>
+      <%
+        name  = entry['name']
+        rank  = rank_by_name[name]
+        score = entry['score']
+        max   = entry['maxScore']
+        lb    = leaderboard.find { |e| e['name'] == name }
+        champ_pick = entry['winners'][62]  # game 62 = championship
+        champ_team = teams[champ_pick]
+        champ_alive = champ_pick > 0 && !eliminated.include?(champ_pick)
+      %>
+      <div class="flex-none w-80 rounded-xl ring-1 ring-slate-200 shadow-sm bg-white overflow-hidden">
+        <!-- Card header -->
+        <div class="bg-slate-700 text-white px-3 py-2">
+          <div class="flex items-baseline justify-between gap-2">
+            <span class="font-semibold truncate text-sm" title="<%= name %>"><%= name %></span>
+            <% if rank %>
+            <span class="flex-none text-xs bg-slate-600 rounded-full px-2 py-0.5">#<%= rank %></span>
+            <% end %>
+          </div>
+          <div class="flex gap-3 mt-1 text-xs text-slate-300">
+            <span>Score: <strong class="text-white"><%= score %></strong></span>
+            <span>Max: <strong class="text-white"><%= max %></strong></span>
+            <% if champ_team %>
+            <span class="ml-auto <%= champ_alive ? 'text-green-400' : 'text-red-400 line-through' %>">
+              (<%= champ_team[:seed] %>) <%= champ_team[:short] %>
+            </span>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Round-by-round picks -->
+        <div class="p-2 space-y-1.5">
+          <% ROUND_SIZES.each_with_index do |size, round_idx| %>
+          <%
+            start_game = ROUND_STARTS[round_idx]
+            round_picks = (start_game...(start_game + size)).map do |game|
+              pick = entry['winners'][game]
+              next nil if pick.nil? || pick == 0
+              status = pick_status(game, pick, t_winners, eliminated)
+              { team: teams[pick], status: status, game: game }
+            end.compact
+          %>
+          <% next if round_picks.empty? %>
+          <div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
+              <%= ROUND_NAMES[round_idx] %> (<%= round_picks.count { |p| p[:status] == :correct } %>/<%= round_picks.size %>)
+            </div>
+            <div class="grid grid-cols-4 gap-1">
+              <% round_picks.each do |pick| %>
+              <%
+                t = pick[:team]
+                label = t ? "#{t[:seed]} #{t[:short]}" : '?'
+                chip_class = pick_chip_class.call(pick[:status])
+                title_text = t ? "#{t[:name]} — game #{pick[:game]}" : "game #{pick[:game]}"
+              %>
+              <span class="block text-xs rounded px-1 py-0.5 font-mono text-center truncate <%= chip_class %>"
+                    title="<%= title_text %>"><%= label %></span>
+              <% end %>
+            </div>
+          </div>
+          <% end %>
+        </div>
+      </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="mt-10 border-t border-slate-200 bg-white text-center py-4 text-xs text-slate-400">
+  <%= pool_name %> &bull; Generated <%= generated_at %>
+</footer>
+
+</body>
+</html>

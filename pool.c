@@ -267,13 +267,13 @@ int main(int argc, char *argv[]) {
   if (strcmp(command, "teams") == 0) {
     pool_team_report();
   } else if (strcmp(command, "scores") == 0) {
-    pool_score_report();
+    pool_score_report(format);
   } else if (strcmp(command, "poss") == 0) {
     pool_possibilities_report(format, progress, batch, numBatches, restore);
   } else if (strcmp(command, "ffour") == 0) {
-    pool_final_four_report();
+    pool_final_four_report(format);
   } else if (strcmp(command, "entries") == 0) {
-    pool_entries_report();
+    pool_entries_report(format);
   } else if (strcmp(command, "results") == 0) {
     printf("%s: Results\n", poolConfiguration.poolName);
     pool_print_entry(&poolTournamentBracket);

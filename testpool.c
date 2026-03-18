@@ -18,8 +18,8 @@ int main(void) {
       poolConfiguration.roundScores[4],
       poolConfiguration.roundScores[5]);
   pool_team_report();
-  pool_entries_report();
-  pool_score_report();
+  pool_entries_report(PoolFormatText);
+  pool_score_report(PoolFormatText);
   printf("entry4:\n");
   pool_scoredetail_report("entry4");
   printf("Tournament Results:\n");
@@ -52,7 +52,7 @@ int main(void) {
   }
   printf("Random Final Four:\n");
   pool_print_entry(&poolTournamentBracket);
-  pool_final_four_report();
+  pool_final_four_report(PoolFormatText);
 
   return 0;
 }
