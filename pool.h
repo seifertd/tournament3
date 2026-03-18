@@ -614,10 +614,14 @@ POOLDEF void pool_initialize(const char *dirPath) {
 
 
 POOLDEF void pool_print_entry(PoolBracket *bracket) {
-  if (poolTournamentBracket.tieBreak > 0) {
-    printf("%s Score: %d Tie Break Diff: %d\n", bracket->name, bracket->score, bracket->tieBreakDiff);
+  if (bracket != &poolTournamentBracket) {
+    if (poolTournamentBracket.tieBreak > 0) {
+      printf("%s Score: %d Max: %d Tie Break Diff: %d\n", bracket->name, bracket->score, bracket->maxScore, bracket->tieBreakDiff);
+    } else {
+      printf("%s Score: %d Max: %d\n", bracket->name, bracket->score, bracket->maxScore);
+    }
   } else {
-    printf("%s Score: %d\n", bracket->name, bracket->score);
+    printf("Tournament Results\n");
   }
   printf("          ");
   for (size_t g = 0; g < 32; g++) {
