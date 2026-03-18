@@ -45,7 +45,7 @@ High Point,HPt,12
 Arkansas,Ark,4
 Hawaii,Haw,13
 BYU,BYU,6
-Texas/NCSt,PI2,11
+Texas,PI2,11
 Gonzaga,Gon,3
 Kennesaw St.,KeS,14
 Miami FL,MiF,7
@@ -54,7 +54,7 @@ Purdue,Pur,2
 Queens (NC),QNC,15
 Region: Midwest
 Michigan,Mch,1
-UMBC/Howard,PI3,16
+Howard,PI3,16
 Georgia,Geo,8
 Saint Louis,StL,9
 Texas Tech,TTU,5

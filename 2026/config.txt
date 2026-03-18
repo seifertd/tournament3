@@ -2,3 +2,5 @@ name=2026 NCAA BB Tourny: Americorp Challenge
 scorerType=UpsetMultiplier
 payouts=60,30,10,-1
 fee=5
+PI2=Tex
+PI3=How

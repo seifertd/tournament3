@@ -7,6 +7,9 @@ code.txt
 help.txt
 update_help.sh
 mise.toml
+*/stats.csv
+*/weights.json
+*/entries/DAS*.txt
 
 # Ignore score report .bin files
 *.bin
