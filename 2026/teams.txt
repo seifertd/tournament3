@@ -19,7 +19,7 @@ UConn,UCn,2
 Furman,Fur,15
 Region: South
 Florida,Fla,1
-PV A&M/Lehigh,PI1,16
+Prairie View,PI1,16
 Clemson,Cle,8
 Iowa,Iow,9
 Vanderbilt,Van,5
@@ -62,7 +62,7 @@ Akron,Akr,12
 Alabama,Ala,4
 Hofstra,Hof,13
 Tennessee,Ten,6
-Mia-OH/SMU,PI4,11
+Miami OH,PI4,11
 Virginia,Vir,3
 Wright St.,WSt,14
 Kentucky,Ken,7
