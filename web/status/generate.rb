@@ -99,6 +99,20 @@ def eliminated_teams(t_winners)
 end
 
 # ---------------------------------------------------------------------------
+# Parse config.txt for PI mappings
+# ---------------------------------------------------------------------------
+pi_map = {}
+config_file = File.join(dir, 'config.txt')
+if File.exist?(config_file)
+  File.readlines(config_file, encoding: 'utf-8').each do |line|
+    line.chomp!
+    (1..4).each do |i|
+      pi_map["PI#{i}"] = $1.strip if line =~ /^PI#{i}=(.+)/
+    end
+  end
+end
+
+# ---------------------------------------------------------------------------
 # Parse teams.txt
 # ---------------------------------------------------------------------------
 $stderr.puts "Pool directory: #{dir}"
@@ -130,6 +144,11 @@ File.readlines(teams_file, encoding: 'utf-8').each do |line|
     team_num += 1
     region_seed_idx += 1
   end
+end
+
+# Apply PI overrides from config.txt
+teams.each_value do |t|
+  t[:short] = pi_map[t[:short]] if pi_map.key?(t[:short])
 end
 
 # ---------------------------------------------------------------------------
