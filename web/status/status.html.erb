@@ -39,11 +39,10 @@
     .bv-region  { background:white; border-radius:6px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.1); }
     .bv-rname   { background:#475569; color:white; padding:3px 8px;
                   font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
-    .bv-rhdr    { display:grid; grid-template-columns:repeat(4,1fr); padding:2px 4px;
-                  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+    .bv-rhdr    { display:grid; padding:2px 4px;
+                  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
                   color:#94a3b8; text-align:center; background:#f8fafc; }
-    .bv-grid    { display:grid; grid-template-columns:repeat(4,1fr);
-                  grid-template-rows:repeat(8,24px); gap:2px; padding:4px; }
+    .bv-grid    { display:grid; grid-template-rows:repeat(8,24px); gap:2px; padding:4px; }
     .bv-cell    { display:flex; align-items:center; }
     .bv-chip    { display:block; font-size:10px; font-family:ui-monospace,monospace;
                   text-align:center; border-radius:3px; padding:1px 2px;
@@ -94,6 +93,14 @@
     { r1: (24..31).to_a, r2: (44..47).to_a, s16: [54,55], e8: 59 },
   ]
 
+  # Renders a neutral team chip (for the non-picked opponent in R64)
+  bv_team_chip = ->(team_num) {
+    t = teams[team_num]
+    return '<span class="bv-chip bv-empty">?</span>' unless t
+    label = CGI.escapeHTML("#{t[:seed]} #{t[:short]}")
+    %(<span class="bv-chip bv-empty" title="#{CGI.escapeHTML(t[:name])}">#{label}</span>)
+  }
+
   # Renders one pick chip as an HTML string
   bv_chip = ->(game, winners, game_scores = nil) {
     pick = winners[game]
@@ -128,24 +135,44 @@
     h << %(<div class="bv-body">)
 
     # Helper: render one region panel; reversed=true flips columns (E8 on left, R64 on right)
+    # 5-column layout: for normal  col1=top-seed col2=bot-seed col3=R32 col4=S16 col5=E8
+    #                  for reversed col1=E8 col2=S16 col3=R32 col4=top-seed col5=bot-seed
     bv_region_html = ->(ri, reversed) {
       rg    = region_game_structure[ri]
       rname = CGI.escapeHTML(regions[ri] || "Region #{ri + 1}")
-      hdr   = reversed ? '<span>E8</span><span>S16</span><span>R32</span><span>R64</span>'
-                       : '<span>R64</span><span>R32</span><span>S16</span><span>E8</span>'
+      hdr   = reversed ? '<span>E8</span><span>S16</span><span>R32</span><span>R64</span><span></span>'
+                       : '<span>R64</span><span></span><span>R32</span><span>S16</span><span>E8</span>'
+      cols  = reversed ? '1fr 1fr 1fr 1fr 0.5fr' : '0.5fr 1fr 1fr 1fr 1fr'
       s = +''
       s << %(<div class="bv-region"><div class="bv-rname">#{rname}</div>)
-      s << %(<div class="bv-rhdr">#{hdr}</div><div class="bv-grid">)
+      s << %(<div class="bv-rhdr" style="grid-template-columns:#{cols}">#{hdr}</div>)
+      s << %(<div class="bv-grid" style="grid-template-columns:#{cols}">)
       if reversed
         s << %(<span class="bv-cell" style="grid-column:1;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w,gs)}</span>)
         rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w,gs)}</span>) }
         rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w,gs)}</span>) }
-        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:4;grid-row:#{i+1}">#{bv_chip.call(g,w,gs)}</span>) }
+        rg[:r1].each_with_index do |g, i|
+          team1, team2 = 2*g+1, 2*g+2
+          picked = w[g].to_i
+          opp = picked > 0 ? (picked == team1 ? team2 : team1) : team1
+          pick_chip = bv_chip.call(g, w, gs)
+          opp_chip  = bv_team_chip.call(opp)
+          s << %(<span class="bv-cell" style="grid-column:4;grid-row:#{i+1}">#{pick_chip}</span>)
+          s << %(<span class="bv-cell" style="grid-column:5;grid-row:#{i+1}">#{opp_chip}</span>)
+        end
       else
-        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:1;grid-row:#{i+1}">#{bv_chip.call(g,w,gs)}</span>) }
-        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w,gs)}</span>) }
-        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w,gs)}</span>) }
-        s << %(<span class="bv-cell" style="grid-column:4;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w,gs)}</span>)
+        rg[:r1].each_with_index do |g, i|
+          team1, team2 = 2*g+1, 2*g+2
+          picked = w[g].to_i
+          opp = picked > 0 ? (picked == team1 ? team2 : team1) : team2
+          pick_chip = bv_chip.call(g, w, gs)
+          opp_chip  = bv_team_chip.call(opp)
+          s << %(<span class="bv-cell" style="grid-column:1;grid-row:#{i+1}">#{opp_chip}</span>)
+          s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i+1}">#{pick_chip}</span>)
+        end
+        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w,gs)}</span>) }
+        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:4;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w,gs)}</span>) }
+        s << %(<span class="bv-cell" style="grid-column:5;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w,gs)}</span>)
       end
       s << %(</div></div>)
       s
@@ -197,7 +224,7 @@
      ========================================================= -->
 <section x-data="{ open: true }">
   <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
-    <h2 class="text-xl font-semibold">Leaderboard</h2>
+    <h2 class="text-xl font-semibold">Leader Board</h2>
     <% if champion_short
          champ_team = teams[short_to_num[champion_short]]
     %>
@@ -243,7 +270,9 @@
             <td class="px-3 py-2 font-medium"><%= entry['name'] %></td>
             <td class="px-3 py-2 text-right font-semibold"><%= entry['score'] %></td>
             <td class="px-3 py-2 text-right text-slate-500"><%= entry['maxScore'] %></td>
-            <td class="px-3 py-2 text-right text-slate-500"><%= entry['correctPicks'] %></td>
+            <% correct = entry['correctPicks'].to_i
+               pct_str = games_played > 0 ? format(' (%.1f%%)', correct.to_f / games_played * 100) : '' %>
+            <td class="px-3 py-2 text-right text-slate-500"><%= "#{correct}#{pct_str}" %></td>
             <td class="px-3 py-2 text-center text-xs <%= champ_alive_class %>"><%= entry['champShortName'] %></td>
             <td class="px-3 py-2 text-right text-slate-500"><%= entry['tieBreak'] %></td>
             <% if final_points_known %>
@@ -325,7 +354,7 @@
             row_bg  = idx.even? ? 'bg-white' : 'bg-slate-50'
             win_pct = e[ds[:win_key]].to_f
             bar_w   = win_bar_width.call(win_pct)
-            top_champs = (e['champs'] || []).first(3)
+            top_champs = (e['champs'] || []).sort_by { |c| -c['timesWon'] }.first(5)
           %>
           <tr class="<%= row_bg %>">
             <td class="px-3 py-2 font-medium"><%= e['name'] %></td>

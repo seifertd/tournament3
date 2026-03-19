@@ -1845,71 +1845,77 @@ POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, 
   // Sort by best win chance (same comparator as poss report)
   qsort(stats, poolBracketsCount, sizeof(PoolStats), pool_stats_times_won_cmpfunc);
 
-  switch (fmt) {
-    case PoolFormatText: {
-      const char *sep_top = "┌──────────────────────┬──────┬──────┬────────────────┬─────────┬────────┬──────────────────────┐";
-      const char *sep_mid = "├──────────────────────┼──────┼──────┼────────────────┼─────────┼────────┼──────────────────────┤";
-      const char *sep_bot = "└──────────────────────┴──────┴──────┴────────────────┴─────────┴────────┴──────────────────────┘";
-      printf("%s\n", sep_top);
-      printf("│                      │  Min │  Max │                │  Tied%%  │  Simul │                      │\n");
-      printf("│ %-20s │ Rank │ Rank │      Win%%      │         │   Won  │ %-20s │\n",
-             "Name", "Top Champs");
-      printf("%s\n", sep_mid);
-      for (size_t i = 0; i < poolBracketsCount; i++) {
-        PoolStats *stat = &stats[i];
-        double p = numSamples > 0 ? (double)stat->timesWon / (double)numSamples : 0.0;
-        double tiedPct = numSamples > 0 ? (double)stat->timesTied / (double)numSamples * 100.0 : 0.0;
+  // Text output: stdout for text mode, stderr for JSON mode (verification).
+  // Temporary: JSON mode also emits text to stderr so output can be cross-checked.
+  FILE *text_out = (fmt == PoolFormatText) ? stdout : stderr;
+  if (fmt == PoolFormatText || fmt == PoolFormatJson) {
+    const char *sep_top = "┌──────────────────────┬──────┬──────┬───────┬───────┬────────────────┬─────────┬────────┬──────────────────────┐";
+    const char *sep_mid = "├──────────────────────┼──────┼──────┼───────┼───────┼────────────────┼─────────┼────────┼──────────────────────┤";
+    const char *sep_bot = "└──────────────────────┴──────┴──────┴───────┴───────┴────────────────┴─────────┴────────┴──────────────────────┘";
+    fprintf(text_out, "%s\n", sep_top);
+    fprintf(text_out, "│                      │  Min │  Max │ Score │  Max  │                │  Tied%%  │  Simul │                      │\n");
+    fprintf(text_out, "│ %-20s │ Rank │ Rank │       │ Score │      Win%%      │         │   Won  │ %-20s │\n",
+           "Name", "Top Champs");
+    fprintf(text_out, "%s\n", sep_mid);
+    for (size_t i = 0; i < poolBracketsCount; i++) {
+      PoolStats *stat = &stats[i];
+      double p = numSamples > 0 ? (double)stat->timesWon / (double)numSamples : 0.0;
+      double tiedPct = numSamples > 0 ? (double)stat->timesTied / (double)numSamples * 100.0 : 0.0;
 
-        // Build Top Champs string (top 5 by champCounts)
-        char champsStr[32] = "";
-        if (stat->timesWon > 0 || stat->timesTied > 0) {
-          PoolTeamWins top5[5] = {0};
-          for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
-            if (stat->champCounts[t] > 0) {
-              for (size_t j = 0; j < 5; j++) {
-                if (stat->champCounts[t] > top5[j].count) {
-                  for (size_t k = 4; k > j; k--) {
-                    top5[k].team = top5[k-1].team;
-                    top5[k].count = top5[k-1].count;
-                  }
-                  top5[j].team = (uint8_t)(t + 1);
-                  top5[j].count = stat->champCounts[t];
-                  break;
+      // Build Top Champs string (top 5 by champCounts)
+      char champsStr[32] = "";
+      if (stat->timesWon > 0 || stat->timesTied > 0) {
+        PoolTeamWins top5[5] = {0};
+        for (size_t t = 0; t < POOL_NUM_TEAMS; t++) {
+          if (stat->champCounts[t] > 0) {
+            for (size_t j = 0; j < 5; j++) {
+              if (stat->champCounts[t] > top5[j].count) {
+                for (size_t k = 4; k > j; k--) {
+                  top5[k].team = top5[k-1].team;
+                  top5[k].count = top5[k-1].count;
                 }
+                top5[j].team = (uint8_t)(t + 1);
+                top5[j].count = stat->champCounts[t];
+                break;
               }
             }
           }
-          char *cp = champsStr;
-          for (size_t w = 0; w < 5; w++) {
-            if (top5[w].team != 0) {
-              if (w > 0) cp += sprintf(cp, ",");
-              cp += sprintf(cp, "%s", POOL_TEAM_SHORT_NAME(top5[w].team));
-            }
+        }
+        char *cp = champsStr;
+        for (size_t w = 0; w < 5; w++) {
+          if (top5[w].team != 0) {
+            if (w > 0) cp += sprintf(cp, ",");
+            cp += sprintf(cp, "%s", POOL_TEAM_SHORT_NAME(top5[w].team));
           }
         }
-
-        // Print name, min/max rank
-        printf("│ %-20.20s │ %4d │ %4d │ ",
-               stat->bracket->name, stat->minRank, stat->maxRank);
-
-        // Win% column: 14 display chars
-        if (stat->timesWon == 0) {
-          printf("  0.00%%       ");
-        } else if (stat->timesWon < 5) {
-          printf("< 0.001%%      ");
-        } else {
-          double margin = 1.96 * sqrt(p * (1.0 - p) / (double)numSamples);
-          printf("%6.2f%% \xc2\xb1%4.2f%%", p * 100.0, margin * 100.0);
-        }
-
-        // Tied%, Simul Won, Top Champs
-        printf(" │ %6.2f%% │ ", tiedPct);
-        pool_print_humanized(stdout, stat->timesWon, 5);
-        printf(" │ %-20.20s │\n", champsStr);
       }
-      printf("%s\n", sep_bot);
-      break;
+
+      // Print name, min/max rank, score, maxScore
+      fprintf(text_out, "│ %-20.20s │ %4d │ %4d │ %5d │ %5d │ ",
+             stat->bracket->name, stat->minRank, stat->maxRank,
+             stat->bracket->score, stat->bracket->maxScore);
+
+      // Win% column: 14 display chars
+      if (stat->timesWon == 0) {
+        fprintf(text_out, "  0.00%%       ");
+      } else if (stat->timesWon < 5) {
+        fprintf(text_out, "< 0.001%%      ");
+      } else {
+        double margin = 1.96 * sqrt(p * (1.0 - p) / (double)numSamples);
+        fprintf(text_out, "%6.2f%% \xc2\xb1%4.2f%%", p * 100.0, margin * 100.0);
+      }
+
+      // Tied%, Simul Won, Top Champs
+      fprintf(text_out, " │ %6.2f%% │ ", tiedPct);
+      pool_print_humanized(text_out, stat->timesWon, 5);
+      fprintf(text_out, " │ %-20.20s │\n", champsStr);
     }
+    fprintf(text_out, "%s\n", sep_bot);
+  }
+
+  switch (fmt) {
+    case PoolFormatText:
+      break;
     case PoolFormatJson: {
       printf("{");
       printf("\"pool\": {");
@@ -1929,6 +1935,8 @@ POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, 
         printf("\"name\": \"%s\",", stat->bracket->name);
         printf("\"minRank\": %d,", stat->minRank);
         printf("\"maxRank\": %d,", stat->maxRank);
+        printf("\"currentScore\": %d,", stat->bracket->score);
+        printf("\"maxScore\": %d,", stat->bracket->maxScore);
         printf("\"winPct\": %.6f,", p * 100.0);
         printf("\"winMargin\": %.6f,", margin * 100.0);
         printf("\"tiedPct\": %.6f,", tiedPct);
@@ -2027,7 +2035,7 @@ POOLDEF void pool_score_report(PoolReportFormat fmt) {
     return;
   }
 
-  printf("%s: Leaderboard\n", poolConfiguration.poolName);
+  printf("%s: Leader Board\n", poolConfiguration.poolName);
   if (poolTournamentBracket.winners[62] > 0) {
     printf("Champion: %s Final Points: ", POOL_TEAM_NAME(poolTournamentBracket.winners[62]));
     if (poolTournamentBracket.tieBreak > 0) {
