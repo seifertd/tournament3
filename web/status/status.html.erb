@@ -95,13 +95,16 @@
   ]
 
   # Renders one pick chip as an HTML string
-  bv_chip = ->(game, winners) {
+  bv_chip = ->(game, winners, game_scores = nil) {
     pick = winners[game]
     return '<span class="bv-chip bv-empty">—</span>' if !pick || pick == 0
     t = teams[pick]
     return '<span class="bv-chip bv-empty">?</span>' unless t
-    css   = pick_chip_class.call(pick_status(game, pick, t_winners, eliminated))
+    status = pick_status(game, pick, t_winners, eliminated)
+    css   = pick_chip_class.call(status)
+    score = game_scores && status == :correct ? game_scores[game].to_i : nil
     label = CGI.escapeHTML("#{t[:seed]} #{t[:short]}")
+    label += %( <span style="opacity:.75">+#{score}</span>) if score&.positive?
     title = CGI.escapeHTML(t[:name])
     %(<span class="bv-chip #{css}" title="#{title}">#{label}</span>)
   }
@@ -109,6 +112,7 @@
   # Renders the full bracket-view HTML for one entry (goes inside <template>)
   render_bracket_view = ->(entry, lb) {
     w   = entry['winners']
+    gs  = entry['gameScores']
     rnk = lb ? lb['rank']      : nil
     tb  = lb ? lb['tieBreak'].to_s : ''
     h   = +''
@@ -133,15 +137,15 @@
       s << %(<div class="bv-region"><div class="bv-rname">#{rname}</div>)
       s << %(<div class="bv-rhdr">#{hdr}</div><div class="bv-grid">)
       if reversed
-        s << %(<span class="bv-cell" style="grid-column:1;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w)}</span>)
-        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w)}</span>) }
-        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w)}</span>) }
-        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:4;grid-row:#{i+1}">#{bv_chip.call(g,w)}</span>) }
+        s << %(<span class="bv-cell" style="grid-column:1;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w,gs)}</span>)
+        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w,gs)}</span>) }
+        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w,gs)}</span>) }
+        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:4;grid-row:#{i+1}">#{bv_chip.call(g,w,gs)}</span>) }
       else
-        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:1;grid-row:#{i+1}">#{bv_chip.call(g,w)}</span>) }
-        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w)}</span>) }
-        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w)}</span>) }
-        s << %(<span class="bv-cell" style="grid-column:4;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w)}</span>)
+        rg[:r1].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:1;grid-row:#{i+1}">#{bv_chip.call(g,w,gs)}</span>) }
+        rg[:r2].each_with_index  { |g, i| s << %(<span class="bv-cell" style="grid-column:2;grid-row:#{i*2+1}/span 2">#{bv_chip.call(g,w,gs)}</span>) }
+        rg[:s16].each_with_index { |g, i| s << %(<span class="bv-cell" style="grid-column:3;grid-row:#{i*4+1}/span 4">#{bv_chip.call(g,w,gs)}</span>) }
+        s << %(<span class="bv-cell" style="grid-column:4;grid-row:1/span 8">#{bv_chip.call(rg[:e8],w,gs)}</span>)
       end
       s << %(</div></div>)
       s
@@ -163,9 +167,9 @@
     h << %(</div>)  # bv-halves
 
     h << %(<div class="bv-ff">)
-    h << %(<div class="bv-ff-panel"><div class="bv-ff-lbl">Final Four</div>#{bv_chip.call(60,w)}</div>)
-    h << %(<div class="bv-ff-panel champ"><div class="bv-ff-lbl">Champion</div>#{bv_chip.call(62,w)}</div>)
-    h << %(<div class="bv-ff-panel"><div class="bv-ff-lbl">Final Four</div>#{bv_chip.call(61,w)}</div>)
+    h << %(<div class="bv-ff-panel"><div class="bv-ff-lbl">Final Four</div>#{bv_chip.call(60,w,gs)}</div>)
+    h << %(<div class="bv-ff-panel champ"><div class="bv-ff-lbl">Champion</div>#{bv_chip.call(62,w,gs)}</div>)
+    h << %(<div class="bv-ff-panel"><div class="bv-ff-lbl">Final Four</div>#{bv_chip.call(61,w,gs)}</div>)
     h << %(</div>)  # bv-ff
 
     h << %(</div>)  # bv-body
@@ -515,7 +519,8 @@
               pick = entry['winners'][game]
               next nil if pick.nil? || pick == 0
               status = pick_status(game, pick, t_winners, eliminated)
-              { team: teams[pick], status: status, game: game }
+              score = status == :correct ? entry['gameScores']&.[](game).to_i : nil
+              { team: teams[pick], status: status, game: game, score: score }
             end.compact
           %>
           <% next if round_picks.empty? %>
@@ -528,6 +533,7 @@
               <%
                 t = pick[:team]
                 label = t ? "#{t[:seed]} #{t[:short]}" : '?'
+                label += " +#{pick[:score]}" if pick[:score]&.positive?
                 chip_class = pick_chip_class.call(pick[:status])
                 title_text = t ? "#{t[:name]} — game #{pick[:game]}" : "game #{pick[:game]}"
               %>

@@ -131,7 +131,7 @@ File.readlines(teams_file, encoding: 'utf-8').each do |line|
     regions << line[7..].strip
     region_seed_idx = 0
   else
-    name, short = line.split(',', 2)
+    name, short, = line.split(',')
     seed = SEED_ORDER[region_seed_idx % 16]
     teams[team_num] = {
       num:        team_num,

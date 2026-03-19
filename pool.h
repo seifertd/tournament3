@@ -2185,6 +2185,22 @@ POOLDEF void pool_entries_report(PoolReportFormat fmt) {
       printf("\"roundScores\": [%d,%d,%d,%d,%d,%d],",
         e->roundScores[0], e->roundScores[1], e->roundScores[2],
         e->roundScores[3], e->roundScores[4], e->roundScores[5]);
+      printf("\"gameScores\": [");
+      {
+        uint8_t round = 0;
+        for (int g = 0; g < POOL_NUM_GAMES; g++) {
+          if (g > 0) { printf(","); }
+          if (g >= poolGamesInRound[round]) { round++; }
+          uint8_t rw = poolTournamentBracket.winners[g];
+          uint32_t gs = 0;
+          if (rw != 0 && e->winners[g] == rw) {
+            uint8_t loser = pool_loser_of_game(g, &poolTournamentBracket);
+            gs = pool_call_scorer(poolConfiguration.scorerType, e, rw, loser, round, g);
+          }
+          printf("%d", gs);
+        }
+      }
+      printf("],");
       printf("\"winners\": [");
       for (int g = 0; g < POOL_NUM_GAMES; g++) {
         if (g > 0) { printf(","); }
