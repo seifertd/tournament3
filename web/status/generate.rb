@@ -2,19 +2,13 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'erb'
 require 'optparse'
 require 'open3'
 require 'time'
-require 'set'
-require 'cgi'
 
 POOL_BINARY = File.expand_path('../../pool', __dir__)
 
-ROUND_STARTS = [0, 32, 48, 56, 60, 62].freeze
-ROUND_SIZES  = [32, 16, 8, 4, 2, 1].freeze
-ROUND_NAMES  = ['Round of 64', 'Round of 32', 'Sweet 16', 'Elite 8', 'Final Four', 'Championship'].freeze
-SEED_ORDER   = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15].freeze
+SEED_ORDER = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15].freeze
 
 # ---------------------------------------------------------------------------
 # Option parsing
@@ -22,9 +16,9 @@ SEED_ORDER   = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15].freeze
 options = { output: 'status.html', binary: POOL_BINARY }
 OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} -d DIR [-o OUTPUT] [--pool BINARY]"
-  opts.on('-d DIR',    'Pool directory')                 { |d| options[:dir] = d }
-  opts.on('-o FILE',   'Output HTML file (status.html)') { |f| options[:output] = f }
-  opts.on('--pool BIN','Path to pool binary')            { |b| options[:binary] = b }
+  opts.on('-d DIR',     'Pool directory')                 { |d| options[:dir] = d }
+  opts.on('-o FILE',    'Output HTML file (status.html)') { |f| options[:output] = f }
+  opts.on('--pool BIN', 'Path to pool binary')            { |b| options[:binary] = b }
 end.parse!
 
 abort "Error: -d DIR is required\nUsage: #{$0} -d DIR [-o OUTPUT]" unless options[:dir]
@@ -55,47 +49,14 @@ rescue JSON::ParserError => e
   nil
 end
 
-def round_of_game(game)
-  ROUND_STARTS.each_with_index do |start, r|
-    next_start = ROUND_STARTS[r + 1] || 63
-    return r if game >= start && game < next_start
-  end
-  nil
+def normalize_win_prob_entries(entries, win_key)
+  entries
+    .map { |e| e.merge('winChance' => e[win_key].to_f) }
+    .sort_by { |e| -e['winChance'] }
 end
 
-# Returns [src_game1, src_game2] for a given game (nil for R1 games)
-def source_games(game)
-  r = round_of_game(game)
-  return nil if r == 0
-  prev_start = ROUND_STARTS[r - 1]
-  offset = game - ROUND_STARTS[r]
-  [prev_start + 2 * offset, prev_start + 2 * offset + 1]
-end
-
-# Build set of eliminated team numbers from tournament winners array
-def eliminated_teams(t_winners)
-  eliminated = Set.new
-  63.times do |game|
-    winner = t_winners[game]
-    next if winner == 0
-
-    r = round_of_game(game)
-    if r == 0
-      # R1: loser is the other team in the pair (teams are 1-indexed, pairs are consecutive)
-      team1 = 2 * game + 1
-      team2 = 2 * game + 2
-      loser = (winner == team1) ? team2 : team1
-      eliminated << loser
-    else
-      # Later rounds: loser is the winner of one of the two source games
-      src1, src2 = source_games(game)
-      [src1, src2].each do |src|
-        t = t_winners[src]
-        eliminated << t if t > 0 && t != winner
-      end
-    end
-  end
-  eliminated
+def outcomes_label(n)
+  n.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
 end
 
 # ---------------------------------------------------------------------------
@@ -105,10 +66,7 @@ pi_map = {}
 config_file = File.join(dir, 'config.txt')
 if File.exist?(config_file)
   File.readlines(config_file, encoding: 'utf-8').each do |line|
-    line.chomp!
-    (1..4).each do |i|
-      pi_map["PI#{i}"] = $1.strip if line =~ /^PI#{i}=(.+)/
-    end
+    (1..4).each { |i| pi_map["PI#{i}"] = $1.strip if line =~ /^PI#{i}=(.+)/ }
   end
 end
 
@@ -119,36 +77,32 @@ $stderr.puts "Pool directory: #{dir}"
 teams_file = File.join(dir, 'teams.txt')
 abort "Error: #{teams_file} not found" unless File.exist?(teams_file)
 
-teams = {}       # 1-indexed team number => hash
-regions = []
-team_num = 1
-region_seed_idx = 0
+teams       = {}
+regions     = []
+team_num    = 1
+region_seed = 0
 
 File.readlines(teams_file, encoding: 'utf-8').each do |line|
   line.chomp!
   next if line.start_with?('#') || line.empty?
   if line.start_with?('Region:')
     regions << line[7..].strip
-    region_seed_idx = 0
+    region_seed = 0
   else
     name, short, = line.split(',')
-    seed = SEED_ORDER[region_seed_idx % 16]
+    short = short.to_s.strip
+    short = pi_map[short] if pi_map.key?(short)
     teams[team_num] = {
-      num:        team_num,
-      name:       name.to_s.strip,
-      short:      short.to_s.strip,
-      seed:       seed,
-      region:     regions.last || "Region #{(team_num - 1) / 16 + 1}",
-      region_idx: regions.length - 1
+      num:       team_num,
+      name:      name.to_s.strip,
+      short:     short,
+      seed:      SEED_ORDER[region_seed % 16],
+      region:    regions.last || "Region #{(team_num - 1) / 16 + 1}",
+      regionIdx: regions.length - 1,
     }
-    team_num += 1
-    region_seed_idx += 1
+    team_num    += 1
+    region_seed += 1
   end
-end
-
-# Apply PI overrides from config.txt
-teams.each_value do |t|
-  t[:short] = pi_map[t[:short]] if pi_map.key?(t[:short])
 end
 
 # ---------------------------------------------------------------------------
@@ -158,81 +112,83 @@ $stderr.puts 'Fetching report data:'
 scores_data  = run_json(binary, dir, 'scores')
 entries_data = run_json(binary, dir, 'entries')
 
-abort 'Error: could not load scores report' unless scores_data
+abort 'Error: could not load scores report'  unless scores_data
 abort 'Error: could not load entries report' unless entries_data
 
-pool_name          = scores_data['pool']['name']
-games_played       = scores_data['pool']['gamesPlayed']
-games_remaining    = scores_data['pool']['gamesRemaining']
-final_points_known = scores_data['pool']['finalPointsKnown']
-final_points       = scores_data['pool']['finalPoints']
-champion_short     = scores_data['pool'].fetch('champion', nil)
+pool_info       = scores_data['pool']
+games_played    = pool_info['gamesPlayed']
+games_remaining = pool_info['gamesRemaining']
 
-$stderr.puts "  Pool: #{pool_name} — #{games_played} games played, #{games_remaining} remaining"
+$stderr.puts "  Pool: #{pool_info['name']} — #{games_played} played, #{games_remaining} remaining"
 
-t_winners = entries_data['tournament']['winners']  # array of 63 ints
-eliminated = eliminated_teams(t_winners)
-
-# Build a lookup: short_name => team_num for resolving champion
-short_to_num = teams.transform_values { |t| t[:short] }.invert
-
-# Use Monte Carlo while round 1 is still in progress (>31 games remaining),
-# switch to the full possibilities report once day 2 is complete,
-# and skip both when the pool is finished (no games remaining).
 if games_remaining == 0
   $stderr.puts '  Pool complete — skipping win probability report'
-  mc_seed  = nil
-  mc_model = nil
-  poss     = nil
+  mc_seed = mc_model = poss = nil
 elsif games_remaining > 31
   $stderr.puts '  Round 1 in progress — running Monte Carlo (both models):'
   mc_seed  = run_json(binary, dir, 'mc', '-m', 'seed')
   mc_model = run_json(binary, dir, 'mc', '-m', 'model')
   poss     = nil
 else
-  mc_seed  = nil
-  mc_model = nil
-  poss     = run_json(binary, dir, 'poss')
+  mc_seed = mc_model = nil
+  poss    = run_json(binary, dir, 'poss')
 end
 
-# Final four payouts: only available when <=3 games remain.
 ffour = games_remaining <= 3 ? run_json(binary, dir, 'ffour') : nil
 
 # ---------------------------------------------------------------------------
-# Build derived data for the template
+# Build win probability datasets (normalized to common shape)
 # ---------------------------------------------------------------------------
-
-# Leaderboard entries (already sorted by score in scores_data)
-leaderboard = scores_data['entries']
-
-# Entry brackets (sorted by name in entries_data when pool in progress)
-entry_brackets = entries_data['entries']
-
-# For each entry bracket, annotate each pick with its status
-# status: :correct, :wrong, :future, :impossible
-def pick_status(game, pick_team, t_winners, eliminated)
-  actual = t_winners[game]
-  if actual == 0
-    # Game not played yet — but check if picked team is already eliminated
-    eliminated.include?(pick_team) ? :impossible : :future
-  elsif pick_team == actual
-    :correct
-  else
-    :wrong
-  end
+win_prob = []
+if poss
+  win_prob << {
+    label:   "Possibilities — #{outcomes_label(poss['pool']['outcomes'])} outcomes",
+    entries: normalize_win_prob_entries(poss['entries'], 'winChance'),
+  }
+end
+if mc_seed
+  win_prob << {
+    label:   'Monte Carlo — Seed weighted',
+    entries: normalize_win_prob_entries(mc_seed['entries'], 'winPct'),
+  }
+end
+if mc_model
+  win_prob << {
+    label:   'Monte Carlo — Model weighted',
+    entries: normalize_win_prob_entries(mc_model['entries'], 'winPct'),
+  }
 end
 
-generated_at = Time.now.strftime('%B %-d, %Y at %-I:%M %p')
+# ---------------------------------------------------------------------------
+# Assemble data blob
+# ---------------------------------------------------------------------------
+data = {
+  pool: {
+    name:             pool_info['name'],
+    generatedAt:      Time.now.strftime('%B %-d, %Y at %-I:%M %p'),
+    gamesPlayed:      games_played,
+    gamesRemaining:   games_remaining,
+    finalPointsKnown: pool_info['finalPointsKnown'],
+    finalPoints:      pool_info['finalPoints'],
+    champion:         pool_info['champion'],
+  },
+  teams:             teams.values,
+  regions:           regions,
+  leaderboard:       scores_data['entries'],
+  entries:           entries_data['entries'],
+  tournamentWinners: entries_data['tournament']['winners'],
+  winProb:           win_prob,
+  ffour:             ffour,
+}
 
 # ---------------------------------------------------------------------------
-# Render template
+# Inject into template and write output
 # ---------------------------------------------------------------------------
-template_path = File.join(__dir__, 'status.html.erb')
+template_path = File.join(__dir__, 'app.html')
 abort "Error: template not found at #{template_path}" unless File.exist?(template_path)
 
 $stderr.print 'Rendering template ... '
-erb    = ERB.new(File.read(template_path), trim_mode: '%<>')
-output = erb.result(binding)
+output = File.read(template_path).sub('{{POOL_DATA}}', JSON.generate(data))
 File.write(options[:output], output)
 $stderr.puts 'done'
 puts "Generated #{options[:output]}"

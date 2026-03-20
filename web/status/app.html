@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pool Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+
+    .pick-correct    { background:#dcfce7; color:#166534; box-shadow:0 0 0 1px #86efac; }
+    .pick-wrong      { background:#fee2e2; color:#b91c1c; box-shadow:0 0 0 1px #fca5a5; text-decoration:line-through; }
+    .pick-future     { background:#f1f5f9; color:#475569; box-shadow:0 0 0 1px #cbd5e1; }
+    .pick-impossible { background:#ffedd5; color:#c2410c; box-shadow:0 0 0 1px #fdba74; text-decoration:line-through; }
+
+    .entry-gallery::-webkit-scrollbar       { height: 6px; }
+    .entry-gallery::-webkit-scrollbar-track { background: #f1f5f9; }
+    .entry-gallery::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+
+    #bracket-modal { border:none; border-radius:8px; padding:0; max-height:92vh; width:min(95vw,1100px); overflow:auto; }
+    #bracket-modal::backdrop { background:rgba(0,0,0,.75); }
+    .bv-bar  { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:10px;
+               background:#1e293b; color:white; padding:8px 16px; }
+    .bv-bar button { margin-left:auto; background:#7f1d1d; border:none; color:white;
+                     border-radius:4px; padding:4px 12px; font-size:13px; cursor:pointer; }
+    .bv-bar button:hover { background:#991b1b; }
+    .bv-header { display:flex; flex-wrap:wrap; align-items:baseline; gap:12px;
+                 padding:10px 16px; background:#334155; color:white; }
+    .bv-name   { font-size:16px; font-weight:700; }
+    .bv-meta   { font-size:12px; color:#cbd5e1; }
+    .bv-meta strong { color:white; }
+    .bv-body   { padding:8px; background:#f1f5f9; }
+    .bv-halves { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+    .bv-half   { display:flex; flex-direction:column; gap:6px; }
+    .bv-ff     { display:flex; justify-content:center; align-items:flex-start; gap:12px;
+                 background:white; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.1); padding:10px; }
+    .bv-region { background:white; border-radius:6px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.1); }
+    .bv-rname  { background:#475569; color:white; padding:3px 8px;
+                 font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .bv-rhdr   { display:grid; padding:2px 4px;
+                 font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+                 color:#94a3b8; text-align:center; background:#f8fafc; }
+    .bv-grid   { display:grid; grid-template-rows:repeat(8,24px); gap:2px; padding:4px; }
+    .bv-cell   { display:flex; align-items:center; }
+    .bv-chip   { display:block; font-size:10px; font-family:ui-monospace,monospace;
+                 text-align:center; border-radius:3px; padding:1px 2px;
+                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; line-height:1.4; }
+    .bv-empty  { background:#f1f5f9; color:#94a3b8; }
+    .bv-ff-panel       { text-align:center; min-width:100px; }
+    .bv-ff-lbl         { font-size:9px; font-weight:700; text-transform:uppercase;
+                         letter-spacing:.08em; color:#64748b; margin-bottom:4px; }
+    .bv-ff-panel.champ .bv-ff-lbl { color:#92400e; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen" x-data="poolApp()" x-cloak>
+
+<script id="pool-data" type="application/json">{{POOL_DATA}}</script>
+
+<!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+<header class="bg-slate-800 text-white shadow-md">
+  <div class="max-w-screen-2xl mx-auto px-4 py-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <h1 class="text-2xl font-bold tracking-tight" x-text="pool.name"></h1>
+    <span class="text-slate-400 text-sm" x-text="'Generated ' + pool.generatedAt"></span>
+    <span class="ml-auto text-sm text-slate-300">
+      <span x-text="pool.gamesPlayed"></span> games played &bull; <span x-text="pool.gamesRemaining"></span> remaining
+    </span>
+  </div>
+</header>
+
+<main class="max-w-screen-2xl mx-auto px-4 py-6 space-y-10">
+
+<!-- =========================================================
+     LEADERBOARD
+     ========================================================= -->
+<section x-data="{ open: true }">
+  <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+    <h2 class="text-xl font-semibold">Leader Board</h2>
+    <template x-if="pool.champion">
+      <span class="text-sm font-medium bg-yellow-100 text-yellow-800 ring-1 ring-yellow-300 rounded-full px-3 py-0.5">
+        Champion: <span x-text="championLabel()"></span>
+        <template x-if="pool.finalPointsKnown">
+          <span> — Final score: <span x-text="pool.finalPoints"></span></span>
+        </template>
+      </span>
+    </template>
+    <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+  </div>
+
+  <div x-show="open">
+    <div class="overflow-x-auto rounded-lg shadow-sm ring-1 ring-slate-200">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-700 text-white text-xs uppercase tracking-wide">
+          <tr>
+            <th class="px-3 py-2 text-right w-12">Rank</th>
+            <th class="px-3 py-2 text-left">Name</th>
+            <th class="px-3 py-2 text-right">Score</th>
+            <th class="px-3 py-2 text-right">Max</th>
+            <th class="px-3 py-2 text-right">Correct</th>
+            <th class="px-3 py-2 text-center">Champ</th>
+            <th class="px-3 py-2 text-right">Tie Brk</th>
+            <template x-if="pool.finalPointsKnown">
+              <th class="px-3 py-2 text-right">TB Diff</th>
+            </template>
+            <th class="px-3 py-2 text-right">R1</th>
+            <th class="px-3 py-2 text-right">R2</th>
+            <th class="px-3 py-2 text-right">R3</th>
+            <th class="px-3 py-2 text-right">R4</th>
+            <th class="px-3 py-2 text-right">R5</th>
+            <th class="px-3 py-2 text-right">R6</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <template x-for="(entry, idx) in leaderboard" :key="entry.name">
+            <tr :class="idx % 2 === 0 ? 'bg-white hover:bg-blue-50' : 'bg-slate-50 hover:bg-blue-50'" class="transition-colors">
+              <td class="px-3 py-2 text-right font-mono text-slate-500" x-text="entry.rank"></td>
+              <td class="px-3 py-2 font-medium" x-text="entry.name"></td>
+              <td class="px-3 py-2 text-right font-semibold" x-text="entry.score"></td>
+              <td class="px-3 py-2 text-right text-slate-500" x-text="entry.maxScore"></td>
+              <td class="px-3 py-2 text-right text-slate-500" x-text="correctPicksDisplay(entry)"></td>
+              <td class="px-3 py-2 text-center text-xs"
+                  :class="entry.champAlive ? 'text-green-700 font-semibold' : 'text-red-600 line-through'"
+                  x-text="entry.champShortName"></td>
+              <td class="px-3 py-2 text-right text-slate-500" x-text="entry.tieBreak"></td>
+              <template x-if="pool.finalPointsKnown">
+                <td class="px-3 py-2 text-right text-slate-500" x-text="entry.tieBreakDiff"></td>
+              </template>
+              <template x-for="(rs, i) in entry.roundScores" :key="i">
+                <td class="px-3 py-2 text-right text-slate-600" x-text="rs"></td>
+              </template>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     WIN PROBABILITY
+     ========================================================= -->
+<template x-if="winProb.length > 0">
+  <section x-data="{ open: true }">
+    <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+      <h2 class="text-xl font-semibold">Win Probability</h2>
+      <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+    </div>
+
+    <div x-show="open" class="space-y-6">
+      <template x-for="ds in winProb" :key="ds.label">
+        <div>
+          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2" x-text="ds.label"></h3>
+          <div class="overflow-x-auto rounded-lg shadow-sm ring-1 ring-slate-200">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-700 text-white text-xs uppercase tracking-wide">
+                <tr>
+                  <th class="px-3 py-2 text-left">Name</th>
+                  <th class="px-3 py-2 text-right">Win %</th>
+                  <th class="px-3 py-2 text-left w-32"></th>
+                  <th class="px-3 py-2 text-right">Min Rank</th>
+                  <th class="px-3 py-2 text-right">Max Rank</th>
+                  <th class="px-3 py-2 text-right">Score</th>
+                  <th class="px-3 py-2 text-right">Max Score</th>
+                  <th class="px-3 py-2 text-right">Won</th>
+                  <th class="px-3 py-2 text-right">Tied</th>
+                  <th class="px-3 py-2 text-left">Top Champs</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="(e, idx) in ds.entries" :key="e.name">
+                  <tr :class="idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'">
+                    <td class="px-3 py-2 font-medium" x-text="e.name"></td>
+                    <td class="px-3 py-2 text-right font-mono"
+                        :class="e.winChance > 0 ? 'text-green-700 font-semibold' : 'text-slate-400'"
+                        x-text="e.winChance.toFixed(2) + '%'"></td>
+                    <td class="px-3 py-2">
+                      <div class="h-3 rounded bg-slate-200">
+                        <div class="h-3 rounded bg-green-500" :style="'width:' + winBarWidth(e.winChance) + '%'"></div>
+                      </div>
+                    </td>
+                    <td class="px-3 py-2 text-right text-slate-500" x-text="e.minRank"></td>
+                    <td class="px-3 py-2 text-right text-slate-500" x-text="e.maxRank"></td>
+                    <td class="px-3 py-2 text-right" x-text="e.currentScore"></td>
+                    <td class="px-3 py-2 text-right text-slate-500" x-text="e.maxScore"></td>
+                    <td class="px-3 py-2 text-right font-mono text-slate-600" x-text="humanize(e.timesWon)"></td>
+                    <td class="px-3 py-2 text-right font-mono text-slate-500" x-text="humanize(e.timesTied)"></td>
+                    <td class="px-3 py-2 text-xs text-slate-500"
+                        x-text="topChamps(e.champs).map(c => c.team.shortName).join(', ')"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+    </div>
+  </section>
+</template>
+
+<!-- =========================================================
+     FINAL FOUR / CHAMPIONSHIP PAYOUTS
+     ========================================================= -->
+<template x-if="ffour">
+  <section x-data="{ open: true, expanded: null }">
+    <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+      <h2 class="text-xl font-semibold" x-text="ffour.pool.title"></h2>
+      <span class="text-slate-500 text-sm">
+        Fees: $<span x-text="ffour.pool.feesCollected.toFixed(2)"></span>
+        <template x-if="ffour.pool.finalPointsKnown">
+          <span> &bull; Final score: <span x-text="ffour.pool.finalPoints"></span></span>
+        </template>
+      </span>
+      <template x-if="ffour.pool.finalFour && ffour.pool.finalFour.length">
+        <span class="text-sm text-slate-600">
+          &bull; <span x-text="ffour.pool.finalFour.map(t => '(' + t.seed + ') ' + t.shortName).join(' vs ')"></span>
+        </span>
+      </template>
+      <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+    </div>
+
+    <div x-show="open" class="space-y-4">
+      <template x-for="(scenario, pidx) in ffour.possibilities" :key="pidx">
+        <div class="rounded-lg ring-1 ring-slate-200 shadow-sm overflow-hidden">
+          <div class="bg-slate-100 px-4 py-2 flex flex-wrap gap-x-6 gap-y-1 items-center text-sm cursor-pointer"
+               @click="expanded = (expanded === pidx) ? null : pidx">
+            <span class="font-semibold text-slate-700"
+                  x-text="ffour.possibilities.length > 1 ? 'Possibility ' + (pidx + 1) : 'Final Result'"></span>
+            <span x-text="'(' + scenario.finalist1.seed + ') ' + scenario.finalist1.name + ' vs. (' + scenario.finalist2.seed + ') ' + scenario.finalist2.name"></span>
+            <span class="text-yellow-700 font-medium"
+                  x-text="'Champion: (' + scenario.champion.seed + ') ' + scenario.champion.name"></span>
+            <span class="ml-auto text-slate-400" x-text="expanded === pidx ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="expanded === pidx">
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
+                  <tr>
+                    <th class="px-3 py-2 text-right w-12">Rank</th>
+                    <th class="px-3 py-2 text-left">Name</th>
+                    <th class="px-3 py-2 text-right">Score</th>
+                    <th class="px-3 py-2 text-right">Tie Brk</th>
+                    <template x-if="ffour.pool.finalPointsKnown">
+                      <th class="px-3 py-2 text-right">TB Diff</th>
+                    </template>
+                    <th class="px-3 py-2 text-right">Payout</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="(e, eidx) in scenario.entries" :key="e.name">
+                    <tr :class="e.isLast ? 'bg-red-50' : (eidx % 2 === 0 ? 'bg-white' : 'bg-slate-50')">
+                      <td class="px-3 py-2 text-right font-mono text-slate-500"
+                          x-text="e.isLast ? 'Last' : e.rank"></td>
+                      <td class="px-3 py-2 font-medium" x-text="e.name"></td>
+                      <td class="px-3 py-2 text-right font-semibold" x-text="e.score"></td>
+                      <td class="px-3 py-2 text-right text-slate-500" x-text="e.tieBreak"></td>
+                      <template x-if="ffour.pool.finalPointsKnown">
+                        <td class="px-3 py-2 text-right text-slate-500" x-text="e.tieBreakDiff"></td>
+                      </template>
+                      <td class="px-3 py-2 text-right"
+                          :class="e.payout > 0 ? 'text-green-700 font-semibold' : 'text-slate-400'"
+                          x-text="e.payout > 0 ? '$' + e.payout.toFixed(2) : '—'"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </section>
+</template>
+
+<!-- =========================================================
+     ENTRIES GALLERY
+     ========================================================= -->
+<section x-data="{ open: true }">
+  <div class="flex items-center gap-3 mb-3 cursor-pointer select-none" @click="open = !open">
+    <h2 class="text-xl font-semibold">All Entries</h2>
+    <span class="text-slate-500 text-sm" x-text="entries.length + ' entries'"></span>
+    <span class="text-slate-400 text-sm ml-auto" x-text="open ? '▲ collapse' : '▼ expand'"></span>
+  </div>
+
+  <div x-show="open">
+    <div class="flex flex-wrap gap-3 mb-4 text-xs">
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-correct"></span> Correct
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-wrong"></span> Wrong
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-impossible"></span> Impossible (team eliminated)
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="inline-block w-4 h-4 rounded pick-future"></span> Future game
+      </span>
+    </div>
+
+    <div class="entry-gallery flex gap-4 overflow-x-auto pb-4">
+      <template x-for="(entry, idx) in entries" :key="entry.name">
+        <div class="flex-none w-80 rounded-xl ring-1 ring-slate-200 shadow-sm bg-white overflow-hidden">
+          <!-- Card header -->
+          <div class="bg-slate-700 text-white px-3 py-2">
+            <div class="flex items-baseline justify-between gap-2">
+              <span class="font-semibold truncate text-sm" :title="entry.name" x-text="entry.name"></span>
+              <template x-if="rankByName[entry.name]">
+                <span class="flex-none text-xs bg-slate-600 rounded-full px-2 py-0.5"
+                      x-text="'#' + rankByName[entry.name]"></span>
+              </template>
+              <button class="flex-none text-xs bg-slate-500 hover:bg-slate-400 rounded px-2 py-0.5 cursor-pointer border-0 text-white"
+                      @click="openBracket(idx)">Bracket ↗</button>
+            </div>
+            <div class="flex gap-3 mt-1 text-xs text-slate-300">
+              <span>Score: <strong class="text-white" x-text="entry.score"></strong></span>
+              <span>Max: <strong class="text-white" x-text="entry.maxScore"></strong></span>
+              <template x-if="entry.winners[62]">
+                <span class="ml-auto"
+                      :class="isChampAlive(entry.winners[62]) ? 'text-green-400' : 'text-red-400 line-through'"
+                      x-text="champLabel(entry.winners[62])"></span>
+              </template>
+            </div>
+          </div>
+
+          <!-- Round-by-round picks -->
+          <div class="p-2 space-y-1.5">
+            <template x-for="round in entryRoundData(entry)" :key="round.name">
+              <div>
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1"
+                     x-text="round.name + ' (' + round.correct + '/' + round.picks.length + ')'"></div>
+                <div class="grid grid-cols-4 gap-1">
+                  <template x-for="pick in round.picks" :key="pick.game">
+                    <span class="block text-xs rounded px-1 py-0.5 font-mono text-center truncate"
+                          :class="pickChipClass(pick.status)"
+                          :title="pick.team ? pick.team.name + ' — game ' + pick.game : 'game ' + pick.game"
+                          x-text="chipLabel(pick)"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="mt-10 border-t border-slate-200 bg-white text-center py-4 text-xs text-slate-400">
+  <span x-text="pool.name"></span> &bull; Generated <span x-text="pool.generatedAt"></span>
+</footer>
+
+<!-- =========================================================
+     BRACKET VIEW MODAL
+     ========================================================= -->
+<dialog id="bracket-modal">
+  <div class="bv-bar">
+    <span style="font-size:12px;color:#94a3b8;font-style:italic">Bracket View</span>
+    <button @click="closeBracket()">✕ Close</button>
+  </div>
+  <template x-if="selectedEntryIdx !== null">
+    <div>
+      <div class="bv-header">
+        <span class="bv-name" x-text="bracketEntry().name"></span>
+        <template x-if="bracketLb()">
+          <span class="bv-meta">#<span x-text="bracketLb().rank"></span></span>
+        </template>
+        <span class="bv-meta">Score: <strong x-text="bracketEntry().score"></strong></span>
+        <span class="bv-meta">Max: <strong x-text="bracketEntry().maxScore"></strong></span>
+        <span class="bv-meta">Tie Break: <strong x-text="bracketLb() ? bracketLb().tieBreak : ''"></strong></span>
+      </div>
+      <div class="bv-body">
+        <div class="bv-halves">
+          <div class="bv-half" x-html="bracketRegionHtml(0, false) + bracketRegionHtml(1, false)"></div>
+          <div class="bv-half" x-html="bracketRegionHtml(2, true)  + bracketRegionHtml(3, true)"></div>
+        </div>
+        <div class="bv-ff">
+          <div class="bv-ff-panel">
+            <div class="bv-ff-lbl">Final Four</div>
+            <div x-html="bracketChipHtml(60)"></div>
+          </div>
+          <div class="bv-ff-panel champ">
+            <div class="bv-ff-lbl">Champion</div>
+            <div x-html="bracketChipHtml(62)"></div>
+          </div>
+          <div class="bv-ff-panel">
+            <div class="bv-ff-lbl">Final Four</div>
+            <div x-html="bracketChipHtml(61)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+</dialog>
+
+<script>
+const ROUND_STARTS = [0, 32, 48, 56, 60, 62];
+const ROUND_SIZES  = [32, 16, 8, 4, 2, 1];
+const ROUND_NAMES  = ['Round of 64', 'Round of 32', 'Sweet 16', 'Elite 8', 'Final Four', 'Championship'];
+const REGION_GAMES = [
+  { r1: range(0,8),   r2: range(32,36), s16: [48,49], e8: 56 },
+  { r1: range(8,16),  r2: range(36,40), s16: [50,51], e8: 57 },
+  { r1: range(16,24), r2: range(40,44), s16: [52,53], e8: 58 },
+  { r1: range(24,32), r2: range(44,48), s16: [54,55], e8: 59 },
+];
+
+function range(start, end) {
+  return Array.from({length: end - start}, (_, i) => start + i);
+}
+
+function roundOfGame(game) {
+  for (let r = 0; r < ROUND_STARTS.length; r++) {
+    const next = r + 1 < ROUND_STARTS.length ? ROUND_STARTS[r + 1] : 63;
+    if (game >= ROUND_STARTS[r] && game < next) return r;
+  }
+  return 0;
+}
+
+function computeEliminated(tWinners) {
+  const elim = new Set();
+  for (let g = 0; g < 63; g++) {
+    const winner = tWinners[g];
+    if (!winner) continue;
+    const r = roundOfGame(g);
+    if (r === 0) {
+      const t1 = 2 * g + 1, t2 = 2 * g + 2;
+      elim.add(winner === t1 ? t2 : t1);
+    } else {
+      const prevStart = ROUND_STARTS[r - 1];
+      const offset = g - ROUND_STARTS[r];
+      const s1 = prevStart + 2 * offset, s2 = s1 + 1;
+      for (const src of [s1, s2]) {
+        const t = tWinners[src];
+        if (t && t !== winner) elim.add(t);
+      }
+    }
+  }
+  return elim;
+}
+
+function humanize(n) {
+  n = parseInt(n) || 0;
+  if (n >= 1e6) return parseFloat((n / 1e6).toPrecision(3)) + 'M';
+  if (n >= 1e3) return parseFloat((n / 1e3).toPrecision(3)) + 'K';
+  return String(n);
+}
+
+function poolApp() {
+  const data        = JSON.parse(document.getElementById('pool-data').textContent);
+  const eliminated  = computeEliminated(data.tournamentWinners);
+  const teamsByNum  = {};
+  data.teams.forEach(t => { teamsByNum[t.num] = t; });
+  const rankByName  = {};
+  data.leaderboard.forEach(e => { rankByName[e.name] = e.rank; });
+
+  return {
+    pool:              data.pool,
+    teams:             data.teams,
+    regions:           data.regions,
+    leaderboard:       data.leaderboard,
+    entries:           data.entries,
+    tournamentWinners: data.tournamentWinners,
+    winProb:           data.winProb  || [],
+    ffour:             data.ffour    || null,
+    teamsByNum,
+    rankByName,
+    eliminated,
+    selectedEntryIdx:  null,
+    _modal:            null,
+
+    init() {
+      this._modal = document.getElementById('bracket-modal');
+      this._modal.addEventListener('click', e => { if (e.target === this._modal) this.closeBracket(); });
+    },
+
+    // -------------------------------------------------------
+    // Pick status helpers
+    // -------------------------------------------------------
+    pickStatus(game, pickTeam) {
+      const actual = this.tournamentWinners[game];
+      if (!actual) return this.eliminated.has(pickTeam) ? 'impossible' : 'future';
+      return pickTeam === actual ? 'correct' : 'wrong';
+    },
+
+    pickChipClass(status) {
+      return { correct: 'pick-correct', wrong: 'pick-wrong',
+               impossible: 'pick-impossible', future: 'pick-future' }[status] || 'pick-future';
+    },
+
+    chipLabel(pick) {
+      if (!pick.team) return '?';
+      const label = `${pick.team.seed} ${pick.team.short}`;
+      return pick.score ? `${label} +${pick.score}` : label;
+    },
+
+    // -------------------------------------------------------
+    // Team helpers
+    // -------------------------------------------------------
+    isChampAlive(champNum) {
+      return champNum > 0 && !this.eliminated.has(champNum);
+    },
+
+    champLabel(teamNum) {
+      const t = this.teamsByNum[teamNum];
+      return t ? `(${t.seed}) ${t.short}` : '?';
+    },
+
+    championLabel() {
+      const t = this.teams.find(t => t.short === this.pool.champion);
+      return t ? `(${t.seed}) ${this.pool.champion}` : this.pool.champion;
+    },
+
+    // -------------------------------------------------------
+    // Leaderboard helpers
+    // -------------------------------------------------------
+    correctPicksDisplay(entry) {
+      const correct = Math.floor(entry.correctPicks);
+      if (!this.pool.gamesPlayed) return String(correct);
+      const pct = (correct / this.pool.gamesPlayed * 100).toFixed(1);
+      return `${correct} (${pct}%)`;
+    },
+
+    // -------------------------------------------------------
+    // Win probability helpers
+    // -------------------------------------------------------
+    winBarWidth(pct) {
+      return Math.min(Math.max(parseFloat(pct) || 0, 0.5), 100);
+    },
+
+    topChamps(champs) {
+      return [...(champs || [])].sort((a, b) => b.timesWon - a.timesWon).slice(0, 5);
+    },
+
+    humanize,
+
+    // -------------------------------------------------------
+    // Entry card: round data
+    // -------------------------------------------------------
+    entryRoundData(entry) {
+      const rounds = [];
+      for (let r = 0; r < 6; r++) {
+        const start = ROUND_STARTS[r], size = ROUND_SIZES[r];
+        const picks = [];
+        for (let g = start; g < start + size; g++) {
+          const pick = entry.winners[g];
+          if (!pick) continue;
+          const status = this.pickStatus(g, pick);
+          const team   = this.teamsByNum[pick];
+          const gs     = entry.gameScores;
+          const score  = (status === 'correct' && gs) ? (gs[g] || 0) : null;
+          picks.push({ game: g, team, status, score: score || null });
+        }
+        if (!picks.length) continue;
+        const correct = picks.filter(p => p.status === 'correct').length;
+        rounds.push({ name: ROUND_NAMES[r], picks, correct });
+      }
+      return rounds;
+    },
+
+    // -------------------------------------------------------
+    // Bracket modal
+    // -------------------------------------------------------
+    openBracket(idx) {
+      this.selectedEntryIdx = idx;
+      this.$nextTick(() => this._modal.showModal());
+    },
+
+    closeBracket() {
+      this._modal.close();
+      this.selectedEntryIdx = null;
+    },
+
+    bracketEntry() {
+      return this.selectedEntryIdx !== null ? this.entries[this.selectedEntryIdx] : null;
+    },
+
+    bracketLb() {
+      const e = this.bracketEntry();
+      return e ? this.leaderboard.find(lb => lb.name === e.name) || null : null;
+    },
+
+    bracketChipHtml(game) {
+      const entry = this.bracketEntry();
+      if (!entry) return '';
+      return this._chipHtml(game, entry.winners, entry.gameScores);
+    },
+
+    _chipHtml(game, winners, gameScores) {
+      const pick = winners[game];
+      if (!pick) return '<span class="bv-chip bv-empty">—</span>';
+      const t = this.teamsByNum[pick];
+      if (!t) return '<span class="bv-chip bv-empty">?</span>';
+      const status = this.pickStatus(game, pick);
+      const cls    = this.pickChipClass(status);
+      const gs     = gameScores;
+      const score  = (status === 'correct' && gs) ? gs[game] : null;
+      const scoreHtml = score ? ` <span style="opacity:.75">+${score}</span>` : '';
+      return `<span class="bv-chip ${cls}" title="${t.name}">${t.seed} ${t.short}${scoreHtml}</span>`;
+    },
+
+    _teamChipHtml(teamNum) {
+      const t = this.teamsByNum[teamNum];
+      if (!t) return '<span class="bv-chip bv-empty">?</span>';
+      return `<span class="bv-chip bv-empty" title="${t.name}">${t.seed} ${t.short}</span>`;
+    },
+
+    bracketRegionHtml(ri, reversed) {
+      const entry = this.bracketEntry();
+      if (!entry) return '';
+      const rg   = REGION_GAMES[ri];
+      const w    = entry.winners, gs = entry.gameScores;
+      const name = this.regions[ri] || `Region ${ri + 1}`;
+      const cols = reversed ? '1fr 1fr 1fr 1fr 0.5fr' : '0.5fr 1fr 1fr 1fr 1fr';
+      const hdr  = reversed
+        ? '<span>E8</span><span>S16</span><span>R32</span><span>R64</span><span></span>'
+        : '<span>R64</span><span></span><span>R32</span><span>S16</span><span>E8</span>';
+
+      let s = `<div class="bv-region">
+        <div class="bv-rname">${name}</div>
+        <div class="bv-rhdr" style="grid-template-columns:${cols}">${hdr}</div>
+        <div class="bv-grid" style="grid-template-columns:${cols}">`;
+
+      if (reversed) {
+        s += `<span class="bv-cell" style="grid-column:1;grid-row:1/span 8">${this._chipHtml(rg.e8, w, gs)}</span>`;
+        rg.s16.forEach((g, i) => s += `<span class="bv-cell" style="grid-column:2;grid-row:${i*4+1}/span 4">${this._chipHtml(g,w,gs)}</span>`);
+        rg.r2.forEach( (g, i) => s += `<span class="bv-cell" style="grid-column:3;grid-row:${i*2+1}/span 2">${this._chipHtml(g,w,gs)}</span>`);
+        rg.r1.forEach((g, i) => {
+          const t1 = 2*g+1, t2 = 2*g+2;
+          const picked = w[g] || 0;
+          const opp = picked > 0 ? (picked === t1 ? t2 : t1) : t1;
+          s += `<span class="bv-cell" style="grid-column:4;grid-row:${i+1}">${this._chipHtml(g,w,gs)}</span>`;
+          s += `<span class="bv-cell" style="grid-column:5;grid-row:${i+1}">${this._teamChipHtml(opp)}</span>`;
+        });
+      } else {
+        rg.r1.forEach((g, i) => {
+          const t1 = 2*g+1, t2 = 2*g+2;
+          const picked = w[g] || 0;
+          const opp = picked > 0 ? (picked === t1 ? t2 : t1) : t2;
+          s += `<span class="bv-cell" style="grid-column:1;grid-row:${i+1}">${this._teamChipHtml(opp)}</span>`;
+          s += `<span class="bv-cell" style="grid-column:2;grid-row:${i+1}">${this._chipHtml(g,w,gs)}</span>`;
+        });
+        rg.r2.forEach( (g, i) => s += `<span class="bv-cell" style="grid-column:3;grid-row:${i*2+1}/span 2">${this._chipHtml(g,w,gs)}</span>`);
+        rg.s16.forEach((g, i) => s += `<span class="bv-cell" style="grid-column:4;grid-row:${i*4+1}/span 4">${this._chipHtml(g,w,gs)}</span>`);
+        s += `<span class="bv-cell" style="grid-column:5;grid-row:1/span 8">${this._chipHtml(rg.e8,w,gs)}</span>`;
+      }
+
+      s += '</div></div>';
+      return s;
+    },
+  };
+}
+</script>
+
+</body>
+</html>
