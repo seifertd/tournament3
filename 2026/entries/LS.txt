@@ -1,0 +1,70 @@
+# Round 1:
+Duk
+OSU
+NIo
+CaB
+Lou
+NDS
+UCF
+UCn
+Fla
+Iow
+Van
+Try
+NCU
+Ill
+A&M
+Hou
+Ari
+Vil
+HPt
+Haw
+PI2
+Gon
+Mis
+Pur
+Mch
+StL
+Akr
+Ala
+Ten
+Vir
+SCl
+IoS
+# Round 2:
+Duk
+NIo
+Lou
+UCF
+Fla
+Van
+NCU
+Hou
+Ari
+HPt
+PI2
+Mis
+Mch
+Ala
+Ten
+IoS
+# Round 3:
+Duk
+Lou
+Fla
+NCU
+Ari
+Mis
+Mch
+IoS
+# Round 4:
+Duk
+NCU
+Ari
+Mch
+# Final Four:
+Duk
+Mch
+# Championship:
+Mch
+153
