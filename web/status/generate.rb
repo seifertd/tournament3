@@ -5,6 +5,7 @@ require 'json'
 require 'optparse'
 require 'open3'
 require 'time'
+require 'fileutils'
 
 POOL_BINARY = File.expand_path('../../pool', __dir__)
 
@@ -15,10 +16,12 @@ SEED_ORDER = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15].freeze
 # ---------------------------------------------------------------------------
 options = { output: 'status.html', binary: POOL_BINARY }
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{$0} -d DIR [-o OUTPUT] [--pool BINARY]"
-  opts.on('-d DIR',     'Pool directory')                 { |d| options[:dir] = d }
-  opts.on('-o FILE',    'Output HTML file (status.html)') { |f| options[:output] = f }
-  opts.on('--pool BIN', 'Path to pool binary')            { |b| options[:binary] = b }
+  opts.banner = "Usage: #{$0} -d DIR [-o OUTPUT] [--pool BINARY] [--timestamp 'LABEL']"
+  opts.on('-d DIR',            'Pool directory')                        { |d| options[:dir] = d }
+  opts.on('-o FILE',           'Output HTML file (status.html)')        { |f| options[:output] = f }
+  opts.on('--pool BIN',        'Path to pool binary')                   { |b| options[:binary] = b }
+  opts.on('--timestamp LABEL', 'Override timestamp string in snapshot') { |t| options[:timestamp] = t }
+  opts.on('--checkpoint',      'Freeze current snapshot and start a new one next run') { options[:checkpoint] = true }
 end.parse!
 
 abort "Error: -d DIR is required\nUsage: #{$0} -d DIR [-o OUTPUT]" unless options[:dir]
@@ -57,6 +60,18 @@ end
 
 def outcomes_label(n)
   n.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
+end
+
+def snapshot_label(games_played)
+  case games_played
+  when 0     then 'Pre-tournament'
+  when 1..32 then "Round 1 — #{games_played} games"
+  when 33..48 then "Round 2 — #{games_played} games"
+  when 49..56 then "Sweet 16 — #{games_played} games"
+  when 57..60 then "Elite 8 — #{games_played} games"
+  when 61..62 then "Final Four — #{games_played} games"
+  else             "Final — #{games_played} games"
+  end
 end
 
 # ---------------------------------------------------------------------------
@@ -160,12 +175,16 @@ if mc_model
 end
 
 # ---------------------------------------------------------------------------
-# Assemble data blob
+# Assemble current snapshot
 # ---------------------------------------------------------------------------
-data = {
+t_winners = entries_data['tournament']['winners']
+timestamp = options[:timestamp] || Time.now.strftime('%B %-d, %Y at %-I:%M %p')
+snapshot = {
+  label:             snapshot_label(games_played),
+  timestamp:         timestamp,
   pool: {
     name:             pool_info['name'],
-    generatedAt:      Time.now.strftime('%B %-d, %Y at %-I:%M %p'),
+    generatedAt:      timestamp,
     gamesPlayed:      games_played,
     gamesRemaining:   games_remaining,
     finalPointsKnown: pool_info['finalPointsKnown'],
@@ -176,10 +195,31 @@ data = {
   regions:           regions,
   leaderboard:       scores_data['entries'],
   entries:           entries_data['entries'],
-  tournamentWinners: entries_data['tournament']['winners'],
+  tournamentWinners: t_winners,
   winProb:           win_prob,
   ffour:             ffour,
 }
+
+# ---------------------------------------------------------------------------
+# Load snapshot history, deduplicate, and append
+# ---------------------------------------------------------------------------
+snapshots_dir  = File.join(dir, 'web')
+snapshots_file = File.join(snapshots_dir, 'snapshots.json')
+
+FileUtils.mkdir_p(snapshots_dir)
+snapshots = File.exist?(snapshots_file) ? JSON.parse(File.read(snapshots_file)) : []
+
+if snapshots.empty? || options[:checkpoint]
+  action = snapshots.empty? ? 'First snapshot' : 'Checkpoint — new snapshot'
+  $stderr.puts "  #{action} (#{snapshot[:label]})"
+  snapshots << snapshot
+else
+  $stderr.puts "  Updating current snapshot in place (#{snapshot[:label]})"
+  snapshots[-1] = snapshot
+end
+
+File.write(snapshots_file, JSON.generate(snapshots))
+$stderr.puts "  #{snapshots.length} snapshot(s) in history"
 
 # ---------------------------------------------------------------------------
 # Inject into template and write output
@@ -188,7 +228,7 @@ template_path = File.join(__dir__, 'app.html')
 abort "Error: template not found at #{template_path}" unless File.exist?(template_path)
 
 $stderr.print 'Rendering template ... '
-output = File.read(template_path).sub('{{POOL_DATA}}', JSON.generate(data))
+output = File.read(template_path).sub('{{POOL_DATA}}', JSON.generate(snapshots))
 File.write(options[:output], output)
 $stderr.puts 'done'
 puts "Generated #{options[:output]}"

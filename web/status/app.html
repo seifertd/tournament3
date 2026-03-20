@@ -68,7 +68,31 @@
       <span x-text="pool.gamesPlayed"></span> games played &bull; <span x-text="pool.gamesRemaining"></span> remaining
     </span>
   </div>
+  <!-- Timeline nav: only shown when there are multiple snapshots -->
+  <template x-if="snapshots.length > 1">
+    <div class="border-t border-slate-700">
+      <div class="max-w-screen-2xl mx-auto px-4 py-2 flex gap-2 overflow-x-auto">
+        <template x-for="(snap, idx) in snapshots" :key="idx">
+          <button @click="loadSnapshot(idx)"
+                  :class="idx === currentIdx
+                    ? 'bg-white text-slate-800 font-semibold'
+                    : 'bg-slate-600 text-slate-200 hover:bg-slate-500'"
+                  class="flex-none text-xs rounded px-3 py-1 whitespace-nowrap transition-colors"
+                  x-text="snap.label"></button>
+        </template>
+      </div>
+    </div>
+  </template>
 </header>
+
+<!-- Historical snapshot banner -->
+<template x-if="currentIdx < snapshots.length - 1">
+  <div class="bg-amber-50 border-b border-amber-200 text-amber-800 text-sm text-center py-2">
+    Viewing historical snapshot — <span x-text="snapshots[currentIdx].timestamp"></span>
+    <button @click="loadSnapshot(snapshots.length - 1)"
+            class="ml-3 underline font-medium hover:text-amber-900">Jump to latest</button>
+  </div>
+</template>
 
 <main class="max-w-screen-2xl mx-auto px-4 py-6 space-y-10">
 
@@ -448,32 +472,60 @@ function humanize(n) {
   return String(n);
 }
 
+function buildTeamsByNum(teams) {
+  const m = {};
+  teams.forEach(t => { m[t.num] = t; });
+  return m;
+}
+
+function buildRankByName(leaderboard) {
+  const m = {};
+  leaderboard.forEach(e => { m[e.name] = e.rank; });
+  return m;
+}
+
 function poolApp() {
-  const data        = JSON.parse(document.getElementById('pool-data').textContent);
-  const eliminated  = computeEliminated(data.tournamentWinners);
-  const teamsByNum  = {};
-  data.teams.forEach(t => { teamsByNum[t.num] = t; });
-  const rankByName  = {};
-  data.leaderboard.forEach(e => { rankByName[e.name] = e.rank; });
+  const snapshots = JSON.parse(document.getElementById('pool-data').textContent);
+  const latest    = snapshots[snapshots.length - 1];
 
   return {
-    pool:              data.pool,
-    teams:             data.teams,
-    regions:           data.regions,
-    leaderboard:       data.leaderboard,
-    entries:           data.entries,
-    tournamentWinners: data.tournamentWinners,
-    winProb:           data.winProb  || [],
-    ffour:             data.ffour    || null,
-    teamsByNum,
-    rankByName,
-    eliminated,
+    snapshots,
+    currentIdx:        snapshots.length - 1,
+    pool:              latest.pool,
+    teams:             latest.teams,
+    regions:           latest.regions,
+    leaderboard:       latest.leaderboard,
+    entries:           latest.entries,
+    tournamentWinners: latest.tournamentWinners,
+    winProb:           latest.winProb  || [],
+    ffour:             latest.ffour    || null,
+    teamsByNum:        buildTeamsByNum(latest.teams),
+    rankByName:        buildRankByName(latest.leaderboard),
+    eliminated:        computeEliminated(latest.tournamentWinners),
     selectedEntryIdx:  null,
     _modal:            null,
 
     init() {
       this._modal = document.getElementById('bracket-modal');
       this._modal.addEventListener('click', e => { if (e.target === this._modal) this.closeBracket(); });
+    },
+
+    loadSnapshot(idx) {
+      if (idx === this.currentIdx) return;
+      this.closeBracket();
+      this.currentIdx        = idx;
+      const snap             = this.snapshots[idx];
+      this.pool              = snap.pool;
+      this.teams             = snap.teams;
+      this.regions           = snap.regions;
+      this.leaderboard       = snap.leaderboard;
+      this.entries           = snap.entries;
+      this.tournamentWinners = snap.tournamentWinners;
+      this.winProb           = snap.winProb  || [];
+      this.ffour             = snap.ffour    || null;
+      this.teamsByNum        = buildTeamsByNum(snap.teams);
+      this.rankByName        = buildRankByName(snap.leaderboard);
+      this.eliminated        = computeEliminated(snap.tournamentWinners);
     },
 
     // -------------------------------------------------------
