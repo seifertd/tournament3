@@ -209,13 +209,17 @@ snapshots_file = File.join(snapshots_dir, 'snapshots.json')
 FileUtils.mkdir_p(snapshots_dir)
 snapshots = File.exist?(snapshots_file) ? JSON.parse(File.read(snapshots_file)) : []
 
-if snapshots.empty? || options[:checkpoint]
-  action = snapshots.empty? ? 'First snapshot' : 'Checkpoint — new snapshot'
-  $stderr.puts "  #{action} (#{snapshot[:label]})"
+if snapshots.empty? || snapshots.last['checkpointed']
+  $stderr.puts "  New snapshot (#{snapshot[:label]})"
   snapshots << snapshot
 else
   $stderr.puts "  Updating current snapshot in place (#{snapshot[:label]})"
   snapshots[-1] = snapshot
+end
+
+if options[:checkpoint]
+  $stderr.puts "  Checkpointing — next run will start a new snapshot"
+  snapshots[-1] = snapshots[-1].merge('checkpointed' => true)
 end
 
 File.write(snapshots_file, JSON.generate(snapshots))
