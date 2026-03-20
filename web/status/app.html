@@ -143,7 +143,7 @@
               <td class="px-3 py-2 font-medium" x-text="entry.name"></td>
               <td class="px-3 py-2 text-right font-semibold" x-text="entry.score"></td>
               <td class="px-3 py-2 text-right text-slate-500" x-text="entry.maxScore"></td>
-              <td class="px-3 py-2 text-right text-slate-500" x-text="correctPicksDisplay(entry)"></td>
+              <td class="px-3 py-2 text-right text-slate-500" x-text="entry.correctPicksLabel"></td>
               <td class="px-3 py-2 text-center text-xs"
                   :class="entry.champAlive ? 'text-green-700 font-semibold' : 'text-red-600 line-through'"
                   x-text="entry.champShortName"></td>
@@ -472,6 +472,15 @@ function humanize(n) {
   return String(n);
 }
 
+function enrichLeaderboard(leaderboard, gamesPlayed) {
+  return leaderboard.map(e => ({
+    ...e,
+    correctPicksLabel: gamesPlayed > 0
+      ? `${e.correctPicks} (${(e.correctPicks / gamesPlayed * 100).toFixed(1)}%)`
+      : String(e.correctPicks),
+  }));
+}
+
 function buildTeamsByNum(teams) {
   const m = {};
   teams.forEach(t => { m[t.num] = t; });
@@ -494,7 +503,7 @@ function poolApp() {
     pool:              latest.pool,
     teams:             latest.teams,
     regions:           latest.regions,
-    leaderboard:       latest.leaderboard,
+    leaderboard:       enrichLeaderboard(latest.leaderboard, latest.pool.gamesPlayed),
     entries:           latest.entries,
     tournamentWinners: latest.tournamentWinners,
     winProb:           latest.winProb  || [],
@@ -518,7 +527,7 @@ function poolApp() {
       this.pool              = snap.pool;
       this.teams             = snap.teams;
       this.regions           = snap.regions;
-      this.leaderboard       = snap.leaderboard;
+      this.leaderboard       = enrichLeaderboard(snap.leaderboard, snap.pool.gamesPlayed);
       this.entries           = snap.entries;
       this.tournamentWinners = snap.tournamentWinners;
       this.winProb           = snap.winProb  || [];
@@ -563,16 +572,6 @@ function poolApp() {
     championLabel() {
       const t = this.teams.find(t => t.short === this.pool.champion);
       return t ? `(${t.seed}) ${this.pool.champion}` : this.pool.champion;
-    },
-
-    // -------------------------------------------------------
-    // Leaderboard helpers
-    // -------------------------------------------------------
-    correctPicksDisplay(entry) {
-      const correct = Math.floor(entry.correctPicks);
-      if (!this.pool.gamesPlayed) return String(correct);
-      const pct = (correct / this.pool.gamesPlayed * 100).toFixed(1);
-      return `${correct} (${pct}%)`;
     },
 
     // -------------------------------------------------------

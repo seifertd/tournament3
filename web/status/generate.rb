@@ -209,7 +209,15 @@ snapshots_file = File.join(snapshots_dir, 'snapshots.json')
 FileUtils.mkdir_p(snapshots_dir)
 snapshots = File.exist?(snapshots_file) ? JSON.parse(File.read(snapshots_file)) : []
 
-if snapshots.empty? || snapshots.last['checkpointed']
+last           = snapshots.last
+same_state     = last && last['tournamentWinners'] == t_winners
+was_checkpoint = last && last['checkpointed']
+
+if same_state
+  $stderr.puts "  Tournament state unchanged — updating in place (#{snapshot[:label]})"
+  # Preserve checkpointed flag: a checkpoint shouldn't lose its status on a re-run
+  snapshots[-1] = was_checkpoint ? snapshot.merge('checkpointed' => true) : snapshot
+elsif snapshots.empty? || was_checkpoint
   $stderr.puts "  New snapshot (#{snapshot[:label]})"
   snapshots << snapshot
 else
