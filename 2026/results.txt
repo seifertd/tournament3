@@ -35,3 +35,5 @@ UCn
 # Round 2 Day 1
 Mch
 MSU
+Duk
+Hou
