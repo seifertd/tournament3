@@ -62,6 +62,20 @@ def outcomes_label(n)
   n.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
 end
 
+# MC is a sampling approximation — don't run it when the outcome space is
+# small enough that it would just re-sample the same bracket sets.
+MC_MIN_OUTCOMES = 16_384
+
+# Scale sample count to 10% of the outcome space, capping at 1M.
+def mc_samples(possible_outcomes)
+  [(possible_outcomes * 0.1).ceil, 1_000_000].min
+end
+
+# 95% confidence margin of error for a proportion, worst case p=0.5.
+def mc_margin_of_error(samples)
+  (1.96 * 0.5 / Math.sqrt(samples) * 100).round(1)
+end
+
 def snapshot_label(games_played)
   case games_played
   when 0     then 'Pre-tournament'
@@ -136,17 +150,46 @@ games_remaining = pool_info['gamesRemaining']
 
 $stderr.puts "  Pool: #{pool_info['name']} — #{games_played} played, #{games_remaining} remaining"
 
+# ---------------------------------------------------------------------------
+# Detect fresh poss bin files (produced by parallel.sh, newer than results.txt)
+# ---------------------------------------------------------------------------
+results_file  = File.join(dir, 'results.txt')
+results_mtime = File.exist?(results_file) ? File.mtime(results_file) : Time.at(0)
+
+poss_bin_fresh = false
+poss_bin_candidates = Dir.glob(File.join(dir, 'poss_0_of_*.bin'))
+if poss_bin_candidates.any?
+  candidate = poss_bin_candidates.max_by { |f| File.mtime(f) }
+  if File.mtime(candidate) > results_mtime
+    total = candidate.match(/poss_0_of_(\d+)\.bin/)[1].to_i
+    poss_bin_fresh = true
+    $stderr.puts "  Found fresh poss bin files (#{total} batches, newer than results.txt)"
+  else
+    $stderr.puts "  Poss bin files found but stale — skipping"
+  end
+end
+
+# ---------------------------------------------------------------------------
+# Run reports: poss from bin files if fresh; MC when outcome space is large
+# ---------------------------------------------------------------------------
 if games_remaining == 0
-  $stderr.puts '  Pool complete — skipping win probability report'
+  $stderr.puts '  Pool complete — skipping win probability reports'
   mc_seed = mc_model = poss = nil
-elsif games_remaining > 31
-  $stderr.puts '  Round 1 in progress — running Monte Carlo (both models):'
-  mc_seed  = run_json(binary, dir, 'mc', '-m', 'seed')
-  mc_model = run_json(binary, dir, 'mc', '-m', 'model')
-  poss     = nil
 else
-  mc_seed = mc_model = nil
-  poss    = run_json(binary, dir, 'poss')
+  poss = poss_bin_fresh ? run_json(binary, dir, '-r', 'poss') : nil
+
+  possible_outcomes = poss ? poss['pool']['outcomes'].to_i : (1 << [games_remaining, 62].min)
+
+  if possible_outcomes < MC_MIN_OUTCOMES
+    $stderr.puts "  #{outcomes_label(possible_outcomes)} possible outcomes — skipping Monte Carlo (too few to be meaningful)"
+    mc_seed = mc_model = nil
+  else
+    samples = mc_samples(possible_outcomes)
+    mc_moe  = mc_margin_of_error(samples)
+    $stderr.puts "  Running Monte Carlo (#{outcomes_label(possible_outcomes)} possible outcomes, #{outcomes_label(samples)} samples, ±#{mc_moe}%):"
+    mc_seed  = run_json(binary, dir, '-s', samples.to_s, 'mc', '-m', 'seed')
+    mc_model = run_json(binary, dir, '-s', samples.to_s, 'mc', '-m', 'model')
+  end
 end
 
 ffour = games_remaining <= 3 ? run_json(binary, dir, 'ffour') : nil
@@ -163,13 +206,13 @@ if poss
 end
 if mc_seed
   win_prob << {
-    label:   'Monte Carlo — Seed weighted',
+    label:   "Monte Carlo — Seed weighted (±#{mc_moe}%)",
     entries: normalize_win_prob_entries(mc_seed['entries'], 'winPct'),
   }
 end
 if mc_model
   win_prob << {
-    label:   'Monte Carlo — Model weighted',
+    label:   "Monte Carlo — Model weighted (±#{mc_moe}%)",
     entries: normalize_win_prob_entries(mc_model['entries'], 'winPct'),
   }
 end
