@@ -1,0 +1,70 @@
+# Round 1:
+PI1
+Cre
+USD
+Yal
+PI2
+Lip
+NMx
+Bry
+NoS
+UCn
+CSt
+GCy
+Drk
+Wil
+Ark
+Oma
+Duk
+Bay
+Lib
+Akr
+VCU
+Mon
+Van
+RbM
+SIU
+UGa
+McN
+HPt
+PI4
+Try
+USt
+Wof
+# Round 2:
+PI1
+Yal
+PI2
+NMx
+UCn
+GCy
+Drk
+Ark
+Duk
+Lib
+Mon
+RbM
+SIU
+HPt
+PI4
+Wof
+# Round 3:
+Yal
+PI2
+UCn
+Ark
+Duk
+RbM
+HPt
+Wof
+# Round 4:
+PI2
+UCn
+Duk
+HPt
+# Final Four:
+UCn
+Duk
+# Championship:
+Duk
+125

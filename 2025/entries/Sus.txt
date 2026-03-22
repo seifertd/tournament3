@@ -1,0 +1,70 @@
+# Round 1:
+Aub
+Cre
+Mch
+A&M
+Ole
+IoS
+NMx
+MSU
+Fla
+UCn
+Mem
+GCy
+Msr
+TTU
+Kan
+StJ
+Duk
+Bay
+Lib
+Ari
+VCU
+Wis
+Van
+Ala
+Hou
+Gon
+McN
+Pur
+PI4
+Ken
+UCL
+Ten
+# Round 2:
+Aub
+A&M
+IoS
+MSU
+Fla
+GCy
+Msr
+StJ
+Duk
+Ari
+Wis
+Ala
+Hou
+Pur
+PI4
+Ten
+# Round 3:
+Aub
+MSU
+Fla
+Msr
+Duk
+Wis
+Hou
+Ten
+# Round 4:
+Aub
+Msr
+Wis
+Ten
+# Final Four:
+Aub
+Wis
+# Championship:
+Wis
+167
