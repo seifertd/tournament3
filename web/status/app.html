@@ -51,6 +51,15 @@
     .bv-ff-lbl         { font-size:9px; font-weight:700; text-transform:uppercase;
                          letter-spacing:.08em; color:#64748b; margin-bottom:4px; }
     .bv-ff-panel.champ .bv-ff-lbl { color:#92400e; }
+    .bv-tb-wrap  { margin-top:6px; display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .bv-tb-val   { font-size:18px; font-weight:700; font-family:ui-monospace,monospace;
+                   color:#92400e; background:#fef3c7; border-radius:6px; padding:2px 10px; line-height:1.4; }
+    .bv-tb-diff  { font-size:11px; font-weight:700; font-family:ui-monospace,monospace;
+                   border-radius:4px; padding:1px 7px; }
+    .bv-tb-exact { background:#d1fae5; color:#065f46; }
+    .bv-tb-close { background:#dcfce7; color:#166534; }
+    .bv-tb-near  { background:#fef9c3; color:#854d0e; }
+    .bv-tb-far   { background:#fee2e2; color:#991b1b; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen" x-data="poolApp()" x-cloak>
@@ -354,12 +363,23 @@
               <div>
                 <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1"
                      x-text="round.name + ' (' + round.correct + '/' + round.picks.length + ')'"></div>
-                <div class="grid grid-cols-4 gap-1">
+                <div :class="round.tieBreak !== undefined ? 'flex items-center gap-1.5' : 'grid grid-cols-4 gap-1'">
                   <template x-for="pick in round.picks" :key="pick.game">
                     <span class="block text-xs rounded px-1 py-0.5 font-mono text-center truncate"
                           :class="pickChipClass(pick.status)"
-                          :title="pick.team ? pick.team.name + ' — game ' + pick.game : 'game ' + pick.game"
+                          :title="pick.title"
                           x-text="chipLabel(pick)"></span>
+                  </template>
+                  <template x-if="round.tieBreak !== undefined">
+                    <span class="text-xs font-mono font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5"
+                          :title="'Tie Break: ' + round.tieBreak + (pool.finalPointsKnown ? ' (' + (round.tieBreak > pool.finalPoints ? '+' : '') + (round.tieBreak - pool.finalPoints) + ' pts)' : '')"
+                          x-text="round.tieBreak"></span>
+                  </template>
+                  <template x-if="round.tieBreak !== undefined && pool.finalPointsKnown">
+                    <span class="text-xs font-mono font-bold rounded px-1.5 py-0.5"
+                          :class="round.tieBreakDiff === 0 ? 'bg-green-100 text-green-800' : round.tieBreakDiff <= 5 ? 'bg-green-50 text-green-700' : round.tieBreakDiff <= 15 ? 'bg-yellow-50 text-yellow-800' : 'bg-red-50 text-red-700'"
+                          :title="'Tie Break: ' + round.tieBreak + ' (' + (round.tieBreak > pool.finalPoints ? '+' : '') + (round.tieBreak - pool.finalPoints) + ' pts)'"
+                          x-text="(() => { const d = round.tieBreak - pool.finalPoints; return (d > 0 ? '+' : '') + d + ' pts'; })()"></span>
                   </template>
                 </div>
               </div>
@@ -409,6 +429,19 @@
           <div class="bv-ff-panel champ">
             <div class="bv-ff-lbl">Champion</div>
             <div x-html="bracketChipHtml(62)"></div>
+            <template x-if="bracketLb()">
+              <div class="bv-tb-wrap">
+                <span class="bv-tb-val"
+                      :title="'Tie Break: ' + bracketLb().tieBreak + (pool.finalPointsKnown ? ' (' + (bracketLb().tieBreak > pool.finalPoints ? '+' : '') + (bracketLb().tieBreak - pool.finalPoints) + ' pts)' : '')"
+                      x-text="bracketLb().tieBreak"></span>
+                <template x-if="pool.finalPointsKnown">
+                  <span class="bv-tb-diff"
+                    :class="bracketLb().tieBreakDiff === 0 ? 'bv-tb-exact' : bracketLb().tieBreakDiff <= 5 ? 'bv-tb-close' : bracketLb().tieBreakDiff <= 15 ? 'bv-tb-near' : 'bv-tb-far'"
+                    :title="'Tie Break: ' + bracketLb().tieBreak + ' (' + (bracketLb().tieBreak > pool.finalPoints ? '+' : '') + (bracketLb().tieBreak - pool.finalPoints) + ' pts)'"
+                    x-text="(() => { const d = bracketLb().tieBreak - pool.finalPoints; return (d > 0 ? '+' : '') + d + ' pts'; })()"></span>
+                </template>
+              </div>
+            </template>
           </div>
           <div class="bv-ff-panel">
             <div class="bv-ff-lbl">Final Four</div>
@@ -493,6 +526,12 @@ function buildRankByName(leaderboard) {
   return m;
 }
 
+function buildLbByName(leaderboard) {
+  const m = {};
+  leaderboard.forEach(e => { m[e.name] = e; });
+  return m;
+}
+
 function poolApp() {
   const snapshots = JSON.parse(document.getElementById('pool-data').textContent);
   const latest    = snapshots[snapshots.length - 1];
@@ -510,6 +549,7 @@ function poolApp() {
     ffour:             latest.ffour    || null,
     teamsByNum:        buildTeamsByNum(latest.teams),
     rankByName:        buildRankByName(latest.leaderboard),
+    lbByName:          buildLbByName(latest.leaderboard),
     eliminated:        computeEliminated(latest.tournamentWinners),
     selectedEntryIdx:  null,
     _modal:            null,
@@ -534,6 +574,7 @@ function poolApp() {
       this.ffour             = snap.ffour    || null;
       this.teamsByNum        = buildTeamsByNum(snap.teams);
       this.rankByName        = buildRankByName(snap.leaderboard);
+      this.lbByName          = buildLbByName(snap.leaderboard);
       this.eliminated        = computeEliminated(snap.tournamentWinners);
     },
 
@@ -592,6 +633,7 @@ function poolApp() {
     // -------------------------------------------------------
     entryRoundData(entry) {
       const rounds = [];
+      const lb = this.lbByName[entry.name];
       for (let r = 0; r < 6; r++) {
         const start = ROUND_STARTS[r], size = ROUND_SIZES[r];
         const picks = [];
@@ -602,11 +644,24 @@ function poolApp() {
           const team   = this.teamsByNum[pick];
           const gs     = entry.gameScores;
           const score  = (status === 'correct' && gs) ? (gs[g] || 0) : null;
-          picks.push({ game: g, team, status, score: score || null });
+          let title = team ? `${team.name} — game ${g}` : `game ${g}`;
+          if (g === 62 && lb) {
+            const diff = lb.tieBreak - this.pool.finalPoints;
+            const diffStr = this.pool.finalPointsKnown
+              ? ` (${diff > 0 ? '+' : ''}${diff} pts)`
+              : '';
+            title = (team ? team.name + ' — ' : '') + `Tie Break: ${lb.tieBreak}${diffStr}`;
+          }
+          picks.push({ game: g, team, status, score: score || null, title });
         }
         if (!picks.length) continue;
         const correct = picks.filter(p => p.status === 'correct').length;
-        rounds.push({ name: ROUND_NAMES[r], picks, correct });
+        const round = { name: ROUND_NAMES[r], picks, correct };
+        if (r === 5 && lb) {
+          round.tieBreak = lb.tieBreak;
+          round.tieBreakDiff = lb.tieBreakDiff;
+        }
+        rounds.push(round);
       }
       return rounds;
     },
