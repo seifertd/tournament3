@@ -273,20 +273,20 @@ POOLDEF void pool_print_humanized(FILE *f_stream, uint64_t num, int fieldLength)
     fprintf(f_stream, "%*" PRIu64, fieldLength+1, num);
     return;
   }
-  static uint64_t factors[5] = {1e15, 1e12, 1e9, 1e6, 1e3};
-  static char abbrev[5] = {'Q', 'T', 'B', 'M', 'K'};
-  for (int i = 0; i < 5; ++i) {
+  static uint64_t factors[6] = {1e18, 1e15, 1e12, 1e9, 1e6, 1e3};
+  static char *abbrev[6] = {"Qn", "Qd", "T", "B", "M", "K"};
+  for (int i = 0; i < 6; ++i) {
     if (factors[i] <= num) {
       double dispNum = (double) num / (double) factors[i];
       if (dispNum < 10) {
-        fprintf(f_stream, "%*.3f%c", fieldLength, dispNum, abbrev[i]);
+        fprintf(f_stream, "%*.3f%s", fieldLength, dispNum, abbrev[i]);
       } else if (dispNum < 100) {
-        fprintf(f_stream, "%*.2f%c", fieldLength, dispNum, abbrev[i]);
+        fprintf(f_stream, "%*.2f%s", fieldLength, dispNum, abbrev[i]);
       } else {
         if ((dispNum - (uint64_t) dispNum) >= 0.1) {
-          fprintf(f_stream, "%*.1f%c", fieldLength, dispNum, abbrev[i]);
+          fprintf(f_stream, "%*.1f%s", fieldLength, dispNum, abbrev[i]);
         } else {
-          fprintf(f_stream, "%*.0f%c", fieldLength, dispNum, abbrev[i]);
+          fprintf(f_stream, "%*.0f%s", fieldLength, dispNum, abbrev[i]);
         }
       }
       return;
