@@ -79,12 +79,12 @@ end
 def snapshot_label(games_played)
   case games_played
   when 0     then 'Pre-tournament'
-  when 1..32 then "Round 1 — #{games_played} games"
-  when 33..48 then "Round 2 — #{games_played} games"
-  when 49..56 then "Sweet 16 — #{games_played} games"
-  when 57..60 then "Elite 8 — #{games_played} games"
-  when 61..62 then "Final Four — #{games_played} games"
-  else             "Final — #{games_played} games"
+  when 1..32 then 'Round 1'
+  when 33..48 then 'Round 2'
+  when 49..56 then 'Sweet Sixteen'
+  when 57..60 then 'Elite Eight'
+  when 61..62 then 'Final Four'
+  else             'Championship'
   end
 end
 
