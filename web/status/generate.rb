@@ -64,11 +64,11 @@ end
 
 # MC is a sampling approximation — don't run it when the outcome space is
 # small enough that it would just re-sample the same bracket sets.
-MC_MIN_OUTCOMES = 16_384
+MC_MIN_OUTCOMES = 256
 
-# Scale sample count to 10% of the outcome space, capping at 1M.
+# Scale sample count to 20% of the outcome space, capping at 1M.
 def mc_samples(possible_outcomes)
-  [(possible_outcomes * 0.1).ceil, 1_000_000].min
+  [(possible_outcomes * 0.2).ceil, 1_000_000].min
 end
 
 # 95% confidence margin of error for a proportion, worst case p=0.5.

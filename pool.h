@@ -1729,8 +1729,11 @@ POOLDEF void pool_monte_carlo_report(uint64_t numSamples, PoolReportFormat fmt, 
     stats[i].minRank = (uint16_t)(poolBracketsCount + 1);
   }
 
-  // Seed RNG from current time; avoid zero state
-  uint64_t rng = (uint64_t)time(NULL);
+  // Seed RNG with time XOR'd with a stack address. The stack address varies
+  // per-process via ASLR, so two back-to-back runs (e.g. seed vs model MC)
+  // that start within the same second still get different seeds.
+  volatile uint64_t _stack_addr;
+  uint64_t rng = (uint64_t)time(NULL) ^ (uint64_t)(uintptr_t)&_stack_addr;
   if (rng == 0) rng = 0xDEADBEEFCAFEULL;
   // Warm up RNG
   for (int w = 0; w < 16; w++) pool_rng_next(&rng);
