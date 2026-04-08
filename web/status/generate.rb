@@ -21,7 +21,6 @@ OptionParser.new do |opts|
   opts.on('-o FILE',           'Output HTML file (status.html)')        { |f| options[:output] = f }
   opts.on('--pool BIN',        'Path to pool binary')                   { |b| options[:binary] = b }
   opts.on('--timestamp LABEL', 'Override timestamp string in snapshot') { |t| options[:timestamp] = t }
-  opts.on('--checkpoint',      'Freeze current snapshot and start a new one next run') { options[:checkpoint] = true }
 end.parse!
 
 abort "Error: -d DIR is required\nUsage: #{$0} -d DIR [-o OUTPUT]" unless options[:dir]
@@ -76,15 +75,28 @@ def mc_margin_of_error(samples)
   (1.96 * 0.5 / Math.sqrt(samples) * 100).round(1)
 end
 
+# Games played at which a snapshot is automatically checkpointed (frozen).
+CHECKPOINT_GAMES = [0, 16, 32, 40, 48, 56, 60, 62, 63].freeze
+
 def snapshot_label(games_played)
   case games_played
-  when 0     then 'Pre-tournament'
-  when 1..32 then 'Round 1'
-  when 33..48 then 'Round 2'
-  when 49..56 then 'Sweet Sixteen'
-  when 57..60 then 'Elite Eight'
-  when 61..62 then 'Final Four'
-  else             'Championship'
+  when 0       then 'Pre-tournament'
+  when 1..15   then 'Day 1 \u2026'
+  when 16      then 'Day 1'
+  when 17..31  then 'Day 2 \u2026'
+  when 32      then 'Day 2'
+  when 33..39  then 'Day 3 \u2026'
+  when 40      then 'Day 3'
+  when 41..47  then 'Day 4 \u2026'
+  when 48      then 'Day 4'
+  when 49..55  then 'Sweet Sixteen \u2026'
+  when 56      then 'Sweet Sixteen'
+  when 57..59  then 'Elite Eight \u2026'
+  when 60      then 'Elite Eight'
+  when 61      then 'Final Four \u2026'
+  when 62      then 'Final Four'
+  when 63      then 'Final'
+  else              'Complete'
   end
 end
 
@@ -268,8 +280,8 @@ else
   snapshots[-1] = snapshot
 end
 
-if options[:checkpoint]
-  $stderr.puts "  Checkpointing — next run will start a new snapshot"
+if CHECKPOINT_GAMES.include?(games_played)
+  $stderr.puts "  Auto-checkpointing at #{games_played} games played (#{snapshot[:label]})"
   snapshots[-1] = snapshots[-1].merge('checkpointed' => true)
 end
 
