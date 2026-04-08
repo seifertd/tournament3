@@ -364,6 +364,27 @@ progress, and `-f json` outputs JSON. The `-s` flag controls sample count (defau
 The output table mirrors the `poss` report format with an inline ±margin on the
 Win% column showing the statistical uncertainty for each entry's win probability.
 
+HTML Status Report
+---------------------------------
+Included in the repo is a ruby script that will generate a HTML
+status report page that you can either host on a web server or send 
+around for opening in a web browser. It is completely stand alone.
+To create it run the ruby web/status/generate.rb script. The script 
+is likewise completely stand alone, requiring only Ruby 3.x and relying
+on no third party gems. You can run it at any time, including before
+the tournament starts. It will generate a history of the leader
+board and possibilities as the tournament progresses. You should run it
+before the tourny begins, after each day in the first weekend, and
+then after the Sweet Sixten, Elite Eight, Final Four and Championship 
+game. It is ok to run it in between these milestones if you want to.
+
+See a sample here: [HTML Status Report](https://seifertd.github.io/tournament3/2026/pool.html)
+
+To run:
+
+```console
+ruby ./web/status/generate.rb -d <POOL_DIR> -o path/to/status.html
+```
 Game Index
 -----------
 Game numbers by round and what game numbers teams will play in
