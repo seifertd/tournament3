@@ -12,6 +12,7 @@
 # games remaining. Auto-checkpointing is handled by generate.rb — no
 # --checkpoint flag needed here.
 
+require 'date'
 require 'fileutils'
 require 'rbconfig'
 require 'optparse'
@@ -43,6 +44,22 @@ POSS_PROCS = 16
 # Run poss starting from the Day 2 checkpoint (32 games played, 31 remaining).
 # Day 1 has 47 games remaining (2^47 outcomes) — far too many to enumerate.
 POSS_MIN_GAMES_PLAYED = 32
+
+# Day offsets from tournament start (Day 1 = Thursday) for each checkpoint.
+# Day 1: Thu, Day 2: Fri, Day 3: Sat, Day 4: Sun,
+# Sweet Sixteen ends Fri (+8), Elite Eight ends Sun (+10),
+# Final Four is Sat (+16), Championship is Mon (+18).
+CHECKPOINT_DAY_OFFSETS = {
+  0  => -1,
+  16 =>  0,
+  32 =>  1,
+  40 =>  2,
+  48 =>  3,
+  56 =>  8,
+  60 => 10,
+  62 => 16,
+  63 => 18,
+}.freeze
 
 # ---------------------------------------------------------------------------
 # Option parsing
@@ -123,6 +140,27 @@ abort "Error: expected #{TOTAL_GAMES} total game lines, found #{total_game_lines
 # Helpers
 # ---------------------------------------------------------------------------
 
+# Find the date of the first commit that added game results to results.txt.
+# Returns a Date, or nil if git history can't be found.
+def find_tournament_start(project_root, year)
+  log_lines = `git -C #{project_root} log --reverse --format="%H %as" -- #{year}/results.txt 2>/dev/null`.lines
+  log_lines.each do |line|
+    sha, date_str = line.split
+    content = `git -C #{project_root} show #{sha}:#{year}/results.txt 2>/dev/null`
+    game_count = content.lines.count { |l| !l.start_with?('#') && !l.match?(/^\d+$/) && !l.strip.empty? }
+    return Date.parse(date_str) if game_count > 0
+  end
+  nil
+end
+
+# Return a date label for a checkpoint given the tournament start date.
+def checkpoint_date_label(start_date, games_played)
+  return nil unless start_date
+  offset = CHECKPOINT_DAY_OFFSETS[games_played]
+  return nil unless offset
+  (start_date + offset).strftime('%B %-d, %Y')
+end
+
 # Build a results.txt body containing exactly game_count game lines,
 # preserving all section headers. Sections may be split mid-way.
 def build_results(file_title, sections, game_count)
@@ -165,7 +203,7 @@ def run_parallel_poss(binary, pool_dir, games_remaining)
 end
 
 def run_checkpoint(label:, pool_dir:, results_content:, run_poss:, games_remaining:,
-                   binary:, results_file:, output_html:)
+                   binary:, results_file:, output_html:, timestamp: nil)
   puts "=== #{label} ==="
   File.write(results_file, results_content)
 
@@ -176,7 +214,9 @@ def run_checkpoint(label:, pool_dir:, results_content:, run_poss:, games_remaini
   run_parallel_poss(binary, pool_dir, games_remaining) if run_poss
 
   puts "  Running generate.rb ..."
-  ok = system(RUBY, GENERATE_RB, '-d', pool_dir, '-o', output_html)
+  cmd = [RUBY, GENERATE_RB, '-d', pool_dir, '-o', output_html]
+  cmd += ['--timestamp', timestamp] if timestamp
+  ok = system(*cmd)
   abort "  generate.rb failed for #{label}" unless ok
 
   remove_poss_bins(pool_dir) if run_poss
@@ -194,6 +234,10 @@ if File.exist?(snapshots_file)
   puts "Cleared existing snapshots.json\n\n"
 end
 
+tournament_start = find_tournament_start(PROJECT_ROOT, year)
+puts tournament_start ? "Tournament start date: #{tournament_start.strftime('%B %-d, %Y')}\n\n" \
+                      : "Warning: could not determine tournament start date from git history\n\n"
+
 begin
   CHECKPOINT_GAMES.each do |games_played|
     games_remaining = TOTAL_GAMES - games_played
@@ -206,6 +250,7 @@ begin
       binary:          binary,
       results_file:    results_file,
       output_html:     output_html,
+      timestamp:       checkpoint_date_label(tournament_start, games_played),
     )
   end
 ensure
